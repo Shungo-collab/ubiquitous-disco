@@ -1,0 +1,626 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSH3 最終クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f0f14;
+    --surface: #17171f;
+    --surface2: #1e1e28;
+    --border: #2a2a38;
+    --accent1: #b06aff;
+    --accent2: #ff5fa0;
+    --grad: linear-gradient(135deg, #b06aff, #ff5fa0);
+    --text: #f0eeff;
+    --sub: #8a879e;
+    --correct: #4ecb8d;
+    --wrong: #ff5f5f;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+  }
+
+  /* ===== スタート画面 ===== */
+  #start-screen {
+    text-align: center;
+    max-width: 480px;
+    width: 100%;
+  }
+
+  .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 4px;
+    color: var(--sub);
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  #start-screen h1 {
+    font-size: 30px;
+    font-weight: 900;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+
+  #start-screen p {
+    color: var(--sub);
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  .info-row {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+
+  .info-chip {
+    padding: 8px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    font-size: 13px;
+    color: var(--sub);
+  }
+  .info-chip span { color: var(--text); font-weight: 700; }
+
+  .recap-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: left;
+    margin-bottom: 28px;
+  }
+  .recap-box h3 {
+    font-size: 12px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 3px;
+    color: var(--sub);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+  }
+  .recap-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    font-size: 14px;
+    color: var(--sub);
+    margin-bottom: 8px;
+    line-height: 1.5;
+  }
+  .recap-item:last-child { margin-bottom: 0; }
+  .recap-dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent1);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+  .recap-item span { color: var(--text); }
+
+  .start-btn {
+    width: 100%;
+    padding: 18px;
+    background: var(--grad);
+    border: none;
+    border-radius: 12px;
+    color: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .start-btn:hover { opacity: 0.88; }
+
+  /* ===== クイズ画面 ===== */
+  #quiz-screen {
+    display: none;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+
+  .quiz-tag {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    text-transform: uppercase;
+  }
+
+  .quiz-count {
+    font-family: 'Space Mono', monospace;
+    font-size: 13px;
+    color: var(--sub);
+  }
+
+  .progress-track {
+    width: 100%;
+    height: 4px;
+    background: var(--border);
+    border-radius: 2px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: var(--grad);
+    border-radius: 2px;
+    transition: width 0.4s ease;
+  }
+
+  .question-number {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    color: var(--sub);
+    margin-bottom: 10px;
+    letter-spacing: 2px;
+  }
+
+  .question-text {
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    color: var(--text);
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.18s;
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    line-height: 1.5;
+    width: 100%;
+  }
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--accent1);
+    background: var(--surface2);
+  }
+
+  .choice-label {
+    width: 30px;
+    height: 30px;
+    border-radius: 6px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--sub);
+    flex-shrink: 0;
+  }
+
+  .choice-btn.correct { border-color: var(--correct); background: rgba(78,203,141,0.08); }
+  .choice-btn.correct .choice-label { background: var(--correct); color: #fff; border-color: var(--correct); }
+  .choice-btn.wrong { border-color: var(--wrong); background: rgba(255,95,95,0.06); }
+  .choice-btn.wrong .choice-label { background: var(--wrong); color: #fff; border-color: var(--wrong); }
+  .choice-btn:disabled { cursor: default; }
+
+  .feedback-box {
+    display: none;
+    padding: 14px 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    line-height: 1.7;
+    margin-bottom: 20px;
+    animation: fadeUp 0.3s ease;
+  }
+  .feedback-box.correct-fb { background: rgba(78,203,141,0.1); border-left: 3px solid var(--correct); color: #d0f5e8; }
+  .feedback-box.wrong-fb { background: rgba(176,106,255,0.1); border-left: 3px solid var(--accent1); color: #ddd8ff; }
+  .feedback-box.show { display: block; }
+  .feedback-head { font-weight: 700; font-size: 15px; margin-bottom: 6px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .next-btn {
+    width: 100%;
+    padding: 15px;
+    background: var(--grad);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    display: none;
+    transition: opacity 0.2s;
+  }
+  .next-btn:hover { opacity: 0.88; }
+  .next-btn.show { display: block; }
+
+  /* ===== 結果画面 ===== */
+  #result-screen {
+    display: none;
+    width: 100%;
+    max-width: 520px;
+    text-align: center;
+  }
+
+  .result-icon { font-size: 60px; margin-bottom: 16px; }
+  .result-title {
+    font-size: 24px;
+    font-weight: 900;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 10px;
+  }
+  .result-score {
+    font-family: 'Space Mono', monospace;
+    font-size: 52px;
+    font-weight: 700;
+    color: var(--text);
+    margin: 16px 0;
+  }
+  .result-score span { font-size: 22px; color: var(--sub); }
+
+  .result-message {
+    font-size: 15px;
+    color: var(--sub);
+    line-height: 1.8;
+    margin-bottom: 24px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    text-align: left;
+  }
+  .result-message strong { color: var(--text); display: block; font-size: 16px; margin-bottom: 8px; }
+
+  .chapter-scores {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+  .chapter-scores h4 {
+    font-size: 11px;
+    font-family: 'Space Mono', monospace;
+    letter-spacing: 3px;
+    color: var(--sub);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+  .chapter-row { margin-bottom: 14px; }
+  .chapter-info { display: flex; justify-content: space-between; font-size: 13px; color: var(--sub); margin-bottom: 6px; }
+  .chapter-name { color: var(--text); font-weight: 700; }
+  .chapter-bar-track { height: 6px; background: var(--border); border-radius: 3px; overflow: hidden; }
+  .chapter-bar-fill { height: 100%; background: var(--grad); border-radius: 3px; transition: width 0.9s ease; }
+
+  .action-btns { display: flex; flex-direction: column; gap: 10px; }
+
+  .btn-secondary {
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--sub);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .btn-secondary:hover { border-color: var(--accent1); color: var(--text); }
+</style>
+</head>
+<body>
+
+<!-- スタート画面 -->
+<div id="start-screen">
+  <p class="label">Photoshop 3 ── Final Quiz</p>
+  <h1>🎯 最終クイズ</h1>
+  <p>今日の授業をまるごとおさらい！<br>全5問、自分の理解度を確かめよう。</p>
+
+  <div class="info-row">
+    <div class="info-chip">問題数 <span>5問</span></div>
+    <div class="info-chip">テーマ <span>授業全体</span></div>
+  </div>
+
+  <div class="recap-box">
+    <h3>今日のゴール</h3>
+    <div class="recap-item"><div class="recap-dot"></div><span>写真の気になる部分を自然に消せる</span></div>
+    <div class="recap-item"><div class="recap-dot"></div><span>写真の上に文字をのせられる</span></div>
+    <div class="recap-item"><div class="recap-dot"></div><span>文字の中に画像を入れられる</span></div>
+  </div>
+
+  <button class="start-btn" onclick="startQuiz()">スタート →</button>
+</div>
+
+<!-- クイズ画面 -->
+<div id="quiz-screen">
+  <div class="quiz-header">
+    <span class="quiz-tag">FINAL QUIZ</span>
+    <span class="quiz-count" id="quiz-count">1 / 5</span>
+  </div>
+  <div class="progress-track">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+  </div>
+  <div class="question-number" id="q-number">Q1</div>
+  <div class="question-text" id="q-text"></div>
+  <div class="choices" id="choices"></div>
+  <div class="feedback-box" id="feedback-box">
+    <div class="feedback-head" id="feedback-head"></div>
+    <div id="feedback-body"></div>
+  </div>
+  <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+</div>
+
+<!-- 結果画面 -->
+<div id="result-screen">
+  <div class="result-icon" id="result-icon"></div>
+  <div class="result-title" id="result-title"></div>
+  <div class="result-score" id="result-score"></div>
+  <div class="result-message" id="result-message"></div>
+  <div class="chapter-scores" id="chapter-scores"></div>
+  <div class="action-btns">
+    <button class="btn-secondary" onclick="restart()">もう一度やる</button>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "写真にテキストを入力するには、どのツールを使いますか？",
+    choices: [
+      "移動ツール（矢印アイコン）",
+      "文字ツール（Tのアイコン）",
+      "スポット修復ツール（絆創膏アイコン）"
+    ],
+    correct: 1,
+    chapter: "テキスト入力",
+    correctMsg: "正解！　Tのアイコンが文字ツールです。",
+    explanation: "左のツールバーにある大文字の「T」が横書き文字ツール。クリックしてから画像の上をクリックするとカーソルが出て、文字を入力できます。"
+  },
+  {
+    q: "テキストを入力した後、文字の位置を動かしたいときに使うツールはどれですか？",
+    choices: [
+      "文字ツール（T）のまま操作する",
+      "移動ツール（矢印アイコン）に切り替えてドラッグする",
+      "スポット修復ツールでなぞる"
+    ],
+    correct: 1,
+    chapter: "テキスト入力",
+    correctMsg: "正解！　位置の調整は移動ツールで行います。",
+    explanation: "文字を置いたら移動ツールに切り替えてドラッグ。文字ツールのままドラッグすると新しいテキストが作られてしまうので、ツールの切り替えを忘れずに！"
+  },
+  {
+    q: "クリッピングマスクとは、一言で言うとどんな機能ですか？",
+    choices: [
+      "画像を完全に切り取って、元に戻せなくする機能",
+      "上のレイヤーの画像を、下のレイヤーの形の中にだけ表示させる機能",
+      "複数のレイヤーをひとつにまとめる機能"
+    ],
+    correct: 1,
+    chapter: "クリッピングマスク",
+    correctMsg: "正解！　下が型、上が中身のイメージです。",
+    explanation: "クリッピングマスクは「上の画像を、下の型の形にはめ込む」機能。型の形に切り取っているわけではないので、あとから位置や大きさを自由に変えられます。"
+  },
+  {
+    q: "クリッピングマスクで「文字の中に画像を入れる」とき、レイヤーの上下はどう並べますか？",
+    choices: [
+      "上に「画像」、下に「文字」",
+      "上に「文字」、下に「画像」",
+      "どちらでも同じ結果になる"
+    ],
+    correct: 0,
+    chapter: "クリッピングマスク",
+    correctMsg: "正解！　上が中身（画像）、下が型（文字）です。",
+    explanation: "授業でやった「HELLO」の演習では、上にpaintcloud（画像）、下にHELLO（文字）の順番でした。下が型＝形を決めるもの、上が中身＝流し込む素材と覚えてください！"
+  },
+  {
+    q: "クリッピングマスクのいちばんの強みはどれですか？",
+    choices: [
+      "画像を切り取っていないので、あとから位置や大きさを自由に変えられる",
+      "一度作ると、絶対にズレなくなる",
+      "ファイルの容量が自動で小さくなる"
+    ],
+    correct: 0,
+    chapter: "クリッピングマスク",
+    correctMsg: "正解！　切り取っていないから、あとから何度でも直せます。",
+    explanation: "クリッピングマスクは「隠しているだけ」で画像そのものは残っています。だから位置も大きさもあとから変更OK。ちなみにレイヤーマスクは「写真の一部を隠す」のに使い、クリッピングマスクは「型の形に流し込む」のに使います。使い分けを少しずつ覚えていきましょう！"
+  }
+];
+
+let currentIndex = 0;
+let score = 0;
+let chapResults = {};
+let answered = false;
+
+function startQuiz() {
+  currentIndex = 0; score = 0; chapResults = {}; answered = false;
+  document.getElementById('start-screen').style.display = 'none';
+  document.getElementById('quiz-screen').style.display = 'block';
+  showQuestion();
+}
+
+function showQuestion() {
+  answered = false;
+  const q = QUESTIONS[currentIndex];
+  const total = QUESTIONS.length;
+
+  document.getElementById('q-number').textContent = `Q${currentIndex + 1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('quiz-count').textContent = `${currentIndex + 1} / ${total}`;
+  document.getElementById('progress-fill').style.width = `${(currentIndex / total) * 100}%`;
+
+  const fb = document.getElementById('feedback-box');
+  fb.className = 'feedback-box';
+  document.getElementById('next-btn').classList.remove('show');
+  document.getElementById('next-btn').textContent = currentIndex === total - 1 ? '結果を見る →' : '次の問題へ →';
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const labels = ['A', 'B', 'C'];
+  q.choices.forEach((text, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-label">${labels[i]}</span><span>${text}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    choicesEl.appendChild(btn);
+  });
+}
+
+function selectAnswer(idx) {
+  if (answered) return;
+  answered = true;
+
+  const q = QUESTIONS[currentIndex];
+  const btns = document.querySelectorAll('.choice-btn');
+  btns.forEach(b => b.disabled = true);
+
+  if (!chapResults[q.chapter]) chapResults[q.chapter] = { correct: 0, total: 0 };
+  chapResults[q.chapter].total++;
+
+  const fb = document.getElementById('feedback-box');
+  const head = document.getElementById('feedback-head');
+  const body = document.getElementById('feedback-body');
+
+  if (idx === q.correct) {
+    btns[idx].classList.add('correct');
+    score++;
+    chapResults[q.chapter].correct++;
+    fb.className = 'feedback-box correct-fb show';
+    head.textContent = '✅ ' + q.correctMsg;
+    body.textContent = q.explanation;
+  } else {
+    btns[idx].classList.add('wrong');
+    btns[q.correct].classList.add('correct');
+    fb.className = 'feedback-box wrong-fb show';
+    head.textContent = '💡 惜しい！　正解は「' + q.choices[q.correct] + '」です。';
+    body.textContent = q.explanation;
+  }
+
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function nextQuestion() {
+  currentIndex++;
+  if (currentIndex >= QUESTIONS.length) showResult();
+  else showQuestion();
+}
+
+function showResult() {
+  document.getElementById('quiz-screen').style.display = 'none';
+  document.getElementById('result-screen').style.display = 'block';
+
+  const total = QUESTIONS.length;
+  const pct = Math.round((score / total) * 100);
+
+  document.getElementById('result-score').innerHTML = `${score}<span> / ${total}</span>`;
+
+  let icon, title, msg;
+  if (pct === 100) {
+    icon = '🏆'; title = '満点！すごい！';
+    msg = '全問正解！今日学んだことが完璧に整理されています。ぜひOD動画を見ながら、自分でも操作を復習してみてください！';
+  } else if (pct >= 60) {
+    icon = '👏'; title = 'よくできました！';
+    msg = '今日の授業の核心をしっかり掴んでいます。間違えた問題は解説を見直して、もう一度操作で確認してみましょう！';
+  } else {
+    icon = '💪'; title = 'もう一度挑戦しよう！';
+    msg = '解説を読むと「なるほど！」となるはずです。各ツールの役割をもう一度整理して、再チャレンジしてみてください！';
+  }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-message').innerHTML = `<strong>${msg}</strong>`;
+
+  // チャプター別スコア（重複除去）
+  const seen = new Set();
+  const chapEl = document.getElementById('chapter-scores');
+  let html = '<h4>CHAPTER SCORE</h4>';
+  QUESTIONS.forEach(q => {
+    if (seen.has(q.chapter)) return;
+    seen.add(q.chapter);
+    // count totals
+    let total = 0, correct = 0;
+    QUESTIONS.forEach(qq => {
+      if (qq.chapter === q.chapter) {
+        total++;
+        if (chapResults[q.chapter] && chapResults[q.chapter].correct > 0) {
+          // handled below
+        }
+      }
+    });
+    const d = chapResults[q.chapter] || { correct: 0, total: 0 };
+    const p = d.total > 0 ? Math.round((d.correct / d.total) * 100) : 0;
+    html += `
+      <div class="chapter-row">
+        <div class="chapter-info">
+          <span class="chapter-name">${q.chapter}</span>
+          <span>${d.correct} / ${d.total}</span>
+        </div>
+        <div class="chapter-bar-track">
+          <div class="chapter-bar-fill" style="width:${p}%"></div>
+        </div>
+      </div>`;
+  });
+  chapEl.innerHTML = html;
+}
+
+function restart() {
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('start-screen').style.display = 'block';
+}
+</script>
+</body>
+</html>
