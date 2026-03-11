@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>受付係 確認テスト 💍</title>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;800&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #fdf6ee;
+    --blush: #e8c4b0;
+    --rose: #c97b63;
+    --gold: #b8975a;
+    --deep: #3a2a20;
+    --soft: #7a5c4e;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    min-height: 100vh;
+    background: var(--cream);
+    font-family: 'Shippori Mincho', serif;
+    color: var(--deep);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px 16px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 60% 40% at 10% 10%, rgba(232,196,176,0.35) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 90% 90%, rgba(184,151,90,0.18) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  /* 花びら装飾 */
+  .petal {
+    position: fixed;
+    font-size: 1.4rem;
+    opacity: 0.18;
+    pointer-events: none;
+    animation: drift linear infinite;
+  }
+  .petal:nth-child(1) { left: 5%;  top: -40px; animation-duration: 12s; animation-delay: 0s; }
+  .petal:nth-child(2) { left: 20%; top: -40px; animation-duration: 15s; animation-delay: 3s; }
+  .petal:nth-child(3) { left: 45%; top: -40px; animation-duration: 10s; animation-delay: 6s; }
+  .petal:nth-child(4) { left: 70%; top: -40px; animation-duration: 13s; animation-delay: 1s; }
+  .petal:nth-child(5) { left: 88%; top: -40px; animation-duration: 11s; animation-delay: 4s; }
+
+  @keyframes drift {
+    0%   { transform: translateY(-40px) rotate(0deg);   opacity: 0; }
+    10%  { opacity: 0.18; }
+    90%  { opacity: 0.18; }
+    100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+  }
+
+  .card {
+    background: rgba(255,255,255,0.82);
+    backdrop-filter: blur(6px);
+    border: 1.5px solid rgba(184,151,90,0.28);
+    border-radius: 20px;
+    padding: 40px 36px 44px;
+    max-width: 560px;
+    width: 100%;
+    position: relative;
+    box-shadow: 0 8px 40px rgba(58,42,32,0.09);
+    animation: fadeUp 0.7s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ornament {
+    text-align: center;
+    font-size: 1.5rem;
+    letter-spacing: 0.4em;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+
+  .title {
+    text-align: center;
+    font-family: 'DM Serif Display', serif;
+    font-style: italic;
+    font-size: 1.05rem;
+    color: var(--soft);
+    letter-spacing: 0.12em;
+    margin-bottom: 4px;
+  }
+
+  .title-ja {
+    text-align: center;
+    font-size: 1.55rem;
+    font-weight: 800;
+    color: var(--deep);
+    letter-spacing: 0.05em;
+    margin-bottom: 28px;
+  }
+
+  /* プログレスバー */
+  .progress-wrap {
+    margin-bottom: 28px;
+  }
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.78rem;
+    color: var(--soft);
+    margin-bottom: 7px;
+    letter-spacing: 0.04em;
+  }
+  .progress-bar {
+    height: 5px;
+    background: rgba(184,151,90,0.18);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--blush), var(--gold));
+    border-radius: 99px;
+    transition: width 0.5s ease;
+  }
+
+  /* 問題 */
+  .q-number {
+    font-size: 0.75rem;
+    color: var(--rose);
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    font-weight: 600;
+  }
+
+  .q-text {
+    font-size: 1.15rem;
+    font-weight: 600;
+    line-height: 1.75;
+    color: var(--deep);
+    margin-bottom: 24px;
+  }
+
+  /* 選択肢 */
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 11px;
+    margin-bottom: 20px;
+  }
+
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--cream);
+    border: 1.5px solid rgba(184,151,90,0.3);
+    border-radius: 12px;
+    cursor: pointer;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 0.97rem;
+    color: var(--deep);
+    text-align: left;
+    transition: all 0.22s ease;
+    line-height: 1.55;
+  }
+
+  .choice-btn:hover:not(:disabled) {
+    background: rgba(232,196,176,0.3);
+    border-color: var(--rose);
+    transform: translateX(4px);
+  }
+
+  .choice-label {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: 50%;
+    background: rgba(184,151,90,0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--gold);
+    border: 1px solid rgba(184,151,90,0.3);
+  }
+
+  .choice-btn.correct {
+    background: rgba(144,188,144,0.18);
+    border-color: #7ab87a;
+  }
+  .choice-btn.correct .choice-label {
+    background: #7ab87a;
+    color: white;
+    border-color: #7ab87a;
+  }
+  .choice-btn.wrong {
+    background: rgba(201,123,99,0.12);
+    border-color: var(--rose);
+  }
+  .choice-btn.wrong .choice-label {
+    background: var(--rose);
+    color: white;
+    border-color: var(--rose);
+  }
+
+  /* フィードバック */
+  .feedback {
+    min-height: 52px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    font-size: 0.92rem;
+    line-height: 1.65;
+    display: none;
+    animation: pop 0.3s ease;
+  }
+  .feedback.correct {
+    display: block;
+    background: rgba(144,188,144,0.14);
+    border: 1px solid rgba(122,184,122,0.4);
+    color: #3a6b3a;
+  }
+  .feedback.wrong {
+    display: block;
+    background: rgba(201,123,99,0.10);
+    border: 1px solid rgba(201,123,99,0.35);
+    color: #7a3a2a;
+  }
+
+  @keyframes pop {
+    from { opacity: 0; transform: scale(0.96); }
+    to   { opacity: 1; transform: scale(1); }
+  }
+
+  .next-btn {
+    margin-top: 22px;
+    width: 100%;
+    padding: 16px;
+    background: linear-gradient(135deg, var(--rose), var(--gold));
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    display: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 18px rgba(184,151,90,0.28);
+  }
+  .next-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(184,151,90,0.38); }
+
+  /* 結果画面 */
+  .result-screen {
+    display: none;
+    text-align: center;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .result-emoji { font-size: 4rem; margin-bottom: 16px; }
+
+  .result-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: var(--deep);
+    margin-bottom: 10px;
+  }
+
+  .score-display {
+    font-family: 'DM Serif Display', serif;
+    font-size: 3.5rem;
+    color: var(--gold);
+    margin: 16px 0;
+    line-height: 1;
+  }
+  .score-display span { font-size: 1.5rem; color: var(--soft); }
+
+  .result-msg {
+    font-size: 0.95rem;
+    color: var(--soft);
+    line-height: 1.85;
+    margin-bottom: 28px;
+    white-space: pre-line;
+  }
+
+  .retry-btn {
+    padding: 14px 36px;
+    background: linear-gradient(135deg, var(--blush), var(--rose));
+    color: white;
+    border: none;
+    border-radius: 99px;
+    font-family: 'Shippori Mincho', serif;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    letter-spacing: 0.08em;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 18px rgba(201,123,99,0.28);
+  }
+  .retry-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 24px rgba(201,123,99,0.38); }
+
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(184,151,90,0.3), transparent);
+    margin: 28px 0;
+  }
+</style>
+</head>
+<body>
+
+<!-- 花びら -->
+<div class="petal">🌸</div>
+<div class="petal">🌸</div>
+<div class="petal">🌸</div>
+<div class="petal">🌸</div>
+<div class="petal">🌸</div>
+
+<div class="card">
+  <!-- クイズ本体 -->
+  <div id="quiz-area">
+    <div class="ornament">✦ ✦ ✦</div>
+    <p class="title">Reception Staff Check</p>
+    <h1 class="title-ja">受付係 確認テスト</h1>
+
+    <div class="progress-wrap">
+      <div class="progress-label">
+        <span id="q-label">Question 1 / 5</span>
+        <span id="score-label">0 正解</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="q-number" id="q-number">Q 1</div>
+    <p class="q-text" id="q-text"></p>
+
+    <div class="choices" id="choices"></div>
+
+    <div class="feedback" id="feedback"></div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">次の問題へ →</button>
+  </div>
+
+  <!-- 結果画面 -->
+  <div class="result-screen" id="result-screen">
+    <div class="result-emoji" id="result-emoji"></div>
+    <p class="title">Reception Staff Check</p>
+    <h2 class="result-title">お疲れ様でした！</h2>
+    <div class="divider"></div>
+    <div class="score-display" id="score-display"></div>
+    <p class="result-msg" id="result-msg"></p>
+    <button class="retry-btn" onclick="restartQuiz()">もう一度挑戦 🌸</button>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    q: "今回結婚するお二人の名前はどれ？",
+    choices: [
+      "鎌倉 勇紀 × 村上 玲奈",
+      "鎌倉 勇紀 × 栗本 玲奈",
+      "千葉 勇紀 × 栗本 玲奈",
+      "鎌倉 大次郎 × 栗本 玲奈"
+    ],
+    answer: 1,
+    correct: "✅ 正解！鎌倉 勇紀くん × 栗本 玲奈さん💍\nおめでとう、二人とも！！",
+    wrong: "❌ 正解は 鎌倉 勇紀くん × 栗本 玲奈さん！\n親友の名前だよ、しっかり覚えておこう🌸"
+  },
+  {
+    q: "結婚式当日（4/5）の会場はどこ？",
+    choices: [
+      "ラシック アンジュール（銀座）",
+      "ザ・リッツカールトン東京",
+      "アンダーズ東京（虎ノ門）",
+      "東京大神宮マツヤサロン"
+    ],
+    answer: 0,
+    correct: "✅ 正解！ラシック アンジュール（東京都中央区銀座2-3-6、銀座並木通りビル6階）だよ✨",
+    wrong: "❌ 正解は ラシック アンジュール（銀座）！\n東京都中央区銀座2-3-6、銀座並木通りビル6階だよ🗺️"
+  },
+  {
+    q: "当日（4/5）の受付係の集合時間は何時ですか？",
+    choices: ["9時30分", "10時00分", "10時15分", "10時30分"],
+    answer: 2,
+    correct: "✅ 正解！集合は 10時15分 だよ。\n受付開始（10時半）の15分前に集まって準備しよう！",
+    wrong: "❌ 惜しい！正解は 10時15分。\n待合スペースの開場は10時、受付開始は10時半だから、その前の10時15分に集合だよ！"
+  },
+  {
+    q: "ご祝儀を受付で受け取った後、式が始まる前に誰に渡せばいい？",
+    choices: [
+      "司会者に渡す",
+      "新郎・新婦本人に渡す",
+      "新郎母・新婦母にそれぞれ渡す",
+      "受付が式の間も保管する"
+    ],
+    answer: 2,
+    correct: "✅ 正解！新郎母・新婦母 にそれぞれまとめて渡して受付完了🎉\n袋は当日渡してもらえるから安心してね！",
+    wrong: "❌ 惜しい！正解は 新郎母・新婦母 にそれぞれ渡すこと。\n式が始まる前に渡して、受付は終了になるよ✨"
+  },
+  {
+    q: "受付の流れとして正しい順番はどれ？",
+    choices: [
+      "御祝儀受取 → 名簿記入 → 待合室案内",
+      "名簿記入 → 御祝儀受取 → エスコートカード回収 → 参加型コーナー案内 → 待合室へ",
+      "名簿記入 → 待合室案内 → エスコートカード回収",
+      "エスコートカード回収 → 名簿記入 → 御祝儀受取 → 待合室へ"
+    ],
+    answer: 1,
+    correct: "✅ 完璧！\n①名簿に名前を書いてもらう → ②御祝儀を受け取る → ③エスコートカード回収 → ④参加型コーナー案内 → ⑤待合室へ、の流れだよ！",
+    wrong: "❌ 惜しい！正解は「名簿記入 → 御祝儀受取 → エスコートカード回収 → 参加型コーナー案内 → 待合室へ」の順番だよ。\n参加型コーナーに案内するのを忘れずに！"
+  }
+];
+
+let current = 0;
+let score = 0;
+let answered = false;
+
+function renderQuestion() {
+  const q = questions[current];
+  document.getElementById('q-number').textContent = `Q ${current + 1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('q-label').textContent = `Question ${current + 1} / ${questions.length}`;
+  document.getElementById('progress-fill').style.width = `${(current / questions.length) * 100}%`;
+
+  const choicesEl = document.getElementById('choices');
+  choicesEl.innerHTML = '';
+  const labels = ['A', 'B', 'C', 'D'];
+
+  q.choices.forEach((c, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'choice-btn';
+    btn.innerHTML = `<span class="choice-label">${labels[i]}</span><span>${c}</span>`;
+    btn.onclick = () => selectAnswer(i);
+    choicesEl.appendChild(btn);
+  });
+
+  document.getElementById('feedback').style.display = 'none';
+  document.getElementById('feedback').className = 'feedback';
+  document.getElementById('next-btn').style.display = 'none';
+  answered = false;
+}
+
+function selectAnswer(selected) {
+  if (answered) return;
+  answered = true;
+
+  const q = questions[current];
+  const btns = document.querySelectorAll('.choice-btn');
+  const fb = document.getElementById('feedback');
+
+  btns.forEach(b => b.disabled = true);
+
+  if (selected === q.answer) {
+    btns[selected].classList.add('correct');
+    fb.className = 'feedback correct';
+    fb.textContent = q.correct;
+    score++;
+    document.getElementById('score-label').textContent = `${score} 正解`;
+  } else {
+    btns[selected].classList.add('wrong');
+    btns[q.answer].classList.add('correct');
+    fb.className = 'feedback wrong';
+    fb.textContent = q.wrong;
+  }
+
+  document.getElementById('next-btn').style.display = 'block';
+  document.getElementById('next-btn').textContent =
+    current < questions.length - 1 ? '次の問題へ →' : '結果を見る 🎊';
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    renderQuestion();
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  document.getElementById('quiz-area').style.display = 'none';
+  const rs = document.getElementById('result-screen');
+  rs.style.display = 'block';
+
+  const total = questions.length;
+  document.getElementById('score-display').innerHTML = `${score}<span> / ${total}</span>`;
+
+  let emoji, msg;
+  if (score === total) {
+    emoji = '🎊';
+    msg = '満点！完璧だよ！当日も自信を持って受付を任せたよ💍\n\n鎌倉 勇紀くんと栗本 玲奈さん、\nふたりがこれから歩む毎日が\n笑顔と愛情で溢れますように。\nずっとずっと幸せでいてね。🌸';
+  } else if (score >= 3) {
+    emoji = '💐';
+    msg = `惜しい！あと少し。苦手なところを読み返して当日は完璧にいこう！\n\n鎌倉 勇紀くんと栗本 玲奈さん、\nふたりの新しい章が始まるね。\nどうか末永く、幸せに。🌸`;
+  } else {
+    emoji = '📋';
+    msg = `もう一度共有メッセージを読み返してみてね！\n当日びっくりしないようにしっかり確認しよう。\n\n鎌倉 勇紀くんと栗本 玲奈さん、\nおめでとう。ふたりの未来が明るく輝きますように✨`;
+  }
+
+  document.getElementById('result-emoji').textContent = emoji;
+  document.getElementById('result-msg').textContent = msg;
+  document.getElementById('progress-fill').style.width = '100%';
+}
+
+function restartQuiz() {
+  current = 0;
+  score = 0;
+  answered = false;
+  document.getElementById('score-label').textContent = '0 正解';
+  document.getElementById('result-screen').style.display = 'none';
+  document.getElementById('quiz-area').style.display = 'block';
+  renderQuestion();
+}
+
+renderQuestion();
+</script>
+</body>
+</html>
