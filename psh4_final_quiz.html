@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Photoshop4 総復習クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0f0f14;
+    --surface: #1a1a24;
+    --surface2: #22223080;
+    --border: #2e2e42;
+    --grad: linear-gradient(135deg, #a855f7, #ec4899);
+    --grad-text: linear-gradient(135deg, #c084fc, #f472b6);
+    --purple: #a855f7;
+    --pink: #ec4899;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #f0f0f8;
+    --muted: #888899;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .wrapper {
+    width: 100%;
+    max-width: 680px;
+  }
+
+  .header {
+    text-align: center;
+    margin-bottom: 32px;
+  }
+  .header .label {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    margin-bottom: 8px;
+  }
+  .header h1 {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--text);
+  }
+  .header .subtitle {
+    margin-top: 8px;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.6;
+  }
+
+  .progress-wrap { margin-bottom: 32px; }
+  .progress-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--grad);
+    border-radius: 99px;
+    transition: width 0.4s ease;
+  }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 32px;
+  }
+
+  .q-num {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 16px;
+  }
+
+  .q-type-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--muted);
+  }
+  .q-type-badge.ox { color: #60a5fa; border-color: #60a5fa44; }
+  .q-type-badge.mc { color: var(--purple); border-color: #a855f744; }
+
+  /* 回次バッジ */
+  .q-chapter-badge {
+    display: inline-block;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 99px;
+    margin-bottom: 12px;
+    margin-left: 6px;
+    background: #a855f718;
+    border: 1px solid #a855f744;
+    color: #c084fc;
+    font-family: 'Space Mono', monospace;
+  }
+
+  .question {
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.6;
+    margin-bottom: 28px;
+  }
+
+  .choices {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .choice-btn {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.18s ease;
+  }
+  .choice-btn:hover:not(:disabled) {
+    border-color: var(--purple);
+    background: #a855f712;
+  }
+  .choice-btn .badge {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    font-weight: 700;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.18s;
+  }
+  .choice-btn:hover:not(:disabled) .badge { background: var(--purple); }
+
+  .ox-choices { display: flex; gap: 16px; }
+  .ox-btn {
+    flex: 1;
+    padding: 20px;
+    border-radius: 12px;
+    border: 2px solid var(--border);
+    background: var(--surface2);
+    font-size: 42px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .ox-btn.maru { border-color: #22c55e44; background: #22c55e0a; color: var(--green); }
+  .ox-btn.batsu { border-color: #ef444444; background: #ef44440a; color: var(--red); }
+  .ox-btn.maru:hover:not(:disabled) { border-color: var(--green); background: #22c55e22; transform: scale(1.04); }
+  .ox-btn.batsu:hover:not(:disabled) { border-color: var(--red); background: #ef444422; transform: scale(1.04); }
+
+  .choice-btn.correct { border-color: var(--green); background: #22c55e14; }
+  .choice-btn.correct .badge { background: var(--green); }
+  .choice-btn.wrong { border-color: var(--red); background: #ef444414; }
+  .choice-btn.wrong .badge { background: var(--red); }
+  .choice-btn.show-correct { border-color: var(--green); background: #22c55e0a; }
+  .choice-btn.show-correct .badge { background: var(--green); }
+
+  .ox-btn.correct { border-color: var(--green); background: #22c55e14; }
+  .ox-btn.wrong { border-color: var(--red); background: #ef444414; }
+  .ox-btn.show-correct { border-color: var(--green); background: #22c55e0a; }
+
+  .explanation {
+    margin-top: 24px;
+    padding: 18px 20px;
+    border-radius: 10px;
+    border-left: 3px solid var(--purple);
+    background: #a855f710;
+    font-size: 14px;
+    line-height: 1.75;
+    color: #d4d4e8;
+    display: none;
+  }
+  .explanation.visible { display: block; }
+  .explanation .result-label {
+    font-weight: 900;
+    font-size: 15px;
+    margin-bottom: 6px;
+  }
+  .explanation .result-label.ok { color: var(--green); }
+  .explanation .result-label.ng { color: var(--red); }
+
+  .next-btn {
+    display: none;
+    width: 100%;
+    margin-top: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    border: none;
+    background: var(--grad);
+    color: #fff;
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.18s;
+  }
+  .next-btn:hover { opacity: 0.88; }
+  .next-btn.visible { display: block; }
+
+  .result-screen { display: none; text-align: center; }
+  .result-screen.visible { display: block; }
+  .result-screen .score-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 12px;
+  }
+  .result-screen .score {
+    font-size: 72px;
+    font-weight: 900;
+    background: var(--grad);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .result-screen .score-denom { font-size: 18px; color: var(--muted); margin-bottom: 24px; }
+  .result-screen .message { font-size: 17px; font-weight: 700; margin-bottom: 32px; line-height: 1.6; }
+
+  /* CHAPTER BREAKDOWN */
+  .breakdown-title {
+    font-family: 'Space Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .score-graph {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+  }
+  .score-item {
+    flex: 1;
+    min-width: 80px;
+    max-width: 120px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 14px 10px;
+  }
+  .score-item .q-label {
+    font-family: 'Space Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .score-item .chapter-tag {
+    font-size: 10px;
+    font-weight: 700;
+    color: #c084fc;
+    margin-bottom: 4px;
+  }
+  .score-item .icon { font-size: 26px; margin-bottom: 4px; }
+  .score-item .q-text { font-size: 11px; color: var(--muted); line-height: 1.4; }
+
+  .retry-btn {
+    padding: 14px 40px;
+    border-radius: 10px;
+    border: 1px solid var(--purple);
+    background: transparent;
+    color: var(--purple);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.18s;
+  }
+  .retry-btn:hover { background: #a855f714; }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <div class="label">Photoshop 1〜4 — 総復習クイズ</div>
+    <h1>まとめクイズ</h1>
+    <div class="subtitle">4回分の授業から出題。授業で聞いたことを思い出しながら挑戦！</div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-meta">
+      <span id="prog-text">1 / 5</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="quiz-area" id="quiz-area"></div>
+    <div class="result-screen" id="result-screen"></div>
+  </div>
+</div>
+
+<script>
+const questions = [
+  {
+    type: 'ox',
+    chapter: 'PSH 1',
+    question: 'Photoshopは、写真の加工やWebデザインなど幅広く使われているプロ向けの画像編集ソフトである。',
+    correct: true,
+    explanation: 'その通り！第1回の最初に学んだPhotoshopの説明です。写真加工・レタッチ・デザインカンプ作成まで、4回通して使ってきましたね。プロの現場で毎日使われているソフトです！'
+  },
+  {
+    type: 'ox',
+    chapter: 'PSH 2',
+    question: 'Photoshopのレタッチ機能を使うと、写真に写り込んだシミや不要なものを消すことができる。',
+    correct: true,
+    explanation: 'その通り！第2回でシミ取りや不要なものを消す練習をしましたね。クリックするだけで周囲の模様に自動でなじませてくれるので、まるで最初からなかったかのようにきれいに消せます！'
+  },
+  {
+    type: 'ox',
+    chapter: 'PSH 3',
+    question: 'クリッピングマスクを使うと、画像を実際に切り取るので後から元に戻せなくなる。',
+    correct: false,
+    explanation: '×です！クリッピングマスクは画像を「実際には切り取らずに、見た目だけ切り取ったように見せる」技術です。額縁に絵をはめ込むイメージで、元データは傷ついていないので後から何度でも修正できます！'
+  },
+  {
+    type: 'ox',
+    chapter: 'PSH 4',
+    question: 'デザインカンプとは、色・フォント・写真・余白をすべて作り込んだ「Webサイトの完成見本」のことである。',
+    correct: true,
+    explanation: 'その通り！デザインカンプをクライアントに見せてOKをもらってから、コーダーがHTMLとCSSでコーディングを進めます。今日作ったカフェサイトのヘッダーがまさにそれです！'
+  },
+  {
+    type: 'mc',
+    chapter: 'PSH 4',
+    question: 'スマホ版デザインカンプのアートボードの横幅は何px？',
+    choices: [
+      '375px',
+      '750px',
+      '1366px',
+      '1024px'
+    ],
+    correct: 1,
+    explanation: '750pxです！実際にスマホで表示されるのは375pxですが、デザインカンプは2倍の750pxで作ります。「スマホは2倍で作る」と覚えておきましょう！'
+  }
+];
+
+let current = 0;
+let score = 0;
+let results = [];
+let answered = false;
+
+const quizArea = document.getElementById('quiz-area');
+const resultScreen = document.getElementById('result-screen');
+const progFill = document.getElementById('prog-fill');
+const progText = document.getElementById('prog-text');
+const progPct = document.getElementById('prog-pct');
+
+function updateProgress(idx) {
+  const pct = Math.round((idx / questions.length) * 100);
+  progFill.style.width = pct + '%';
+  progText.textContent = (idx + 1) + ' / ' + questions.length;
+  progPct.textContent = pct + '%';
+}
+
+function renderQuestion(idx) {
+  answered = false;
+  updateProgress(idx);
+  const q = questions[idx];
+  const typeBadge = q.type === 'ox'
+    ? '<span class="q-type-badge ox">○ × 問題</span>'
+    : '<span class="q-type-badge mc">4 択</span>';
+  const chapterBadge = `<span class="q-chapter-badge">${q.chapter}</span>`;
+
+  let choicesHTML = '';
+  if (q.type === 'ox') {
+    choicesHTML = `
+      <div class="ox-choices">
+        <button class="ox-btn maru" onclick="answerOX(true)">○</button>
+        <button class="ox-btn batsu" onclick="answerOX(false)">×</button>
+      </div>`;
+  } else {
+    const labels = ['A', 'B', 'C', 'D'];
+    choicesHTML = '<div class="choices">' + q.choices.map((c, i) =>
+      `<button class="choice-btn" id="choice-${i}" onclick="answerMC(${i})">
+        <span class="badge">${labels[i]}</span><span>${c}</span>
+      </button>`
+    ).join('') + '</div>';
+  }
+
+  quizArea.innerHTML = `
+    <div class="q-num">Q${idx + 1}</div>
+    ${typeBadge}${chapterBadge}
+    <div class="question">${q.question}</div>
+    ${choicesHTML}
+    <div class="explanation" id="explanation"></div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">
+      ${idx + 1 < questions.length ? '次の問題へ →' : '結果を見る →'}
+    </button>
+  `;
+}
+
+function showExplanation(isCorrect) {
+  const q = questions[current];
+  const exp = document.getElementById('explanation');
+  exp.innerHTML = `
+    <div class="result-label ${isCorrect ? 'ok' : 'ng'}">${isCorrect ? '✓ 正解！' : '✗ 不正解'}</div>
+    ${q.explanation}
+  `;
+  exp.classList.add('visible');
+  document.getElementById('next-btn').classList.add('visible');
+}
+
+function answerOX(selected) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const isCorrect = selected === q.correct;
+  if (isCorrect) score++;
+  results.push(isCorrect);
+
+  const maruBtn = document.querySelector('.ox-btn.maru');
+  const batsuBtn = document.querySelector('.ox-btn.batsu');
+  maruBtn.disabled = true;
+  batsuBtn.disabled = true;
+
+  if (selected === true) {
+    maruBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (!isCorrect) batsuBtn.classList.add('show-correct');
+  } else {
+    batsuBtn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (!isCorrect) maruBtn.classList.add('show-correct');
+  }
+  showExplanation(isCorrect);
+}
+
+function answerMC(selected) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const isCorrect = selected === q.correct;
+  if (isCorrect) score++;
+  results.push(isCorrect);
+
+  document.querySelectorAll('.choice-btn').forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === selected && isCorrect) btn.classList.add('correct');
+    else if (i === selected && !isCorrect) btn.classList.add('wrong');
+    else if (i === q.correct) btn.classList.add('show-correct');
+  });
+  showExplanation(isCorrect);
+}
+
+function nextQuestion() {
+  current++;
+  if (current < questions.length) {
+    renderQuestion(current);
+  } else {
+    showResult();
+  }
+}
+
+function showResult() {
+  progFill.style.width = '100%';
+  progText.textContent = questions.length + ' / ' + questions.length;
+  progPct.textContent = '100%';
+
+  quizArea.style.display = 'none';
+  resultScreen.classList.add('visible');
+
+  const msgs = [
+    { min: 5, text: '全問正解！！すごい、ちゃんと身についてる 🎉<br>Photoshop1〜4、お疲れ様でした！<br>ぜひ日常の写真加工やデザインでPhotoshopを使ってみてください！' },
+    { min: 4, text: '4問正解！十分すぎるくらい理解できてます 👏<br>今日の授業、ちゃんと聞いてましたね！<br>ここまで来たらあとは使うだけ。ぜひPhotoshopで何か作ってみてください！' },
+    { min: 3, text: '3問正解！それだけ覚えてれば全然OK 👍<br>解説読めば残りもすぐ分かります！<br>4回の授業を最後まで受けてくれただけで本当に偉い。あとは触って慣れるだけです！' },
+    { min: 0, text: '最後まで挑戦してくれてありがとう！<br>解説を読めば必ず分かるので大丈夫です 💪<br>4回の授業を受けてきたこと自体が最高に偉い。まずPhotoshopを1回開いてみてください！' }
+  ];
+  const msg = msgs.find(m => score >= m.min).text;
+
+  const graphItems = questions.map((q, i) => `
+    <div class="score-item">
+      <div class="q-label">Q${i + 1}</div>
+      <div class="chapter-tag">${q.chapter}</div>
+      <div class="icon">${results[i] ? '✅' : '❌'}</div>
+      <div class="q-text">${q.type === 'ox' ? '○×問題' : '4択'}</div>
+    </div>
+  `).join('');
+
+  resultScreen.innerHTML = `
+    <div class="score-label">SCORE</div>
+    <div class="score">${score}</div>
+    <div class="score-denom">/ ${questions.length} 問正解</div>
+    <div class="message">${msg}</div>
+    <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+    <div class="score-graph">${graphItems}</div>
+    <button class="retry-btn" onclick="restart()">もう一度挑戦する</button>
+  `;
+}
+
+function restart() {
+  current = 0;
+  score = 0;
+  results = [];
+  resultScreen.classList.remove('visible');
+  resultScreen.innerHTML = '';
+  quizArea.style.display = '';
+  renderQuestion(0);
+}
+
+renderQuestion(0);
+</script>
+</body>
+</html>
