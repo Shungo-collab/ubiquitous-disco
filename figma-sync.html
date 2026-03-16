@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figma デザイン同期ツール</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'Helvetica Neue', Arial, 'Hiragino Kaku Gothic ProN', sans-serif;
+    background: #0f0f14;
+    color: #e0e0e0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+
+  .card {
+    background: #1a1a24;
+    border: 1px solid #2a2a3a;
+    border-radius: 16px;
+    padding: 40px;
+    width: 100%;
+    max-width: 560px;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+  }
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, #b06aff, #ff5fa0);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+  }
+  .logo-text { font-size: 18px; font-weight: 700; color: #fff; }
+  .logo-sub  { font-size: 12px; color: #888; margin-top: 2px; }
+
+  h1 { font-size: 22px; font-weight: 700; color: #fff; margin-bottom: 8px; }
+  .desc { font-size: 14px; color: #888; margin-bottom: 28px; line-height: 1.6; }
+
+  label { display: block; font-size: 13px; color: #aaa; margin-bottom: 6px; }
+  input, textarea {
+    width: 100%;
+    background: #0f0f14;
+    border: 1px solid #2a2a3a;
+    border-radius: 8px;
+    color: #e0e0e0;
+    font-size: 14px;
+    padding: 10px 14px;
+    margin-bottom: 16px;
+    outline: none;
+    transition: border-color .2s;
+  }
+  input:focus, textarea:focus { border-color: #b06aff; }
+  input::placeholder { color: #444; }
+
+  .help {
+    font-size: 12px;
+    color: #666;
+    margin-top: -12px;
+    margin-bottom: 16px;
+    line-height: 1.5;
+  }
+  .help a { color: #b06aff; text-decoration: none; }
+
+  button {
+    width: 100%;
+    padding: 14px;
+    background: linear-gradient(135deg, #b06aff, #ff5fa0);
+    border: none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity .2s;
+    margin-top: 4px;
+  }
+  button:hover  { opacity: .9; }
+  button:active { opacity: .8; }
+  button:disabled { opacity: .5; cursor: not-allowed; }
+
+  .status {
+    margin-top: 20px;
+    padding: 12px 16px;
+    border-radius: 8px;
+    font-size: 14px;
+    display: none;
+  }
+  .status.info    { background: #1e1e3a; border: 1px solid #3a3a6a; color: #aaa; }
+  .status.success { background: #0d2a1e; border: 1px solid #1a5a3a; color: #4ecb8d; }
+  .status.error   { background: #2a0d0d; border: 1px solid #5a1a1a; color: #ff7070; }
+
+  .result { display: none; margin-top: 20px; }
+  .result h2 { font-size: 15px; color: #4ecb8d; margin-bottom: 10px; }
+
+  textarea.css-output {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    height: 200px;
+    resize: vertical;
+    margin-bottom: 10px;
+    color: #b06aff;
+  }
+
+  .dl-btn {
+    background: #1a1a24;
+    border: 1px solid #b06aff;
+    color: #b06aff;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background .2s;
+  }
+  .dl-btn:hover { background: #2a1a3a; opacity: 1; }
+
+  .stats {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .stat-chip {
+    background: #0f0f14;
+    border: 1px solid #2a2a3a;
+    border-radius: 20px;
+    padding: 4px 12px;
+    font-size: 12px;
+    color: #aaa;
+  }
+  .stat-chip span { color: #b06aff; font-weight: 700; }
+
+  .step {
+    background: #0f0f14;
+    border: 1px solid #2a2a3a;
+    border-radius: 10px;
+    padding: 16px;
+    margin-bottom: 20px;
+  }
+  .step-title { font-size: 13px; font-weight: 700; color: #888; margin-bottom: 10px; }
+  .step-item {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    margin-bottom: 6px;
+    font-size: 13px;
+    color: #aaa;
+    line-height: 1.5;
+  }
+  .step-num {
+    background: linear-gradient(135deg, #b06aff, #ff5fa0);
+    color: #fff;
+    font-size: 10px;
+    font-weight: 700;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+  <div class="logo">
+    <div class="logo-icon">🎨</div>
+    <div>
+      <div class="logo-text">Figma Sync</div>
+      <div class="logo-sub">デザイントークン自動取得ツール</div>
+    </div>
+  </div>
+
+  <h1>Figmaからデザインを取得</h1>
+  <p class="desc">
+    FigmaファイルのURL・アクセストークンを入力して「取得する」を押すだけで、<br>
+    色・フォント・スペーシングがCSS変数として生成されます。
+  </p>
+
+  <div class="step">
+    <div class="step-title">📌 使い方</div>
+    <div class="step-item"><div class="step-num">1</div><div>下の入力欄にFigmaのURLとトークンを入力</div></div>
+    <div class="step-item"><div class="step-num">2</div><div>「取得する」ボタンをクリック</div></div>
+    <div class="step-item"><div class="step-num">3</div><div>生成されたCSSをダウンロード → <code>figma-tokens.css</code> として保存</div></div>
+    <div class="step-item"><div class="step-num">4</div><div>クイズHTMLと同じフォルダに置けば自動で反映！</div></div>
+  </div>
+
+  <label>Figma ファイルURL</label>
+  <input type="text" id="figmaUrl"
+    placeholder="https://www.figma.com/design/xxxxx/..."
+    value="https://www.figma.com/design/zRNcYf0XoaaxhP3WqGvwQP/claude-collab">
+
+  <label>Personal Access Token</label>
+  <input type="password" id="figmaToken" placeholder="figd_xxxxxxxxxxxx">
+  <p class="help">
+    取得方法: Figmaを開く → 左上メニュー → Settings → Security →
+    <a href="https://www.figma.com/settings" target="_blank">Personal access tokens</a> → Generate new token
+  </p>
+
+  <button id="syncBtn" onclick="runSync()">🚀 取得する</button>
+
+  <div class="status" id="status"></div>
+
+  <div class="result" id="result">
+    <h2>✅ 生成完了！</h2>
+    <div class="stats" id="stats"></div>
+    <textarea class="css-output" id="cssOutput" readonly></textarea>
+    <button class="dl-btn" onclick="downloadCSS()">⬇️ figma-tokens.css をダウンロード</button>
+  </div>
+</div>
+
+<script>
+function showStatus(msg, type = 'info') {
+  const el = document.getElementById('status');
+  el.textContent = msg;
+  el.className = 'status ' + type;
+  el.style.display = 'block';
+}
+
+function extractFileId(url) {
+  const m = url.match(/figma\.com\/(?:file|design)\/([a-zA-Z0-9]+)/);
+  return m ? m[1] : null;
+}
+
+async function figmaGet(fileId, endpoint, token) {
+  const res = await fetch(`https://api.figma.com/v1/${endpoint}`, {
+    headers: { 'X-Figma-Token': token }
+  });
+  if (!res.ok) {
+    const txt = await res.text();
+    throw new Error(`Figma API エラー (${res.status}): ${txt}`);
+  }
+  return res.json();
+}
+
+function toCSS(color) {
+  if (!color) return 'transparent';
+  const r = Math.round(color.r * 255);
+  const g = Math.round(color.g * 255);
+  const b = Math.round(color.b * 255);
+  const a = color.a ?? 1;
+  if (Math.abs(a - 1) < 0.001) {
+    return '#' + [r,g,b].map(v => v.toString(16).padStart(2,'0')).join('');
+  }
+  return `rgba(${r},${g},${b},${a.toFixed(3)})`;
+}
+
+function toVarName(name) {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '');
+}
+
+function flattenNodes(node, acc = []) {
+  acc.push(node);
+  if (node.children) node.children.forEach(c => flattenNodes(c, acc));
+  return acc;
+}
+
+async function runSync() {
+  const url   = document.getElementById('figmaUrl').value.trim();
+  const token = document.getElementById('figmaToken').value.trim();
+
+  if (!url || !token) {
+    showStatus('⚠️ URLとトークンを両方入力してください。', 'error');
+    return;
+  }
+
+  const fileId = extractFileId(url);
+  if (!fileId) {
+    showStatus('⚠️ FigmaのURLが正しくありません。', 'error');
+    return;
+  }
+
+  const btn = document.getElementById('syncBtn');
+  btn.disabled = true;
+  document.getElementById('result').style.display = 'none';
+  showStatus('📐 Figmaファイルを取得中...', 'info');
+
+  try {
+    const [file, stylesData] = await Promise.all([
+      figmaGet(fileId, `files/${fileId}`, token),
+      figmaGet(fileId, `files/${fileId}/styles`, token)
+    ]);
+
+    showStatus('🎨 スタイル情報を取得中...', 'info');
+
+    const stylesMeta = stylesData.meta?.styles ?? [];
+    const styleNodeIds = stylesMeta.map(s => s.node_id);
+
+    const styleNodes = {};
+    for (let i = 0; i < styleNodeIds.length; i += 50) {
+      const chunk = styleNodeIds.slice(i, i + 50);
+      if (!chunk.length) break;
+      const res = await figmaGet(fileId,
+        `files/${fileId}/nodes?ids=${chunk.map(encodeURIComponent).join(',')}`,
+        token
+      );
+      Object.assign(styleNodes, res.nodes ?? {});
+    }
+
+    const colorVars = [], fontVars = [], effectVars = [];
+
+    for (const meta of stylesMeta) {
+      const node = styleNodes[meta.node_id]?.document;
+      if (!node) continue;
+      const varName = toVarName(meta.name);
+
+      if (meta.style_type === 'FILL') {
+        const fill = node.fills?.[0];
+        if (fill?.type === 'SOLID') {
+          colorVars.push(`  --color-${varName}: ${toCSS(fill.color)};`);
+        } else if (fill?.type === 'GRADIENT_LINEAR') {
+          const stops = (fill.gradientStops ?? [])
+            .map(s => `${toCSS(s.color)} ${Math.round(s.position*100)}%`)
+            .join(', ');
+          colorVars.push(`  --color-${varName}: linear-gradient(135deg, ${stops});`);
+        }
+      }
+
+      if (meta.style_type === 'TEXT') {
+        const s = node.style ?? {};
+        if (s.fontFamily)  fontVars.push(`  --font-family-${varName}: '${s.fontFamily}', sans-serif;`);
+        if (s.fontSize)    fontVars.push(`  --font-size-${varName}: ${s.fontSize}px;`);
+        if (s.fontWeight)  fontVars.push(`  --font-weight-${varName}: ${s.fontWeight};`);
+        if (s.lineHeightPx && s.fontSize)
+          fontVars.push(`  --line-height-${varName}: ${(s.lineHeightPx/s.fontSize).toFixed(2)};`);
+        if (s.letterSpacing && s.letterSpacing !== 0)
+          fontVars.push(`  --letter-spacing-${varName}: ${s.letterSpacing}px;`);
+      }
+
+      if (meta.style_type === 'EFFECT') {
+        const e = node.effects?.[0];
+        if (e?.type === 'DROP_SHADOW') {
+          const {offset={}, radius=0, spread=0, color} = e;
+          effectVars.push(`  --shadow-${varName}: ${offset.x??0}px ${offset.y??0}px ${radius}px ${spread}px ${toCSS(color)};`);
+        }
+      }
+    }
+
+    const allNodes = flattenNodes(file.document);
+    const spacingSet = new Set(), radiusSet = new Set();
+    for (const node of allNodes) {
+      ['paddingTop','paddingRight','paddingBottom','paddingLeft','itemSpacing'].forEach(k => {
+        if (typeof node[k] === 'number' && node[k] > 0) spacingSet.add(node[k]);
+      });
+      if (typeof node.cornerRadius === 'number' && node.cornerRadius > 0)
+        radiusSet.add(node.cornerRadius);
+    }
+
+    const spacingVars = [...spacingSet].sort((a,b)=>a-b).map(v=>`  --spacing-${v}: ${v}px;`);
+    const radiusVars  = [...radiusSet].sort((a,b)=>a-b).map(v=>`  --radius-${v}: ${v}px;`);
+
+    const sections = [];
+    if (colorVars.length)   sections.push('  /* ── Colors ─────────────── */\n'   + colorVars.join('\n'));
+    if (fontVars.length)    sections.push('  /* ── Typography ─────────── */\n'   + fontVars.join('\n'));
+    if (effectVars.length)  sections.push('  /* ── Effects ────────────── */\n'   + effectVars.join('\n'));
+    if (spacingVars.length) sections.push('  /* ── Spacing ────────────── */\n'   + spacingVars.join('\n'));
+    if (radiusVars.length)  sections.push('  /* ── Border Radius ──────── */\n'   + radiusVars.join('\n'));
+
+    const css = `/*
+ * figma-tokens.css
+ * Figma Sync ツールで自動生成
+ * ファイル: ${file.name}
+ * 生成日時: ${new Date().toLocaleString('ja-JP')}
+ *
+ * ⚠️ このファイルは自動生成されます。直接編集しないでください。
+ */
+
+:root {
+${sections.join('\n\n')}
+}
+`;
+
+    document.getElementById('cssOutput').value = css;
+
+    const statsEl = document.getElementById('stats');
+    statsEl.innerHTML = [
+      ['色', colorVars.length],
+      ['フォント変数', fontVars.length],
+      ['エフェクト', effectVars.length],
+      ['スペーシング', spacingVars.length],
+      ['角丸', radiusVars.length],
+    ].map(([k,v]) => `<div class="stat-chip">${k}: <span>${v}</span>件</div>`).join('');
+
+    document.getElementById('result').style.display = 'block';
+    showStatus('✅ 完了！CSSをダウンロードしてクイズフォルダに置いてください。', 'success');
+
+  } catch(e) {
+    showStatus('❌ エラー: ' + e.message, 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function downloadCSS() {
+  const css  = document.getElementById('cssOutput').value;
+  const blob = new Blob([css], { type: 'text/css' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = 'figma-tokens.css';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script>
+</body>
+</html>
