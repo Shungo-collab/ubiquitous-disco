@@ -1,0 +1,5 @@
+# Figma credentials - DO NOT COMMIT
+.figma.json
+
+# Node
+node_modules/

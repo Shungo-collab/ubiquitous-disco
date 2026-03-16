@@ -1,0 +1,11 @@
+{
+  "name": "ubiquitous-disco",
+  "version": "1.0.0",
+  "description": "Photoshop course quiz platform with Figma integration",
+  "scripts": {
+    "figma-sync": "node figma-sync.js"
+  },
+  "engines": {
+    "node": ">=16"
+  }
+}
