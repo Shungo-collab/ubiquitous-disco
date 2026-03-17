@@ -1,0 +1,1118 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>ポケカ在庫管理</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700;900&family=DM+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #f4f3ee;
+  --surface: #ffffff;
+  --surface2: #f0efe8;
+  --border: #e2e1d9;
+  --text: #1a1a1a;
+  --text2: #777770;
+  --accent: #2563eb;
+  --accent-light: #dbeafe;
+  --green: #16a34a;
+  --green-light: #dcfce7;
+  --red: #dc2626;
+  --red-light: #fee2e2;
+  --rare: #7c3aed;
+  --rare-light: #ede9fe;
+  --ace: #b45309;
+  --ace-light: #fef3c7;
+  --shadow: 0 1px 3px rgba(0,0,0,0.07);
+  --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+body {
+  font-family: 'Noto Sans JP', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  padding-bottom: 72px;
+}
+
+/* ヘッダー */
+.header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 14px 16px 10px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: var(--shadow-md);
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.header h1 {
+  font-size: 17px;
+  font-weight: 900;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.header h1 span { color: var(--accent); }
+.admin-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 12px;
+  font-size: 11px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  color: var(--text2);
+  transition: all 0.15s;
+}
+.admin-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+.search-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface2);
+  outline: none;
+  margin-bottom: 8px;
+  transition: border-color 0.15s;
+}
+.search-input:focus { border-color: var(--accent); background: white; }
+.filter-row {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  scrollbar-width: none;
+}
+.filter-row::-webkit-scrollbar { display: none; }
+.chip {
+  white-space: nowrap;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 4px 11px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: inherit;
+  background: var(--surface);
+  cursor: pointer;
+  transition: all 0.15s;
+  color: var(--text2);
+}
+.chip.active { background: var(--accent); color: white; border-color: var(--accent); }
+
+/* タブ */
+.tabs {
+  display: flex;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+}
+.tab {
+  flex: 1;
+  padding: 11px 6px;
+  text-align: center;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.15s;
+  color: var(--text2);
+  font-family: inherit;
+  background: none;
+  border-top: none;
+  border-left: none;
+  border-right: none;
+}
+.tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+/* サマリーバー */
+.summary-bar {
+  display: flex;
+  gap: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.summary-bar::-webkit-scrollbar { display: none; }
+.summary-item {
+  flex: 1;
+  padding: 8px 12px;
+  text-align: center;
+  border-right: 1px solid var(--border);
+  min-width: 90px;
+}
+.summary-item:last-child { border-right: none; }
+.s-label { font-size: 10px; color: var(--text2); font-weight: 500; }
+.s-value {
+  font-size: 18px;
+  font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  color: var(--accent);
+  line-height: 1.2;
+}
+
+/* カードリスト */
+.card-list {
+  padding: 10px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.card-item {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 13px 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+}
+.card-name-wrap { flex: 1; min-width: 0; }
+.card-name {
+  font-size: 14px;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 3px;
+}
+.card-badges { display: flex; gap: 4px; flex-wrap: wrap; }
+.badge {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-family: 'DM Mono', monospace;
+}
+.badge.rr { background: var(--rare-light); color: var(--rare); }
+.badge.r { background: var(--accent-light); color: var(--accent); }
+.badge.ace { background: var(--ace-light); color: var(--ace); }
+.badge.normal { background: var(--surface2); color: var(--text2); }
+
+/* メルカリ価格 */
+.mercari-price {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--red);
+  font-family: 'DM Mono', monospace;
+  white-space: nowrap;
+}
+.mercari-price.empty { color: var(--border); font-weight: 400; font-size: 11px; font-family: inherit; }
+
+/* 在庫コントロール */
+.stock-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.stock-box {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 9px 10px;
+}
+.stock-box-label {
+  font-size: 10px;
+  color: var(--text2);
+  font-weight: 700;
+  margin-bottom: 6px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.stock-control {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.sBtn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: none;
+  font-size: 20px;
+  font-weight: 300;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.1s;
+  line-height: 1;
+  padding: 0;
+}
+.sBtn:active { transform: scale(0.85); }
+.sBtn.minus { background: var(--red-light); color: var(--red); }
+.sBtn.plus { background: var(--green-light); color: var(--green); }
+.sNum {
+  font-size: 24px;
+  font-weight: 900;
+  font-family: 'DM Mono', monospace;
+  min-width: 36px;
+  text-align: center;
+}
+.stock-total {
+  text-align: center;
+  font-size: 11px;
+  color: var(--text2);
+  padding: 3px 0 6px;
+}
+.stock-total strong {
+  font-family: 'DM Mono', monospace;
+  font-weight: 900;
+  color: var(--text);
+}
+
+/* 展開ボタン */
+.expand-btn {
+  width: 100%;
+  background: none;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  padding: 6px;
+  font-size: 11px;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+.expand-btn:active { background: var(--surface2); }
+
+.card-detail {
+  margin-top: 8px;
+  display: none;
+  flex-direction: column;
+  gap: 8px;
+}
+.card-detail.open { display: flex; }
+
+.detail-label { font-size: 11px; color: var(--text2); font-weight: 700; margin-bottom: 4px; }
+.detail-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface2);
+  outline: none;
+  resize: none;
+}
+.detail-input:focus { border-color: var(--accent); background: white; }
+
+.shop-entry {
+  background: var(--surface2);
+  border-radius: 10px;
+  padding: 10px;
+}
+.shop-fields {
+  display: grid;
+  grid-template-columns: 1fr 80px;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+.save-shop-btn {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.save-shop-btn:active { opacity: 0.8; }
+.shop-history {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.shop-history-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+  padding: 3px 0;
+  border-bottom: 1px solid var(--border);
+}
+.shop-history-row:last-child { border-bottom: none; }
+.shop-history-row .shop-name-text { color: var(--text2); }
+.shop-history-row .shop-price-text { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); }
+.shop-history-row .shop-date-text { color: var(--text2); font-size: 10px; }
+
+/* 管理者フォーム */
+.add-form {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  margin: 10px 12px 0;
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  display: none;
+}
+.add-form.open { display: block; }
+.add-form h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 7px;
+  margin-bottom: 7px;
+}
+.form-row .full { grid-column: 1 / -1; }
+.form-input {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface2);
+  outline: none;
+}
+.form-input:focus { border-color: var(--accent); background: white; }
+.form-select {
+  width: 100%;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 9px 10px;
+  font-size: 13px;
+  font-family: inherit;
+  background: var(--surface2);
+  outline: none;
+  appearance: none;
+}
+.add-btn {
+  width: 100%;
+  background: var(--accent);
+  color: white;
+  border: none;
+  border-radius: 10px;
+  padding: 11px;
+  font-size: 13px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  transition: opacity 0.15s;
+}
+.add-btn:active { opacity: 0.8; }
+
+/* デッキページ */
+.deck-list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.deck-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.deck-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.deck-card-header h3 { font-size: 14px; font-weight: 700; }
+.deck-count { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+.deck-rows { display: flex; flex-direction: column; gap: 0; }
+.deck-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--surface2);
+  font-size: 13px;
+}
+.deck-row:last-child { border-bottom: none; }
+.deck-qty-badge {
+  font-family: 'DM Mono', monospace;
+  font-weight: 700;
+  font-size: 11px;
+  background: var(--accent-light);
+  color: var(--accent);
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+.add-deck-btn {
+  width: 100%;
+  background: none;
+  border: 1.5px dashed var(--border);
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 13px;
+  color: var(--text2);
+  cursor: pointer;
+  font-family: inherit;
+  font-weight: 700;
+  transition: all 0.15s;
+}
+.add-deck-btn:active { background: var(--surface2); }
+
+/* カドショまとめページ */
+.shop-summary { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.shop-card {
+  background: var(--surface);
+  border-radius: 14px;
+  padding: 14px;
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+}
+.shop-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.shop-card-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--surface2);
+  font-size: 12px;
+  gap: 8px;
+}
+.shop-card-row:last-child { border-bottom: none; }
+.shop-card-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shop-card-price { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); white-space: nowrap; }
+.shop-card-date { color: var(--text2); font-size: 10px; white-space: nowrap; }
+
+/* トースト */
+.toast {
+  position: fixed;
+  bottom: 82px;
+  left: 50%;
+  transform: translateX(-50%) translateY(10px);
+  background: #1a1a1a;
+  color: white;
+  padding: 9px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.25s;
+  z-index: 999;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ボトムナビ */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  display: flex;
+  padding: 6px 0 8px;
+  z-index: 100;
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+}
+.nav-btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 3px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  color: var(--text2);
+  font-size: 10px;
+  font-weight: 700;
+  transition: color 0.15s;
+}
+.nav-btn.active { color: var(--accent); }
+.nav-icon { font-size: 22px; line-height: 1; }
+
+.page { display: none; }
+.page.active { display: block; }
+
+.loading {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text2);
+  font-size: 14px;
+}
+.dot { animation: blink 1.2s infinite; display: inline-block; }
+.dot:nth-child(2) { animation-delay: 0.2s; }
+.dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
+
+.empty {
+  text-align: center;
+  padding: 50px 20px;
+  color: var(--text2);
+}
+.empty .e-icon { font-size: 40px; margin-bottom: 10px; }
+.empty p { font-size: 13px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <h1>🃏 ポケカ<span>在庫</span></h1>
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">管理者モード</button>
+  </div>
+  <input class="search-input" type="text" placeholder="カード名で検索..." id="searchInput" oninput="renderInventory()">
+  <div class="filter-row" id="filterRow">
+    <button class="chip active" data-filter="all" onclick="setFilter('all',this)">すべて</button>
+    <button class="chip" data-filter="rare" onclick="setFilter('rare',this)">レア以上</button>
+    <button class="chip" data-filter="stock" onclick="setFilter('stock',this)">在庫あり</button>
+    <button class="chip" data-filter="nostock" onclick="setFilter('nostock',this)">在庫なし</button>
+    <button class="chip" data-sort="price" onclick="setSort('price',this)">高値順</button>
+    <button class="chip" data-sort="name" onclick="setSort('name',this)">名前順</button>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="switchPage('inventory',this)">在庫一覧</button>
+  <button class="tab" onclick="switchPage('deck',this)">デッキ</button>
+  <button class="tab" onclick="switchPage('shop',this)">カドショ</button>
+</div>
+
+<!-- 在庫ページ -->
+<div class="page active" id="page-inventory">
+  <div class="summary-bar" id="summaryBar"></div>
+  <div id="addForm" class="add-form">
+    <h3>＋ カードを追加</h3>
+    <div class="form-row">
+      <input class="form-input full" type="text" id="newName" placeholder="カード名（正式名称）">
+    </div>
+    <div class="form-row">
+      <select class="form-select" id="newRarity">
+        <option value="">レアリティ</option>
+        <option value="RR">RR</option>
+        <option value="R">R</option>
+        <option value="ACE">ACE</option>
+        <option value="-">-</option>
+      </select>
+      <input class="form-input" type="number" id="newMercari" placeholder="メルカリ値">
+    </div>
+    <button class="add-btn" onclick="addCard()">追加する</button>
+  </div>
+  <div class="card-list" id="cardList">
+    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<!-- デッキページ -->
+<div class="page" id="page-deck">
+  <div class="deck-list" id="deckList">
+    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<!-- カドショページ -->
+<div class="page" id="page-shop">
+  <div class="shop-summary" id="shopSummary">
+    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="bottom-nav">
+  <button class="nav-btn active" id="nav-inventory" onclick="switchPage('inventory',this)">
+    <span class="nav-icon">📦</span>在庫
+  </button>
+  <button class="nav-btn" id="nav-deck" onclick="switchPage('deck',this)">
+    <span class="nav-icon">🎴</span>デッキ
+  </button>
+  <button class="nav-btn" id="nav-shop" onclick="switchPage('shop',this)">
+    <span class="nav-icon">🏪</span>カドショ
+  </button>
+</div>
+
+<script>
+const SB_URL = 'https://skrltozqpelemuhjxtml.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcmx0b3pxcGVsZW11aGp4dG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzMzNDQsImV4cCI6MjA4OTMwOTM0NH0.qqJmGsyrL6cBaK0d-ZGAV4mpq6LQU0NBnBovztjwlow';
+
+const HEADERS = {
+  'Content-Type': 'application/json',
+  'apikey': SB_KEY,
+  'Authorization': `Bearer ${SB_KEY}`,
+  'Prefer': 'return=representation'
+};
+
+// 初期データ
+const INITIAL_CARDS = [
+  { name: 'オリーヴァex', rarity: 'RR', stock_home: 2, stock_parents: 0 },
+  { name: 'オリーニョ', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'ミニーブ', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'ニャースex', rarity: 'RR', stock_home: 2, stock_parents: 0 },
+  { name: 'メガニウム', rarity: 'R', stock_home: 2, stock_parents: 0 },
+  { name: 'チコリータ', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'ベイリーフ', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'オーガポンみどりのめんex', rarity: 'RR', stock_home: 4, stock_parents: 0 },
+  { name: 'キチキギスex', rarity: 'RR', stock_home: 1, stock_parents: 0 },
+  { name: 'スボミー', rarity: '-', stock_home: 1, stock_parents: 0 },
+  { name: 'ハイパーボール', rarity: '-', stock_home: 4, stock_parents: 0 },
+  { name: 'むしとりセット', rarity: '-', stock_home: 4, stock_parents: 0 },
+  { name: 'ポケパッド', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'スペシャルレッドカード', rarity: 'R', stock_home: 1, stock_parents: 0 },
+  { name: 'アンフェアスタンプ', rarity: 'ACE', stock_home: 1, stock_parents: 0 },
+  { name: '夜のタンカ', rarity: '-', stock_home: 1, stock_parents: 0 },
+  { name: 'エネルギーつけかえ', rarity: 'R', stock_home: 1, stock_parents: 0 },
+  { name: 'ボスの指令', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'ヒカリ', rarity: '-', stock_home: 2, stock_parents: 0 },
+  { name: 'ブライア', rarity: 'R', stock_home: 1, stock_parents: 0 },
+  { name: 'リーリエの決心', rarity: '-', stock_home: 4, stock_parents: 0 },
+  { name: 'スイレンのお世話', rarity: '-', stock_home: 1, stock_parents: 0 },
+  { name: '活力の森', rarity: '-', stock_home: 4, stock_parents: 0 },
+  { name: '基本草エネルギー', rarity: '-', stock_home: 12, stock_parents: 0 },
+];
+
+let cards = [];
+let decks = [];
+let deckCards = [];
+let isAdmin = false;
+let currentFilter = 'all';
+let currentSort = '';
+
+// API
+async function api(method, table, data, id) {
+  let url = `${SB_URL}/rest/v1/${table}`;
+  if (id) url += `?id=eq.${id}`;
+  const res = await fetch(url, {
+    method,
+    headers: HEADERS,
+    body: data ? JSON.stringify(data) : undefined
+  });
+  if (!res.ok) throw new Error(await res.text());
+  const text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+async function fetchCards() {
+  const res = await fetch(`${SB_URL}/rest/v1/cards?order=created_at.asc`, { headers: HEADERS });
+  return await res.json();
+}
+async function fetchDecks() {
+  const res = await fetch(`${SB_URL}/rest/v1/decks?order=created_at.asc`, { headers: HEADERS });
+  return await res.json();
+}
+async function fetchDeckCards() {
+  const res = await fetch(`${SB_URL}/rest/v1/deck_cards?select=*`, { headers: HEADERS });
+  return await res.json();
+}
+async function fetchShopPrices() {
+  const res = await fetch(`${SB_URL}/rest/v1/shop_prices?select=*`, { headers: HEADERS });
+  if (!res.ok) return [];
+  return await res.json();
+}
+
+// 初期化
+async function init() {
+  try {
+    cards = await fetchCards();
+    if (!cards || cards.length === 0) {
+      // 初期データを投入
+      for (const c of INITIAL_CARDS) {
+        const result = await api('POST', 'cards', c);
+        if (result && result[0]) cards.push(result[0]);
+      }
+    }
+    decks = await fetchDecks();
+    deckCards = await fetchDeckCards();
+    renderInventory();
+    renderSummary();
+    renderDecks();
+    renderShop();
+  } catch(e) {
+    document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">⚠️</div><p>読み込みエラー<br>${e.message}</p></div>`;
+    console.error(e);
+  }
+}
+
+// 在庫レンダリング
+function renderInventory() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  let list = [...cards];
+
+  if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (currentFilter === 'rare') list = list.filter(c => c.rarity && c.rarity !== '-' && c.rarity !== '');
+  if (currentFilter === 'stock') list = list.filter(c => (c.stock_home + c.stock_parents) > 0);
+  if (currentFilter === 'nostock') list = list.filter(c => (c.stock_home + c.stock_parents) === 0);
+  if (currentSort === 'price') list.sort((a,b) => (b.mercari_price||0) - (a.mercari_price||0));
+  if (currentSort === 'name') list.sort((a,b) => a.name.localeCompare(b.name, 'ja'));
+
+  if (list.length === 0) {
+    document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">🔍</div><p>カードが見つかりません</p></div>`;
+    renderSummary();
+    return;
+  }
+
+  document.getElementById('cardList').innerHTML = list.map(c => cardHTML(c)).join('');
+  renderSummary();
+}
+
+function cardHTML(c) {
+  const total = (c.stock_home || 0) + (c.stock_parents || 0);
+  const rarityClass = c.rarity === 'RR' ? 'rr' : c.rarity === 'R' ? 'r' : c.rarity === 'ACE' ? 'ace' : 'normal';
+  const rarityLabel = c.rarity && c.rarity !== '-' ? c.rarity : '−';
+  const mercariDisp = c.mercari_price ? `¥${c.mercari_price.toLocaleString()}` : '';
+  const shopHistory = c.shop_history ? JSON.parse(c.shop_history) : [];
+  const latestShop = shopHistory.length > 0 ? shopHistory[shopHistory.length-1] : null;
+
+  return `
+<div class="card-item" id="card-${c.id}">
+  <div class="card-header">
+    <div class="card-name-wrap">
+      <div class="card-name">${c.name}</div>
+      <div class="card-badges">
+        <span class="badge ${rarityClass}">${rarityLabel}</span>
+        ${latestShop ? `<span class="badge normal">🏪 ¥${latestShop.price.toLocaleString()}</span>` : ''}
+      </div>
+    </div>
+    <div class="mercari-price ${mercariDisp ? 'mercari' : 'empty'}">${mercariDisp || (isAdmin ? '− 設定' : '')}</div>
+  </div>
+
+  <div class="stock-grid">
+    <div class="stock-box">
+      <div class="stock-box-label">🏠 うちの家</div>
+      <div class="stock-control">
+        <button class="sBtn minus" onclick="updateStock('${c.id}','home',-1)">−</button>
+        <div class="sNum" id="sh-${c.id}">${c.stock_home || 0}</div>
+        <button class="sBtn plus" onclick="updateStock('${c.id}','home',1)">＋</button>
+      </div>
+    </div>
+    <div class="stock-box">
+      <div class="stock-box-label">👵 実家</div>
+      <div class="stock-control">
+        <button class="sBtn minus" onclick="updateStock('${c.id}','parents',-1)">−</button>
+        <div class="sNum" id="sp-${c.id}">${c.stock_parents || 0}</div>
+        <button class="sBtn plus" onclick="updateStock('${c.id}','parents',1)">＋</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stock-total">合計 <strong>${total}</strong> 枚</div>
+
+  <button class="expand-btn" onclick="toggleDetail('${c.id}')">▾ メモ・価格詳細</button>
+  <div class="card-detail" id="detail-${c.id}">
+    ${isAdmin ? `
+    <div>
+      <div class="detail-label">メルカリ参考値（円）</div>
+      <input class="detail-input" type="number" id="mercari-${c.id}" value="${c.mercari_price||''}" placeholder="例: 1200" onchange="saveMercari('${c.id}')">
+    </div>` : `
+    ${c.mercari_price ? `<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ¥${c.mercari_price.toLocaleString()}</div>` : ''}
+    `}
+    <div>
+      <div class="detail-label">メモ</div>
+      <textarea class="detail-input" rows="2" id="memo-${c.id}" placeholder="メモ..." onchange="saveMemo('${c.id}')">${c.memo||''}</textarea>
+    </div>
+    <div class="shop-entry">
+      <div class="detail-label">🏪 カドショ価格を記録</div>
+      <div class="shop-fields">
+        <input class="detail-input" type="text" id="sname-${c.id}" placeholder="店名（例：アメニティ）">
+        <input class="detail-input" type="number" id="sprice-${c.id}" placeholder="価格">
+      </div>
+      <button class="save-shop-btn" onclick="saveShop('${c.id}')">記録する</button>
+      ${shopHistory.length > 0 ? `
+      <div class="shop-history">
+        ${shopHistory.slice().reverse().slice(0,5).map(s => `
+          <div class="shop-history-row">
+            <span class="shop-name-text">${s.name}</span>
+            <span class="shop-price-text">¥${s.price.toLocaleString()}</span>
+            <span class="shop-date-text">${s.date}</span>
+          </div>
+        `).join('')}
+      </div>` : ''}
+    </div>
+  </div>
+</div>`;
+}
+
+// サマリー
+function renderSummary() {
+  const totalHome = cards.reduce((s,c) => s + (c.stock_home||0), 0);
+  const totalParents = cards.reduce((s,c) => s + (c.stock_parents||0), 0);
+  const totalAll = totalHome + totalParents;
+  const rareCards = cards.filter(c => c.rarity && c.rarity !== '-' && c.rarity !== '').length;
+  document.getElementById('summaryBar').innerHTML = `
+    <div class="summary-item">
+      <div class="s-label">総枚数</div>
+      <div class="s-value">${totalAll}</div>
+    </div>
+    <div class="summary-item">
+      <div class="s-label">🏠 うちの家</div>
+      <div class="s-value">${totalHome}</div>
+    </div>
+    <div class="summary-item">
+      <div class="s-label">👵 実家</div>
+      <div class="s-value">${totalParents}</div>
+    </div>
+    <div class="summary-item">
+      <div class="s-label">種類数</div>
+      <div class="s-value">${cards.length}</div>
+    </div>
+  `;
+}
+
+// 在庫更新
+async function updateStock(id, loc, delta) {
+  const card = cards.find(c => c.id === id);
+  if (!card) return;
+  const field = loc === 'home' ? 'stock_home' : 'stock_parents';
+  const newVal = Math.max(0, (card[field] || 0) + delta);
+  card[field] = newVal;
+
+  // UI即時反映
+  const el = document.getElementById(loc === 'home' ? `sh-${id}` : `sp-${id}`);
+  if (el) el.textContent = newVal;
+  renderSummary();
+
+  // DB更新
+  try {
+    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ [field]: newVal })
+    });
+  } catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// メモ保存
+async function saveMemo(id) {
+  const val = document.getElementById(`memo-${id}`).value;
+  const card = cards.find(c => c.id === id);
+  if (card) card.memo = val;
+  try {
+    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ memo: val })
+    });
+    showToast('メモを保存しました');
+  } catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// メルカリ値保存
+async function saveMercari(id) {
+  const val = parseInt(document.getElementById(`mercari-${id}`).value) || null;
+  const card = cards.find(c => c.id === id);
+  if (card) card.mercari_price = val;
+  try {
+    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ mercari_price: val })
+    });
+    showToast('価格を保存しました');
+    renderInventory();
+  } catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// カドショ価格保存
+async function saveShop(id) {
+  const nameEl = document.getElementById(`sname-${id}`);
+  const priceEl = document.getElementById(`sprice-${id}`);
+  const shopName = nameEl.value.trim();
+  const price = parseInt(priceEl.value);
+  if (!shopName || !price) { showToast('店名と価格を入力してください'); return; }
+
+  const card = cards.find(c => c.id === id);
+  const history = card.shop_history ? JSON.parse(card.shop_history) : [];
+  const today = new Date().toLocaleDateString('ja-JP', { month:'numeric', day:'numeric' });
+  history.push({ name: shopName, price, date: today });
+  card.shop_history = JSON.stringify(history);
+
+  try {
+    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
+      method: 'PATCH',
+      headers: HEADERS,
+      body: JSON.stringify({ shop_history: card.shop_history })
+    });
+    nameEl.value = '';
+    priceEl.value = '';
+    showToast(`${shopName} ¥${price.toLocaleString()} を記録しました`);
+    renderInventory();
+    renderShop();
+  } catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// カード追加
+async function addCard() {
+  const name = document.getElementById('newName').value.trim();
+  const rarity = document.getElementById('newRarity').value || '-';
+  const mercari = parseInt(document.getElementById('newMercari').value) || null;
+  if (!name) { showToast('カード名を入力してください'); return; }
+
+  try {
+    const result = await api('POST', 'cards', { name, rarity, mercari_price: mercari, stock_home: 0, stock_parents: 0 });
+    if (result && result[0]) {
+      cards.push(result[0]);
+      document.getElementById('newName').value = '';
+      document.getElementById('newMercari').value = '';
+      renderInventory();
+      showToast(`${name} を追加しました`);
+    }
+  } catch(e) { showToast('⚠️ 追加失敗'); }
+}
+
+// デッキレンダリング
+function renderDecks() {
+  if (!decks || decks.length === 0) {
+    document.getElementById('deckList').innerHTML = `
+      <div class="empty"><div class="e-icon">🎴</div><p>デッキがまだ登録されていません</p></div>
+      ${isAdmin ? `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを登録する</button>` : ''}
+    `;
+    return;
+  }
+
+  const html = decks.map(d => {
+    const dc = deckCards.filter(dc => dc.deck_id === d.id);
+    const totalQty = dc.reduce((s,r) => s + (r.quantity||0), 0);
+    const rows = dc.map(r => {
+      const card = cards.find(c => c.id === r.card_id);
+      return card ? `
+        <div class="deck-row">
+          <span>${card.name}</span>
+          <span class="deck-qty-badge">${r.quantity}枚</span>
+        </div>` : '';
+    }).join('');
+    return `
+      <div class="deck-card">
+        <div class="deck-card-header">
+          <h3>${d.name}</h3>
+          <span class="deck-count">${totalQty}/60</span>
+        </div>
+        <div class="deck-rows">${rows || '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>'}</div>
+      </div>`;
+  }).join('');
+
+  document.getElementById('deckList').innerHTML = html + (isAdmin ? `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを追加</button>` : '');
+}
+
+// カドショまとめ
+function renderShop() {
+  const cardsWithShop = cards.filter(c => c.shop_history && JSON.parse(c.shop_history).length > 0);
+
+  if (cardsWithShop.length === 0) {
+    document.getElementById('shopSummary').innerHTML = `
+      <div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません<br>在庫一覧のカードから記録できます</p></div>`;
+    return;
+  }
+
+  // 店舗ごとにまとめる
+  const shopMap = {};
+  cardsWithShop.forEach(c => {
+    const history = JSON.parse(c.shop_history);
+    history.forEach(s => {
+      if (!shopMap[s.name]) shopMap[s.name] = [];
+      shopMap[s.name].push({ cardName: c.name, price: s.price, date: s.date });
+    });
+  });
+
+  const html = Object.entries(shopMap).map(([shopName, items]) => `
+    <div class="shop-card">
+      <h3>🏪 ${shopName}</h3>
+      <div>
+        ${items.sort((a,b) => a.cardName.localeCompare(b.cardName,'ja')).map(i => `
+          <div class="shop-card-row">
+            <span class="shop-card-name">${i.cardName}</span>
+            <span class="shop-card-price">¥${i.price.toLocaleString()}</span>
+            <span class="shop-card-date">${i.date}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+
+  document.getElementById('shopSummary').innerHTML = html;
+}
+
+// デッキ追加
+async function addDeck() {
+  const name = prompt('デッキ名を入力してください');
+  if (!name) return;
+  try {
+    const result = await api('POST', 'decks', { name });
+    if (result && result[0]) {
+      decks.push(result[0]);
+      renderDecks();
+      showToast(`デッキ「${name}」を追加しました`);
+    }
+  } catch(e) { showToast('⚠️ 追加失敗'); }
+}
+
+// 管理者トグル
+function toggleAdmin() {
+  isAdmin = !isAdmin;
+  document.getElementById('adminBtn').classList.toggle('active', isAdmin);
+  document.getElementById('adminBtn').textContent = isAdmin ? '✓ 管理者' : '管理者モード';
+  document.getElementById('addForm').classList.toggle('open', isAdmin);
+  renderInventory();
+  renderDecks();
+}
+
+// フィルター・ソート
+function setFilter(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('[data-filter]').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  renderInventory();
+}
+function setSort(val, el) {
+  currentSort = currentSort === val ? '' : val;
+  document.querySelectorAll('[data-sort]').forEach(e => e.classList.remove('active'));
+  if (currentSort) el.classList.add('active');
+  renderInventory();
+}
+
+// 展開
+function toggleDetail(id) {
+  const el = document.getElementById(`detail-${id}`);
+  el.classList.toggle('open');
+}
+
+// ページ切替
+function switchPage(name, el) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById(`page-${name}`).classList.add('active');
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (el.classList.contains('tab')) {
+    el.classList.add('active');
+    document.getElementById(`nav-${name}`).classList.add('active');
+  } else {
+    el.classList.add('active');
+    document.querySelectorAll('.tab')[['inventory','deck','shop'].indexOf(name)].classList.add('active');
+  }
+}
+
+// トースト
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2000);
+}
+
+init();
+</script>
+</body>
+</html>
