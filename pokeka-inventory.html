@@ -555,6 +555,21 @@ body {
 .empty { text-align: center; padding: 50px 20px; color: var(--text2); }
 .empty .e-icon { font-size: 40px; margin-bottom: 10px; }
 .empty p { font-size: 13px; line-height: 1.6; }
+
+/* カテゴリセクション */
+.cat-section { margin-bottom: 4px; }
+.cat-header {
+  display: flex; align-items: center; gap: 6px;
+  padding: 10px 12px 6px;
+  font-size: 13px; font-weight: 900; color: var(--text2);
+  letter-spacing: 0.5px;
+}
+.cat-icon { font-size: 16px; }
+.cat-count {
+  font-size: 10px; font-weight: 700; color: var(--text2);
+  background: var(--surface2); padding: 2px 7px; border-radius: 20px;
+  font-family: 'DM Mono', monospace; margin-left: 2px;
+}
 </style>
 </head>
 <body>
@@ -570,6 +585,11 @@ body {
   <input class="search-input" type="text" placeholder="カード名で検索..." id="searchInput" oninput="renderInventory()">
   <div class="filter-row">
     <button class="chip active" data-filter="all" onclick="setFilter('all',this)">すべて</button>
+    <button class="chip" data-cat="ポケモン" onclick="setCat('ポケモン',this)">🐾 ポケモン</button>
+    <button class="chip" data-cat="グッズ" onclick="setCat('グッズ',this)">🎒 グッズ</button>
+    <button class="chip" data-cat="サポート" onclick="setCat('サポート',this)">👤 サポート</button>
+    <button class="chip" data-cat="スタジアム" onclick="setCat('スタジアム',this)">🏟 スタジアム</button>
+    <button class="chip" data-cat="エネルギー" onclick="setCat('エネルギー',this)">⚡ エネルギー</button>
     <button class="chip" data-filter="rare" onclick="setFilter('rare',this)">レア以上</button>
     <button class="chip" data-filter="stock" onclick="setFilter('stock',this)">在庫あり</button>
     <button class="chip" data-filter="nostock" onclick="setFilter('nostock',this)">在庫なし</button>
@@ -600,7 +620,16 @@ body {
         <option value="ACE">ACE</option>
         <option value="-">-</option>
       </select>
-      <input class="form-input" type="number" id="newMercari" placeholder="メルカリ値">
+      <select class="form-select" id="newCategory">
+        <option value="グッズ">🎒 グッズ</option>
+        <option value="ポケモン">🐾 ポケモン</option>
+        <option value="サポート">👤 サポート</option>
+        <option value="スタジアム">🏟 スタジアム</option>
+        <option value="エネルギー">⚡ エネルギー</option>
+      </select>
+    </div>
+    <div class="form-row">
+      <input class="form-input full" type="number" id="newMercari" placeholder="メルカリ値（円）">
     </div>
     <button class="add-btn" onclick="addCard()">追加する</button>
   </div>
@@ -702,7 +731,7 @@ const H = {
 };
 
 let cards = [], decks = [], deckCards = [], shopPrices = [], sales = [];
-let isAdmin = false, currentFilter = 'all', currentSort = '';
+let isAdmin = false, currentFilter = 'all', currentSort = '', currentCat = '';
 let pendingListDeckId = null, pendingCompleteId = null;
 let selectedDeckCardName = {};
 
@@ -747,10 +776,14 @@ async function init() {
 }
 
 // ===== 在庫レンダリング =====
+const CAT_ORDER = ['ポケモン','グッズ','サポート','スタジアム','エネルギー'];
+const CAT_ICON = { 'ポケモン':'🐾','グッズ':'🎒','サポート':'👤','スタジアム':'🏟','エネルギー':'⚡' };
+
 function renderInventory() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   let list = [...cards];
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
+  if (currentCat) list = list.filter(c => (c.category||'グッズ') === currentCat);
   if (currentFilter === 'rare') list = list.filter(c => c.rarity && c.rarity !== '-');
   if (currentFilter === 'stock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) > 0);
   if (currentFilter === 'nostock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) === 0);
@@ -761,7 +794,33 @@ function renderInventory() {
     document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">🔍</div><p>カードが見つかりません</p></div>`;
     renderSummary(); return;
   }
-  document.getElementById('cardList').innerHTML = list.map(cardHTML).join('');
+
+  // カテゴリ絞り込み中 or ソート中はそのまま表示
+  if (currentCat || currentSort || q) {
+    document.getElementById('cardList').innerHTML = list.map(cardHTML).join('');
+  } else {
+    // カテゴリ別セクション表示
+    let html = '';
+    const used = new Set();
+    CAT_ORDER.forEach(cat => {
+      const group = list.filter(c => (c.category||'グッズ') === cat);
+      if (!group.length) return;
+      group.forEach(c => used.add(c.id));
+      html += `<div class="cat-section">
+        <div class="cat-header"><span class="cat-icon">${CAT_ICON[cat]}</span>${cat} <span class="cat-count">${group.length}種</span></div>
+        ${group.map(cardHTML).join('')}
+      </div>`;
+    });
+    // 未分類
+    const uncategorized = list.filter(c => !used.has(c.id));
+    if (uncategorized.length) {
+      html += `<div class="cat-section">
+        <div class="cat-header"><span class="cat-icon">❓</span>未分類 <span class="cat-count">${uncategorized.length}種</span></div>
+        ${uncategorized.map(cardHTML).join('')}
+      </div>`;
+    }
+    document.getElementById('cardList').innerHTML = html;
+  }
   renderSummary();
 }
 
@@ -770,6 +829,7 @@ function cardHTML(c) {
   const rc = c.rarity==='RR'?'rr':c.rarity==='R'?'r':c.rarity==='ACE'?'ace':'normal';
   const rl = c.rarity&&c.rarity!=='-'?c.rarity:'−';
   const mp = c.mercari_price?`¥${c.mercari_price.toLocaleString()}`:'';
+  const cat = c.category||'グッズ';
 
   // カドショ最安値
   const myShops = shopPrices.filter(s => s.card_id === c.id);
@@ -793,6 +853,29 @@ function cardHTML(c) {
         </div>`).join('')}
     </div>` : '';
 
+  const adminEditHTML = isAdmin ? `
+    <div style="background:var(--ace-light);border-radius:10px;padding:10px;display:flex;flex-direction:column;gap:8px;">
+      <div class="detail-label">✏️ カード情報を編集</div>
+      <input class="detail-input" type="text" id="ename-${c.id}" value="${c.name}" placeholder="カード名">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+        <select class="detail-input" id="erarity-${c.id}">
+          <option value="RR" ${c.rarity==='RR'?'selected':''}>RR</option>
+          <option value="R" ${c.rarity==='R'?'selected':''}>R</option>
+          <option value="ACE" ${c.rarity==='ACE'?'selected':''}>ACE</option>
+          <option value="-" ${(!c.rarity||c.rarity==='-')?'selected':''}>-</option>
+        </select>
+        <select class="detail-input" id="ecat-${c.id}">
+          <option value="ポケモン" ${cat==='ポケモン'?'selected':''}>🐾 ポケモン</option>
+          <option value="グッズ" ${cat==='グッズ'?'selected':''}>🎒 グッズ</option>
+          <option value="サポート" ${cat==='サポート'?'selected':''}>👤 サポート</option>
+          <option value="スタジアム" ${cat==='スタジアム'?'selected':''}>🏟 スタジアム</option>
+          <option value="エネルギー" ${cat==='エネルギー'?'selected':''}>⚡ エネルギー</option>
+        </select>
+      </div>
+      <input class="detail-input" type="number" id="mercari-${c.id}" value="${c.mercari_price||''}" placeholder="メルカリ値（円）">
+      <button class="save-shop-btn" style="background:var(--ace);" onclick="saveCardEdit('${c.id}')">保存する</button>
+    </div>` : `${mp?`<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ${mp}</div>`:''}`;
+
   return `
 <div class="card-item" id="card-${c.id}">
   <div class="card-header">
@@ -800,6 +883,7 @@ function cardHTML(c) {
       <div class="card-name">${c.name}</div>
       <div class="card-badges">
         <span class="badge ${rc}">${rl}</span>
+        <span class="badge normal" style="background:var(--surface2)">${CAT_ICON[cat]||''} ${cat}</span>
         ${shopBadge}
       </div>
     </div>
@@ -824,13 +908,9 @@ function cardHTML(c) {
     </div>
   </div>
   <div class="stock-total">合計 <strong>${total}</strong> 枚</div>
-  <button class="expand-btn" onclick="toggleDetail('${c.id}')">▾ メモ・価格詳細</button>
+  <button class="expand-btn" onclick="toggleDetail('${c.id}')">▾ メモ・価格詳細${isAdmin?' / 編集':''}</button>
   <div class="card-detail" id="detail-${c.id}">
-    ${isAdmin?`
-    <div>
-      <div class="detail-label">メルカリ参考値（円）</div>
-      <input class="detail-input" type="number" id="mercari-${c.id}" value="${c.mercari_price||''}" placeholder="例: 1200" onchange="saveMercari('${c.id}')">
-    </div>`:`${mp?`<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ${mp}</div>`:''}` }
+    ${adminEditHTML}
     <div>
       <div class="detail-label">メモ</div>
       <textarea class="detail-input" rows="2" id="memo-${c.id}" placeholder="メモ..." onchange="saveMemo('${c.id}')">${c.memo||''}</textarea>
@@ -908,13 +988,29 @@ async function saveShop(id) {
   } catch(e) { showToast('⚠️ 保存失敗'); }
 }
 
+async function saveCardEdit(id) {
+  const name = document.getElementById(`ename-${id}`).value.trim();
+  const rarity = document.getElementById(`erarity-${id}`).value;
+  const category = document.getElementById(`ecat-${id}`).value;
+  const mercari = parseInt(document.getElementById(`mercari-${id}`).value)||null;
+  if (!name) { showToast('カード名を入力してください'); return; }
+  const card = cards.find(c=>c.id===id);
+  if (card) { card.name=name; card.rarity=rarity; card.category=category; card.mercari_price=mercari; }
+  try {
+    await sbPatch('cards', id, {name, rarity, category, mercari_price: mercari});
+    showToast('カード情報を更新しました');
+    renderInventory();
+  } catch(e) { showToast('⚠️ 更新失敗'); }
+}
+
 async function addCard() {
   const name = document.getElementById('newName').value.trim();
   const rarity = document.getElementById('newRarity').value||'-';
+  const category = document.getElementById('newCategory').value||'グッズ';
   const mercari = parseInt(document.getElementById('newMercari').value)||null;
   if (!name) { showToast('カード名を入力してください'); return; }
   try {
-    const r = await sbPost('cards',{name,rarity,mercari_price:mercari,stock_home:0,stock_parents:0});
+    const r = await sbPost('cards',{name,rarity,category,mercari_price:mercari,stock_home:0,stock_parents:0});
     if (r&&r[0]) { cards.push(r[0]); document.getElementById('newName').value=''; document.getElementById('newMercari').value=''; renderInventory(); showToast(`${name} を追加しました`); }
   } catch(e) { showToast('⚠️ 追加失敗'); }
 }
@@ -1224,8 +1320,17 @@ function toggleAdmin() {
 }
 function setFilter(val,el) {
   currentFilter=val;
-  document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
+  currentCat='';
+  document.querySelectorAll('[data-filter],[data-cat],[data-sort]').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
+  renderInventory();
+}
+function setCat(val,el) {
+  currentCat = currentCat===val?'':val;
+  currentFilter='all';
+  document.querySelectorAll('[data-filter],[data-cat],[data-sort]').forEach(e=>e.classList.remove('active'));
+  if (currentCat) el.classList.add('active');
+  else document.querySelector('[data-filter="all"]').classList.add('active');
   renderInventory();
 }
 function setSort(val,el) {
