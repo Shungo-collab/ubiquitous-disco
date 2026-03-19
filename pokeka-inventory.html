@@ -457,6 +457,67 @@ body {
 .shop-card-price { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); white-space: nowrap; }
 .shop-card-date { color: var(--text2); font-size: 10px; white-space: nowrap; }
 
+/* ===== メルカリページ ===== */
+.mercari-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+.mercari-header-card {
+  background: linear-gradient(135deg, #1a1a2e, #16213e);
+  border-radius: 16px; padding: 16px; color: white;
+}
+.mercari-header-card h2 { font-size: 16px; font-weight: 900; margin-bottom: 4px; }
+.mercari-stats { display: flex; gap: 16px; margin-top: 10px; }
+.mercari-stat { display: flex; flex-direction: column; align-items: center; }
+.mercari-stat .ms-val { font-size: 22px; font-weight: 900; font-family: 'DM Mono', monospace; color: #f97316; }
+.mercari-stat .ms-label { font-size: 10px; opacity: 0.7; }
+
+/* 不足カードアラート */
+.shortage-alert {
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  box-shadow: var(--shadow); border: 1.5px solid var(--red-light);
+}
+.shortage-alert-header {
+  display: flex; align-items: center; gap: 8px; margin-bottom: 12px;
+}
+.shortage-alert-header h3 { font-size: 14px; font-weight: 900; color: var(--red); }
+.shortage-count-badge {
+  background: var(--red); color: white; border-radius: 20px;
+  padding: 2px 8px; font-size: 11px; font-weight: 700;
+  font-family: 'DM Mono', monospace;
+}
+
+.shortage-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid var(--surface2); gap: 8px;
+}
+.shortage-row:last-child { border-bottom: none; }
+.shortage-row-name { font-size: 13px; font-weight: 700; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.shortage-row-detail { display: flex; flex-direction: column; align-items: flex-end; gap: 2px; flex-shrink: 0; }
+.shortage-row-nums { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
+.shortage-row-diff {
+  font-size: 12px; font-weight: 900; font-family: 'DM Mono', monospace;
+  padding: 2px 8px; border-radius: 20px;
+}
+.shortage-row-diff.ng { background: var(--red-light); color: var(--red); }
+.shortage-row-diff.ok { background: var(--green-light); color: var(--green); }
+
+/* 取引中デッキカード */
+.mercari-deck-card {
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.mercari-deck-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 8px; }
+.mercari-deck-name { font-size: 15px; font-weight: 900; }
+.mercari-deck-date { font-size: 11px; color: var(--text2); margin-top: 2px; }
+.mercari-deck-price { font-size: 16px; font-weight: 900; font-family: 'DM Mono', monospace; color: var(--red); white-space: nowrap; }
+.mercari-deck-actions { display: flex; gap: 8px; }
+.mercari-action-btn {
+  flex: 1; border: none; border-radius: 10px; padding: 10px;
+  font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+}
+.mercari-action-btn:active { opacity: 0.8; }
+.mercari-action-btn.complete { background: var(--green); color: white; }
+.mercari-action-btn.cancel { background: var(--surface2); color: var(--text); }
+
 /* ===== 履歴ページ ===== */
 .history-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .history-card {
@@ -612,6 +673,7 @@ body {
 <div class="tabs">
   <button class="tab active" onclick="switchPage('inventory',this)">在庫一覧</button>
   <button class="tab" onclick="switchPage('deck',this)">デッキ</button>
+  <button class="tab" onclick="switchPage('mercari',this)">メルカリ</button>
   <button class="tab" onclick="switchPage('shop',this)">カドショ</button>
 </div>
 
@@ -652,6 +714,13 @@ body {
 <!-- デッキページ -->
 <div class="page" id="page-deck">
   <div class="deck-page" id="deckPage">
+    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<!-- メルカリページ -->
+<div class="page" id="page-mercari">
+  <div class="mercari-page" id="mercariPage">
     <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
   </div>
 </div>
@@ -723,6 +792,9 @@ body {
   <button class="nav-btn" id="nav-deck" onclick="switchPage('deck',this)">
     <span class="nav-icon">🎴</span>デッキ
   </button>
+  <button class="nav-btn" id="nav-mercari" onclick="switchPage('mercari',this)">
+    <span class="nav-icon">🔥</span>メルカリ
+  </button>
   <button class="nav-btn" id="nav-shop" onclick="switchPage('shop',this)">
     <span class="nav-icon">🏪</span>カドショ
   </button>
@@ -779,6 +851,7 @@ async function init() {
     renderInventory();
     renderSummary();
     renderDecks();
+    renderMercari();
     renderShop();
     renderHistory();
   } catch(e) {
@@ -1322,6 +1395,7 @@ async function confirmComplete() {
     closeModal('completeModal');
     showToast('✅ 取引完了しました！');
     renderDecks();
+    renderMercari();
     renderHistory();
   } catch(e) { showToast('⚠️ 更新失敗'); }
 }
@@ -1332,6 +1406,7 @@ async function cancelSale(saleId) {
     sales = sales.filter(s=>s.id!==saleId);
     showToast('出品を取消しました');
     renderDecks();
+    renderMercari();
     renderHistory();
   } catch(e) { showToast('⚠️ 取消失敗'); }
 }
@@ -1367,6 +1442,114 @@ function renderShop() {
         </div>`).join('')}
     </div>`).join('');
   document.getElementById('shopPage').innerHTML = html;
+}
+
+// ===== メルカリページ =====
+function renderMercari() {
+  const activeSales = sales.filter(s=>s.status==='active');
+
+  if (!activeSales.length) {
+    document.getElementById('mercariPage').innerHTML = `
+      <div class="empty"><div class="e-icon">🔥</div><p>現在取引中のデッキはありません</p></div>`;
+    return;
+  }
+
+  // 取引中デッキで使うカードの必要枚数を集計
+  const needed = {}; // card_id → 必要合計枚数
+  activeSales.forEach(s => {
+    const dc = deckCards.filter(r=>r.deck_id===s.deck_id);
+    dc.forEach(r => {
+      if (!needed[r.card_id]) needed[r.card_id] = 0;
+      needed[r.card_id] += (r.quantity||1);
+    });
+  });
+
+  // 不足カードを計算
+  const shortages = [];
+  Object.entries(needed).forEach(([cardId, total]) => {
+    const card = cards.find(c=>c.id===cardId);
+    if (!card) return;
+    const have = (card.stock_home||0) + (card.stock_parents||0);
+    shortages.push({ card, needed: total, have, diff: have - total });
+  });
+  shortages.sort((a,b) => a.diff - b.diff); // 不足が多い順
+
+  const ngList = shortages.filter(s=>s.diff<0);
+  const okList = shortages.filter(s=>s.diff>=0);
+
+  // ヘッダー
+  const totalNeeded = Object.values(needed).reduce((s,v)=>s+v,0);
+  let html = `
+    <div class="mercari-header-card">
+      <h2>🔥 メルカリ出品管理</h2>
+      <div class="mercari-stats">
+        <div class="mercari-stat">
+          <div class="ms-val">${activeSales.length}</div>
+          <div class="ms-label">取引中</div>
+        </div>
+        <div class="mercari-stat">
+          <div class="ms-val">${ngList.length}</div>
+          <div class="ms-label">不足種類</div>
+        </div>
+        <div class="mercari-stat">
+          <div class="ms-val">${Math.abs(ngList.reduce((s,r)=>s+r.diff,0))}</div>
+          <div class="ms-label">不足合計枚数</div>
+        </div>
+      </div>
+    </div>`;
+
+  // 不足カードアラート
+  html += `
+    <div class="shortage-alert">
+      <div class="shortage-alert-header">
+        <h3>⚠️ 不足カード</h3>
+        <span class="shortage-count-badge">${ngList.length}種</span>
+      </div>
+      ${ngList.length === 0 ? `<div style="text-align:center;padding:12px;color:var(--green);font-weight:700;font-size:13px;">✅ すべて充足しています！</div>` :
+        ngList.map(s=>`
+          <div class="shortage-row">
+            <span class="shortage-row-name">${s.card.name}</span>
+            <div class="shortage-row-detail">
+              <span class="shortage-row-nums">必要${s.needed}枚 / 所持${s.have}枚</span>
+              <span class="shortage-row-diff ng">不足 ${Math.abs(s.diff)}枚</span>
+            </div>
+          </div>`).join('')
+      }
+      ${okList.length > 0 ? `
+        <details style="margin-top:8px;">
+          <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0;">充足カード ${okList.length}種を見る</summary>
+          ${okList.map(s=>`
+            <div class="shortage-row">
+              <span class="shortage-row-name">${s.card.name}</span>
+              <div class="shortage-row-detail">
+                <span class="shortage-row-nums">必要${s.needed}枚 / 所持${s.have}枚</span>
+                <span class="shortage-row-diff ok">✓ ${s.have}枚</span>
+              </div>
+            </div>`).join('')}
+        </details>` : ''}
+    </div>`;
+
+  // 取引中デッキ一覧
+  html += `<div style="font-size:12px;font-weight:700;color:var(--text2);padding:4px 2px;">取引中のデッキ</div>`;
+  activeSales.forEach(s => {
+    const date = new Date(s.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+    html += `
+      <div class="mercari-deck-card">
+        <div class="mercari-deck-header">
+          <div>
+            <div class="mercari-deck-name">${s.deck_name}</div>
+            <div class="mercari-deck-date">${date} 出品</div>
+          </div>
+          ${s.sold_price ? `<div class="mercari-deck-price">¥${s.sold_price.toLocaleString()}</div>` : ''}
+        </div>
+        <div class="mercari-deck-actions">
+          <button class="mercari-action-btn complete" onclick="openCompleteModal('${s.id}','${s.deck_name}')">✅ 取引完了</button>
+          <button class="mercari-action-btn cancel" onclick="cancelSale('${s.id}')">取消</button>
+        </div>
+      </div>`;
+  });
+
+  document.getElementById('mercariPage').innerHTML = html;
 }
 
 // ===== 取引履歴 =====
@@ -1425,7 +1608,7 @@ function switchPage(name, el) {
   document.getElementById(`page-${name}`).classList.add('active');
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  const tabs = ['inventory','deck','shop'];
+  const tabs = ['inventory','deck','mercari','shop'];
   const tabIdx = tabs.indexOf(name);
   if (el) {
     if (el.classList.contains('tab')) {
