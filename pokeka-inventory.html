@@ -1579,7 +1579,6 @@ function renderMercari() {
 
   activeSales.forEach(s => {
     const date = new Date(s.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
-    // このデッキで不足してるカード数
     const deckNg = Object.entries(neededByDeck[s.deck_id]||{}).filter(([cid,qty])=>{
       const card = cards.find(c=>c.id===cid);
       if (!card) return false;
@@ -1595,10 +1594,6 @@ function renderMercari() {
         </div>
         ${deckNg>0?`<div style="background:rgba(255,255,255,0.2);color:white;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;">不足${deckNg}種</div>`:
         `<div style="background:rgba(255,255,255,0.2);color:white;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;">✓ 充足</div>`}
-      </div>
-      <div style="display:flex;gap:8px;padding:12px 14px;">
-        <button onclick="openCompleteModal('${s.id}','${s.deck_name}')" style="flex:1;background:var(--green);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">✅ 取引完了</button>
-        <button onclick="cancelSale('${s.id}')" style="flex:1;background:var(--surface2);color:var(--text);border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">取消</button>
       </div>
     </div>`;
   });
