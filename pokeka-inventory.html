@@ -19,6 +19,8 @@
   --green-light: #dcfce7;
   --red: #dc2626;
   --red-light: #fee2e2;
+  --orange: #ea580c;
+  --orange-light: #ffedd5;
   --rare: #7c3aed;
   --rare-light: #ede9fe;
   --ace: #b45309;
@@ -60,6 +62,7 @@ body {
   gap: 6px;
 }
 .header h1 span { color: var(--accent); }
+.header-right { display: flex; gap: 8px; align-items: center; }
 .admin-btn {
   background: none;
   border: 1.5px solid var(--border);
@@ -72,11 +75,17 @@ body {
   color: var(--text2);
   transition: all 0.15s;
 }
-.admin-btn.active {
-  background: var(--accent);
-  color: white;
-  border-color: var(--accent);
+.admin-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+.menu-btn {
+  background: none;
+  border: 1.5px solid var(--border);
+  border-radius: 20px;
+  padding: 5px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  line-height: 1;
 }
+
 .search-input {
   width: 100%;
   border: 1.5px solid var(--border);
@@ -140,7 +149,6 @@ body {
 /* サマリーバー */
 .summary-bar {
   display: flex;
-  gap: 0;
   background: var(--surface);
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
@@ -152,26 +160,14 @@ body {
   padding: 8px 12px;
   text-align: center;
   border-right: 1px solid var(--border);
-  min-width: 90px;
+  min-width: 80px;
 }
 .summary-item:last-child { border-right: none; }
 .s-label { font-size: 10px; color: var(--text2); font-weight: 500; }
-.s-value {
-  font-size: 18px;
-  font-weight: 900;
-  font-family: 'DM Mono', monospace;
-  color: var(--accent);
-  line-height: 1.2;
-}
+.s-value { font-size: 18px; font-weight: 900; font-family: 'DM Mono', monospace; color: var(--accent); line-height: 1.2; }
 
 /* カードリスト */
-.card-list {
-  padding: 10px 12px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
+.card-list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .card-item {
   background: var(--surface);
   border-radius: 14px;
@@ -179,7 +175,6 @@ body {
   box-shadow: var(--shadow);
   border: 1px solid var(--border);
 }
-
 .card-header {
   display: flex;
   align-items: center;
@@ -209,338 +204,342 @@ body {
 .badge.ace { background: var(--ace-light); color: var(--ace); }
 .badge.normal { background: var(--surface2); color: var(--text2); }
 
-/* メルカリ価格 */
-.mercari-price {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--red);
-  font-family: 'DM Mono', monospace;
-  white-space: nowrap;
-}
+.mercari-price { font-size: 13px; font-weight: 700; color: var(--red); font-family: 'DM Mono', monospace; white-space: nowrap; }
 .mercari-price.empty { color: var(--border); font-weight: 400; font-size: 11px; font-family: inherit; }
 
-/* 在庫コントロール */
-.stock-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 8px;
-}
-.stock-box {
-  background: var(--surface2);
-  border-radius: 10px;
-  padding: 9px 10px;
-}
-.stock-box-label {
-  font-size: 10px;
-  color: var(--text2);
-  font-weight: 700;
-  margin-bottom: 6px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-.stock-control {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
+.stock-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+.stock-box { background: var(--surface2); border-radius: 10px; padding: 9px 10px; }
+.stock-box-label { font-size: 10px; color: var(--text2); font-weight: 700; margin-bottom: 6px; }
+.stock-control { display: flex; align-items: center; justify-content: space-between; }
 .sBtn {
-  width: 30px;
-  height: 30px;
-  border-radius: 50%;
-  border: none;
-  font-size: 20px;
-  font-weight: 300;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: transform 0.1s;
-  line-height: 1;
-  padding: 0;
+  width: 30px; height: 30px; border-radius: 50%; border: none;
+  font-size: 20px; font-weight: 300; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.1s; line-height: 1; padding: 0;
 }
 .sBtn:active { transform: scale(0.85); }
 .sBtn.minus { background: var(--red-light); color: var(--red); }
 .sBtn.plus { background: var(--green-light); color: var(--green); }
-.sNum {
-  font-size: 24px;
-  font-weight: 900;
-  font-family: 'DM Mono', monospace;
-  min-width: 36px;
-  text-align: center;
-}
-.stock-total {
-  text-align: center;
-  font-size: 11px;
-  color: var(--text2);
-  padding: 3px 0 6px;
-}
-.stock-total strong {
-  font-family: 'DM Mono', monospace;
-  font-weight: 900;
-  color: var(--text);
-}
+.sNum { font-size: 24px; font-weight: 900; font-family: 'DM Mono', monospace; min-width: 36px; text-align: center; }
+.stock-total { text-align: center; font-size: 11px; color: var(--text2); padding: 3px 0 6px; }
+.stock-total strong { font-family: 'DM Mono', monospace; font-weight: 900; color: var(--text); }
 
-/* 展開ボタン */
 .expand-btn {
-  width: 100%;
-  background: none;
-  border: 1px dashed var(--border);
-  border-radius: 8px;
-  padding: 6px;
-  font-size: 11px;
-  color: var(--text2);
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 500;
-  transition: all 0.15s;
+  width: 100%; background: none; border: 1px dashed var(--border);
+  border-radius: 8px; padding: 6px; font-size: 11px; color: var(--text2);
+  cursor: pointer; font-family: inherit; font-weight: 500; transition: all 0.15s;
 }
 .expand-btn:active { background: var(--surface2); }
-
-.card-detail {
-  margin-top: 8px;
-  display: none;
-  flex-direction: column;
-  gap: 8px;
-}
+.card-detail { margin-top: 8px; display: none; flex-direction: column; gap: 8px; }
 .card-detail.open { display: flex; }
-
 .detail-label { font-size: 11px; color: var(--text2); font-weight: 700; margin-bottom: 4px; }
 .detail-input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 10px;
-  font-size: 13px;
-  font-family: inherit;
-  background: var(--surface2);
-  outline: none;
-  resize: none;
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit;
+  background: var(--surface2); outline: none; resize: none;
 }
 .detail-input:focus { border-color: var(--accent); background: white; }
 
-.shop-entry {
-  background: var(--surface2);
-  border-radius: 10px;
-  padding: 10px;
-}
-.shop-fields {
-  display: grid;
-  grid-template-columns: 1fr 80px;
-  gap: 6px;
-  margin-bottom: 6px;
-}
+/* カドショフォーム */
+.shop-entry { background: var(--surface2); border-radius: 10px; padding: 10px; }
+.shop-fields { display: grid; grid-template-columns: 1fr 80px; gap: 6px; margin-bottom: 6px; }
 .save-shop-btn {
-  width: 100%;
-  background: var(--green);
-  color: white;
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  font-size: 12px;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.15s;
+  width: 100%; background: var(--green); color: white; border: none;
+  border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
 }
 .save-shop-btn:active { opacity: 0.8; }
-.shop-history {
-  margin-top: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
+.shop-history { margin-top: 8px; display: flex; flex-direction: column; gap: 4px; }
 .shop-history-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 11px;
-  padding: 3px 0;
-  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 11px; padding: 3px 0; border-bottom: 1px solid var(--border);
 }
 .shop-history-row:last-child { border-bottom: none; }
-.shop-history-row .shop-name-text { color: var(--text2); }
-.shop-history-row .shop-price-text { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); }
-.shop-history-row .shop-date-text { color: var(--text2); font-size: 10px; }
+.shop-name-text { color: var(--text2); }
+.shop-price-text { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); }
+.shop-date-text { color: var(--text2); font-size: 10px; }
 
 /* 管理者フォーム */
 .add-form {
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 14px;
-  margin: 10px 12px 0;
-  border: 1px solid var(--border);
-  box-shadow: var(--shadow);
-  display: none;
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  margin: 10px 12px 0; border: 1px solid var(--border); box-shadow: var(--shadow); display: none;
 }
 .add-form.open { display: block; }
 .add-form h3 { font-size: 13px; font-weight: 700; margin-bottom: 10px; }
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 7px;
-  margin-bottom: 7px;
-}
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; margin-bottom: 7px; }
 .form-row .full { grid-column: 1 / -1; }
 .form-input {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 10px;
-  font-size: 13px;
-  font-family: inherit;
-  background: var(--surface2);
-  outline: none;
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 10px; font-size: 13px; font-family: inherit; background: var(--surface2); outline: none;
 }
 .form-input:focus { border-color: var(--accent); background: white; }
 .form-select {
-  width: 100%;
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 9px 10px;
-  font-size: 13px;
-  font-family: inherit;
-  background: var(--surface2);
-  outline: none;
-  appearance: none;
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 9px 10px; font-size: 13px; font-family: inherit;
+  background: var(--surface2); outline: none; appearance: none;
 }
 .add-btn {
-  width: 100%;
-  background: var(--accent);
-  color: white;
-  border: none;
-  border-radius: 10px;
-  padding: 11px;
-  font-size: 13px;
-  font-weight: 700;
-  font-family: inherit;
-  cursor: pointer;
-  transition: opacity 0.15s;
+  width: 100%; background: var(--accent); color: white; border: none;
+  border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
 }
 .add-btn:active { opacity: 0.8; }
 
-/* デッキページ */
-.deck-list { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+/* ===== デッキページ ===== */
+.deck-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; }
+
+/* 取引中バナー */
+.active-sale-banner {
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  border-radius: 16px;
+  padding: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+.active-sale-banner::before {
+  content: '🔥';
+  position: absolute;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 40px;
+  opacity: 0.3;
+}
+.sale-badge {
+  display: inline-block;
+  background: rgba(255,255,255,0.2);
+  border-radius: 20px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: 1px;
+}
+.active-sale-banner h2 { font-size: 18px; font-weight: 900; margin-bottom: 4px; }
+.active-sale-banner p { font-size: 12px; opacity: 0.8; margin-bottom: 12px; }
+.sale-actions { display: flex; gap: 8px; }
+.sale-action-btn {
+  flex: 1; border: none; border-radius: 10px; padding: 9px;
+  font-size: 12px; font-weight: 700; font-family: inherit; cursor: pointer;
+  transition: opacity 0.15s;
+}
+.sale-action-btn:active { opacity: 0.8; }
+.sale-action-btn.complete { background: white; color: var(--red); }
+.sale-action-btn.cancel { background: rgba(255,255,255,0.2); color: white; }
+
+/* デッキカード */
 .deck-card {
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
 }
 .deck-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
+  display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;
 }
-.deck-card-header h3 { font-size: 14px; font-weight: 700; }
+.deck-card-header h3 { font-size: 15px; font-weight: 700; }
 .deck-count { font-size: 11px; color: var(--text2); font-family: 'DM Mono', monospace; }
-.deck-rows { display: flex; flex-direction: column; gap: 0; }
+
+/* 不足カード切替タブ */
+.shortage-tabs {
+  display: flex; background: var(--surface2); border-radius: 10px;
+  padding: 3px; margin-bottom: 10px; gap: 2px;
+}
+.shortage-tab {
+  flex: 1; padding: 6px 4px; text-align: center; font-size: 10px; font-weight: 700;
+  border-radius: 8px; cursor: pointer; font-family: inherit; background: none; border: none;
+  color: var(--text2); transition: all 0.15s;
+}
+.shortage-tab.active { background: var(--surface); color: var(--accent); box-shadow: var(--shadow); }
+
+.deck-rows { display: flex; flex-direction: column; }
 .deck-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px solid var(--surface2);
-  font-size: 13px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 0; border-bottom: 1px solid var(--surface2); font-size: 13px; gap: 8px;
 }
 .deck-row:last-child { border-bottom: none; }
+.deck-row-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.deck-row-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
 .deck-qty-badge {
-  font-family: 'DM Mono', monospace;
-  font-weight: 700;
-  font-size: 11px;
-  background: var(--accent-light);
-  color: var(--accent);
-  padding: 2px 8px;
-  border-radius: 20px;
+  font-family: 'DM Mono', monospace; font-weight: 700; font-size: 11px;
+  background: var(--accent-light); color: var(--accent); padding: 2px 8px; border-radius: 20px;
 }
+.shortage-badge {
+  font-family: 'DM Mono', monospace; font-weight: 700; font-size: 11px;
+  padding: 2px 8px; border-radius: 20px;
+}
+.shortage-badge.ok { background: var(--green-light); color: var(--green); }
+.shortage-badge.ng { background: var(--red-light); color: var(--red); }
+.shortage-badge.warn { background: var(--orange-light); color: var(--orange); }
+
+/* デッキにカード追加フォーム */
+.deck-add-card {
+  background: var(--surface2); border-radius: 10px; padding: 10px; margin-top: 10px;
+}
+.deck-add-card h4 { font-size: 12px; font-weight: 700; margin-bottom: 8px; color: var(--text2); }
+.deck-search-wrap { position: relative; margin-bottom: 6px; }
+.deck-search-input {
+  width: 100%; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit;
+  background: var(--surface); outline: none;
+}
+.deck-search-input:focus { border-color: var(--accent); }
+.deck-search-results {
+  position: absolute; top: 100%; left: 0; right: 0; background: var(--surface);
+  border: 1px solid var(--border); border-radius: 8px; z-index: 50;
+  max-height: 160px; overflow-y: auto; box-shadow: var(--shadow-md);
+  display: none;
+}
+.deck-search-results.open { display: block; }
+.deck-search-item {
+  padding: 9px 12px; font-size: 13px; cursor: pointer; border-bottom: 1px solid var(--surface2);
+  transition: background 0.1s;
+}
+.deck-search-item:last-child { border-bottom: none; }
+.deck-search-item:active { background: var(--accent-light); }
+.deck-add-row { display: flex; gap: 6px; }
+.deck-qty-input {
+  width: 70px; border: 1px solid var(--border); border-radius: 8px;
+  padding: 8px 10px; font-size: 13px; font-family: inherit;
+  background: var(--surface); outline: none; text-align: center;
+}
+.deck-add-btn {
+  flex: 1; background: var(--accent); color: white; border: none;
+  border-radius: 8px; padding: 8px; font-size: 12px; font-weight: 700;
+  font-family: inherit; cursor: pointer;
+}
+.deck-add-btn:active { opacity: 0.8; }
+.selected-card-chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: var(--accent-light); color: var(--accent); border-radius: 20px;
+  padding: 4px 10px; font-size: 12px; font-weight: 700; margin-bottom: 6px;
+}
+
+/* 出品ボタン */
+.list-btn {
+  width: 100%; background: var(--red); color: white; border: none;
+  border-radius: 10px; padding: 11px; font-size: 13px; font-weight: 700;
+  font-family: inherit; cursor: pointer; margin-top: 10px; display: flex;
+  align-items: center; justify-content: center; gap: 6px;
+}
+.list-btn:active { opacity: 0.8; }
+
 .add-deck-btn {
-  width: 100%;
-  background: none;
-  border: 1.5px dashed var(--border);
-  border-radius: 14px;
-  padding: 14px;
-  font-size: 13px;
-  color: var(--text2);
-  cursor: pointer;
-  font-family: inherit;
-  font-weight: 700;
-  transition: all 0.15s;
+  width: 100%; background: none; border: 1.5px dashed var(--border);
+  border-radius: 14px; padding: 14px; font-size: 13px; color: var(--text2);
+  cursor: pointer; font-family: inherit; font-weight: 700;
 }
 .add-deck-btn:active { background: var(--surface2); }
 
-/* カドショまとめページ */
-.shop-summary { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+/* ===== カドショページ ===== */
+.shop-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .shop-card {
-  background: var(--surface);
-  border-radius: 14px;
-  padding: 14px;
-  box-shadow: var(--shadow);
-  border: 1px solid var(--border);
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
 }
-.shop-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 8px; }
+.shop-card h3 { font-size: 14px; font-weight: 700; margin-bottom: 10px; }
 .shop-card-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--surface2);
-  font-size: 12px;
-  gap: 8px;
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 6px 0; border-bottom: 1px solid var(--surface2); font-size: 12px; gap: 8px;
 }
 .shop-card-row:last-child { border-bottom: none; }
 .shop-card-name { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .shop-card-price { font-family: 'DM Mono', monospace; font-weight: 700; color: var(--green); white-space: nowrap; }
 .shop-card-date { color: var(--text2); font-size: 10px; white-space: nowrap; }
 
+/* ===== 履歴ページ ===== */
+.history-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
+.history-card {
+  background: var(--surface); border-radius: 14px; padding: 14px;
+  box-shadow: var(--shadow); border: 1px solid var(--border);
+}
+.history-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 8px; }
+.history-card h3 { font-size: 14px; font-weight: 700; }
+.history-date { font-size: 11px; color: var(--text2); }
+.history-status {
+  display: inline-block; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 700; margin-bottom: 6px;
+}
+.history-status.completed { background: var(--green-light); color: var(--green); }
+.history-price { font-size: 16px; font-weight: 900; font-family: 'DM Mono', monospace; color: var(--red); }
+
+/* ハンバーガーメニュー */
+.drawer-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 200;
+  opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.drawer-overlay.open { opacity: 1; pointer-events: all; }
+.drawer {
+  position: fixed; top: 0; right: -280px; bottom: 0; width: 280px;
+  background: var(--surface); z-index: 201; transition: right 0.25s;
+  padding: 60px 24px 24px; display: flex; flex-direction: column; gap: 4px;
+}
+.drawer.open { right: 0; }
+.drawer h2 { font-size: 16px; font-weight: 900; margin-bottom: 16px; color: var(--text2); }
+.drawer-item {
+  display: flex; align-items: center; gap: 12px; padding: 14px 12px;
+  border-radius: 10px; cursor: pointer; font-size: 14px; font-weight: 700;
+  transition: background 0.1s; border: none; background: none; font-family: inherit;
+  width: 100%; text-align: left; color: var(--text);
+}
+.drawer-item:active { background: var(--surface2); }
+.drawer-item .d-icon { font-size: 20px; }
+.drawer-close {
+  position: absolute; top: 16px; right: 16px; background: var(--surface2);
+  border: none; border-radius: 50%; width: 32px; height: 32px;
+  font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+}
+
+/* モーダル */
+.modal-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300;
+  display: flex; align-items: flex-end; opacity: 0; pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+.modal {
+  background: var(--surface); border-radius: 20px 20px 0 0; padding: 24px 20px;
+  width: 100%; transform: translateY(100%); transition: transform 0.25s;
+}
+.modal-overlay.open .modal { transform: translateY(0); }
+.modal h3 { font-size: 16px; font-weight: 900; margin-bottom: 6px; }
+.modal p { font-size: 13px; color: var(--text2); margin-bottom: 20px; }
+.modal-btns { display: flex; flex-direction: column; gap: 8px; }
+.modal-btn {
+  width: 100%; border: none; border-radius: 12px; padding: 14px;
+  font-size: 14px; font-weight: 700; font-family: inherit; cursor: pointer;
+}
+.modal-btn.confirm { background: var(--red); color: white; }
+.modal-btn.cancel { background: var(--surface2); color: var(--text); }
+.modal-btn:active { opacity: 0.8; }
+.modal-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 10px;
+  padding: 12px; font-size: 14px; font-family: inherit; background: var(--surface2);
+  outline: none; margin-bottom: 12px;
+}
+.modal-input:focus { border-color: var(--accent); background: white; }
+
 /* トースト */
 .toast {
-  position: fixed;
-  bottom: 82px;
-  left: 50%;
+  position: fixed; bottom: 82px; left: 50%;
   transform: translateX(-50%) translateY(10px);
-  background: #1a1a1a;
-  color: white;
-  padding: 9px 18px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 500;
-  opacity: 0;
-  transition: all 0.25s;
-  z-index: 999;
-  white-space: nowrap;
-  pointer-events: none;
+  background: #1a1a1a; color: white; padding: 9px 18px;
+  border-radius: 20px; font-size: 12px; font-weight: 500;
+  opacity: 0; transition: all 0.25s; z-index: 999;
+  white-space: nowrap; pointer-events: none;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
 /* ボトムナビ */
 .bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  background: var(--surface);
-  border-top: 1px solid var(--border);
-  display: flex;
-  padding: 6px 0 8px;
-  z-index: 100;
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-top: 1px solid var(--border);
+  display: flex; padding: 6px 0 8px; z-index: 100;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
 }
 .nav-btn {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 2px;
-  padding: 3px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  font-family: inherit;
-  color: var(--text2);
-  font-size: 10px;
-  font-weight: 700;
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
+  padding: 3px; background: none; border: none; cursor: pointer;
+  font-family: inherit; color: var(--text2); font-size: 10px; font-weight: 700;
   transition: color 0.15s;
 }
 .nav-btn.active { color: var(--accent); }
@@ -548,25 +547,14 @@ body {
 
 .page { display: none; }
 .page.active { display: block; }
-
-.loading {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--text2);
-  font-size: 14px;
-}
+.loading { text-align: center; padding: 50px 20px; color: var(--text2); font-size: 14px; }
 .dot { animation: blink 1.2s infinite; display: inline-block; }
 .dot:nth-child(2) { animation-delay: 0.2s; }
 .dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes blink { 0%,80%,100%{opacity:0} 40%{opacity:1} }
-
-.empty {
-  text-align: center;
-  padding: 50px 20px;
-  color: var(--text2);
-}
+.empty { text-align: center; padding: 50px 20px; color: var(--text2); }
 .empty .e-icon { font-size: 40px; margin-bottom: 10px; }
-.empty p { font-size: 13px; }
+.empty p { font-size: 13px; line-height: 1.6; }
 </style>
 </head>
 <body>
@@ -574,10 +562,13 @@ body {
 <div class="header">
   <div class="header-top">
     <h1>🃏 ポケカ<span>在庫</span></h1>
-    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">管理者モード</button>
+    <div class="header-right">
+      <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">管理者モード</button>
+      <button class="menu-btn" onclick="openDrawer()">☰</button>
+    </div>
   </div>
   <input class="search-input" type="text" placeholder="カード名で検索..." id="searchInput" oninput="renderInventory()">
-  <div class="filter-row" id="filterRow">
+  <div class="filter-row">
     <button class="chip active" data-filter="all" onclick="setFilter('all',this)">すべて</button>
     <button class="chip" data-filter="rare" onclick="setFilter('rare',this)">レア以上</button>
     <button class="chip" data-filter="stock" onclick="setFilter('stock',this)">在庫あり</button>
@@ -620,15 +611,66 @@ body {
 
 <!-- デッキページ -->
 <div class="page" id="page-deck">
-  <div class="deck-list" id="deckList">
+  <div class="deck-page" id="deckPage">
     <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
   </div>
 </div>
 
 <!-- カドショページ -->
 <div class="page" id="page-shop">
-  <div class="shop-summary" id="shopSummary">
+  <div class="shop-page" id="shopPage">
     <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<!-- 履歴ページ -->
+<div class="page" id="page-history">
+  <div class="history-page" id="historyPage">
+    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  </div>
+</div>
+
+<!-- ハンバーガーメニュー -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer">
+  <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  <h2>メニュー</h2>
+  <button class="drawer-item" onclick="switchPage('inventory',document.querySelector('.tab'));closeDrawer()">
+    <span class="d-icon">📦</span>在庫一覧
+  </button>
+  <button class="drawer-item" onclick="switchPage('deck',document.querySelectorAll('.tab')[1]);closeDrawer()">
+    <span class="d-icon">🎴</span>デッキ管理
+  </button>
+  <button class="drawer-item" onclick="switchPage('shop',document.querySelectorAll('.tab')[2]);closeDrawer()">
+    <span class="d-icon">🏪</span>カドショ価格
+  </button>
+  <button class="drawer-item" onclick="switchPage('history',null);closeDrawer()">
+    <span class="d-icon">📋</span>取引履歴
+  </button>
+</div>
+
+<!-- 出品確認モーダル -->
+<div class="modal-overlay" id="listModal">
+  <div class="modal">
+    <h3 id="listModalTitle">出品しますか？</h3>
+    <p id="listModalDesc">このデッキをメルカリに出品します。在庫から自動でマイナスされます。</p>
+    <input class="modal-input" type="number" id="listPrice" placeholder="売値（円）を入力">
+    <div class="modal-btns">
+      <button class="modal-btn confirm" onclick="confirmList()">🔥 出品・取引開始</button>
+      <button class="modal-btn cancel" onclick="closeModal('listModal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
+<!-- 取引完了モーダル -->
+<div class="modal-overlay" id="completeModal">
+  <div class="modal">
+    <h3>取引完了！</h3>
+    <p id="completeModalDesc">取引が完了しました。履歴に移動します。</p>
+    <div class="modal-btns">
+      <button class="modal-btn confirm" style="background:var(--green)" onclick="confirmComplete()">✅ 完了にする</button>
+      <button class="modal-btn cancel" onclick="closeModal('completeModal')">キャンセル</button>
+    </div>
   </div>
 </div>
 
@@ -644,138 +686,112 @@ body {
   <button class="nav-btn" id="nav-shop" onclick="switchPage('shop',this)">
     <span class="nav-icon">🏪</span>カドショ
   </button>
+  <button class="nav-btn" id="nav-history" onclick="switchPage('history',this)">
+    <span class="nav-icon">📋</span>履歴
+  </button>
 </div>
 
 <script>
 const SB_URL = 'https://skrltozqpelemuhjxtml.supabase.co';
 const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcmx0b3pxcGVsZW11aGp4dG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzMzNDQsImV4cCI6MjA4OTMwOTM0NH0.qqJmGsyrL6cBaK0d-ZGAV4mpq6LQU0NBnBovztjwlow';
-
-const HEADERS = {
+const H = {
   'Content-Type': 'application/json',
   'apikey': SB_KEY,
   'Authorization': `Bearer ${SB_KEY}`,
   'Prefer': 'return=representation'
 };
 
-// 初期データ
-const INITIAL_CARDS = [
-  { name: 'オリーヴァex', rarity: 'RR', stock_home: 2, stock_parents: 0 },
-  { name: 'オリーニョ', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'ミニーブ', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'ニャースex', rarity: 'RR', stock_home: 2, stock_parents: 0 },
-  { name: 'メガニウム', rarity: 'R', stock_home: 2, stock_parents: 0 },
-  { name: 'チコリータ', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'ベイリーフ', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'オーガポンみどりのめんex', rarity: 'RR', stock_home: 4, stock_parents: 0 },
-  { name: 'キチキギスex', rarity: 'RR', stock_home: 1, stock_parents: 0 },
-  { name: 'スボミー', rarity: '-', stock_home: 1, stock_parents: 0 },
-  { name: 'ハイパーボール', rarity: '-', stock_home: 4, stock_parents: 0 },
-  { name: 'むしとりセット', rarity: '-', stock_home: 4, stock_parents: 0 },
-  { name: 'ポケパッド', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'スペシャルレッドカード', rarity: 'R', stock_home: 1, stock_parents: 0 },
-  { name: 'アンフェアスタンプ', rarity: 'ACE', stock_home: 1, stock_parents: 0 },
-  { name: '夜のタンカ', rarity: '-', stock_home: 1, stock_parents: 0 },
-  { name: 'エネルギーつけかえ', rarity: 'R', stock_home: 1, stock_parents: 0 },
-  { name: 'ボスの指令', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'ヒカリ', rarity: '-', stock_home: 2, stock_parents: 0 },
-  { name: 'ブライア', rarity: 'R', stock_home: 1, stock_parents: 0 },
-  { name: 'リーリエの決心', rarity: '-', stock_home: 4, stock_parents: 0 },
-  { name: 'スイレンのお世話', rarity: '-', stock_home: 1, stock_parents: 0 },
-  { name: '活力の森', rarity: '-', stock_home: 4, stock_parents: 0 },
-  { name: '基本草エネルギー', rarity: '-', stock_home: 12, stock_parents: 0 },
-];
+let cards = [], decks = [], deckCards = [], shopPrices = [], sales = [];
+let isAdmin = false, currentFilter = 'all', currentSort = '';
+let pendingListDeckId = null, pendingCompleteId = null;
+let selectedDeckCardName = {};
 
-let cards = [];
-let decks = [];
-let deckCards = [];
-let isAdmin = false;
-let currentFilter = 'all';
-let currentSort = '';
-
-// API
-async function api(method, table, data, id) {
-  let url = `${SB_URL}/rest/v1/${table}`;
-  if (id) url += `?id=eq.${id}`;
-  const res = await fetch(url, {
-    method,
-    headers: HEADERS,
-    body: data ? JSON.stringify(data) : undefined
-  });
-  if (!res.ok) throw new Error(await res.text());
-  const text = await res.text();
-  return text ? JSON.parse(text) : null;
+// ===== API =====
+async function sbFetch(table, query='') {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}${query}`, { headers: H });
+  if (!r.ok) throw new Error(await r.text());
+  return r.json();
+}
+async function sbPost(table, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}`, { method:'POST', headers:H, body:JSON.stringify(data) });
+  if (!r.ok) throw new Error(await r.text());
+  const t = await r.text(); return t ? JSON.parse(t) : null;
+}
+async function sbPatch(table, id, data) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method:'PATCH', headers:H, body:JSON.stringify(data) });
+  if (!r.ok) throw new Error(await r.text());
+}
+async function sbDelete(table, id) {
+  const r = await fetch(`${SB_URL}/rest/v1/${table}?id=eq.${id}`, { method:'DELETE', headers:H });
+  if (!r.ok) throw new Error(await r.text());
 }
 
-async function fetchCards() {
-  const res = await fetch(`${SB_URL}/rest/v1/cards?order=created_at.asc`, { headers: HEADERS });
-  return await res.json();
-}
-async function fetchDecks() {
-  const res = await fetch(`${SB_URL}/rest/v1/decks?order=created_at.asc`, { headers: HEADERS });
-  return await res.json();
-}
-async function fetchDeckCards() {
-  const res = await fetch(`${SB_URL}/rest/v1/deck_cards?select=*`, { headers: HEADERS });
-  return await res.json();
-}
-async function fetchShopPrices() {
-  const res = await fetch(`${SB_URL}/rest/v1/shop_prices?select=*`, { headers: HEADERS });
-  if (!res.ok) return [];
-  return await res.json();
-}
-
-// 初期化
+// ===== 初期化 =====
 async function init() {
   try {
-    cards = await fetchCards();
-    if (!cards || cards.length === 0) {
-      // 初期データを投入
-      for (const c of INITIAL_CARDS) {
-        const result = await api('POST', 'cards', c);
-        if (result && result[0]) cards.push(result[0]);
-      }
-    }
-    decks = await fetchDecks();
-    deckCards = await fetchDeckCards();
+    [cards, decks, deckCards, sales] = await Promise.all([
+      sbFetch('cards', '?order=created_at.asc'),
+      sbFetch('decks', '?order=created_at.asc'),
+      sbFetch('deck_cards', '?select=*'),
+      sbFetch('sales', '?order=created_at.desc').catch(() => [])
+    ]);
+    shopPrices = await sbFetch('shop_prices', '?order=created_at.desc').catch(() => []);
     renderInventory();
     renderSummary();
     renderDecks();
     renderShop();
+    renderHistory();
   } catch(e) {
     document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">⚠️</div><p>読み込みエラー<br>${e.message}</p></div>`;
-    console.error(e);
   }
 }
 
-// 在庫レンダリング
+// ===== 在庫レンダリング =====
 function renderInventory() {
   const q = document.getElementById('searchInput').value.toLowerCase();
   let list = [...cards];
-
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
-  if (currentFilter === 'rare') list = list.filter(c => c.rarity && c.rarity !== '-' && c.rarity !== '');
-  if (currentFilter === 'stock') list = list.filter(c => (c.stock_home + c.stock_parents) > 0);
-  if (currentFilter === 'nostock') list = list.filter(c => (c.stock_home + c.stock_parents) === 0);
-  if (currentSort === 'price') list.sort((a,b) => (b.mercari_price||0) - (a.mercari_price||0));
-  if (currentSort === 'name') list.sort((a,b) => a.name.localeCompare(b.name, 'ja'));
+  if (currentFilter === 'rare') list = list.filter(c => c.rarity && c.rarity !== '-');
+  if (currentFilter === 'stock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) > 0);
+  if (currentFilter === 'nostock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) === 0);
+  if (currentSort === 'price') list.sort((a,b) => (b.mercari_price||0)-(a.mercari_price||0));
+  if (currentSort === 'name') list.sort((a,b) => a.name.localeCompare(b.name,'ja'));
 
-  if (list.length === 0) {
+  if (!list.length) {
     document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">🔍</div><p>カードが見つかりません</p></div>`;
-    renderSummary();
-    return;
+    renderSummary(); return;
   }
-
-  document.getElementById('cardList').innerHTML = list.map(c => cardHTML(c)).join('');
+  document.getElementById('cardList').innerHTML = list.map(cardHTML).join('');
   renderSummary();
 }
 
 function cardHTML(c) {
-  const total = (c.stock_home || 0) + (c.stock_parents || 0);
-  const rarityClass = c.rarity === 'RR' ? 'rr' : c.rarity === 'R' ? 'r' : c.rarity === 'ACE' ? 'ace' : 'normal';
-  const rarityLabel = c.rarity && c.rarity !== '-' ? c.rarity : '−';
-  const mercariDisp = c.mercari_price ? `¥${c.mercari_price.toLocaleString()}` : '';
-  const shopHistory = c.shop_history ? JSON.parse(c.shop_history) : [];
-  const latestShop = shopHistory.length > 0 ? shopHistory[shopHistory.length-1] : null;
+  const total = (c.stock_home||0)+(c.stock_parents||0);
+  const rc = c.rarity==='RR'?'rr':c.rarity==='R'?'r':c.rarity==='ACE'?'ace':'normal';
+  const rl = c.rarity&&c.rarity!=='-'?c.rarity:'−';
+  const mp = c.mercari_price?`¥${c.mercari_price.toLocaleString()}`:'';
+
+  // カドショ最安値
+  const myShops = shopPrices.filter(s => s.card_id === c.id);
+  const cheapest = myShops.length ? myShops.reduce((m,s) => s.price < m.price ? s : m) : null;
+  const shopBadge = cheapest ? `<span class="badge normal">🏪¥${cheapest.price.toLocaleString()}</span>` : '';
+
+  // カドショ履歴（店舗ごと最新）
+  const shopByStore = {};
+  myShops.forEach(s => {
+    if (!shopByStore[s.shop_name] || new Date(s.created_at) > new Date(shopByStore[s.shop_name].created_at)) {
+      shopByStore[s.shop_name] = s;
+    }
+  });
+  const shopHistoryHTML = Object.values(shopByStore).length ? `
+    <div class="shop-history">
+      ${Object.values(shopByStore).sort((a,b)=>a.price-b.price).map(s=>`
+        <div class="shop-history-row">
+          <span class="shop-name-text">${s.shop_name}</span>
+          <span class="shop-price-text">¥${s.price.toLocaleString()}</span>
+          <span class="shop-date-text">${s.recorded_date}</span>
+        </div>`).join('')}
+    </div>` : '';
 
   return `
 <div class="card-item" id="card-${c.id}">
@@ -783,19 +799,18 @@ function cardHTML(c) {
     <div class="card-name-wrap">
       <div class="card-name">${c.name}</div>
       <div class="card-badges">
-        <span class="badge ${rarityClass}">${rarityLabel}</span>
-        ${latestShop ? `<span class="badge normal">🏪 ¥${latestShop.price.toLocaleString()}</span>` : ''}
+        <span class="badge ${rc}">${rl}</span>
+        ${shopBadge}
       </div>
     </div>
-    <div class="mercari-price ${mercariDisp ? 'mercari' : 'empty'}">${mercariDisp || (isAdmin ? '− 設定' : '')}</div>
+    <div class="mercari-price ${mp?'':'empty'}">${mp||''}</div>
   </div>
-
   <div class="stock-grid">
     <div class="stock-box">
       <div class="stock-box-label">🏠 うちの家</div>
       <div class="stock-control">
         <button class="sBtn minus" onclick="updateStock('${c.id}','home',-1)">−</button>
-        <div class="sNum" id="sh-${c.id}">${c.stock_home || 0}</div>
+        <div class="sNum" id="sh-${c.id}">${c.stock_home||0}</div>
         <button class="sBtn plus" onclick="updateStock('${c.id}','home',1)">＋</button>
       </div>
     </div>
@@ -803,23 +818,19 @@ function cardHTML(c) {
       <div class="stock-box-label">👵 実家</div>
       <div class="stock-control">
         <button class="sBtn minus" onclick="updateStock('${c.id}','parents',-1)">−</button>
-        <div class="sNum" id="sp-${c.id}">${c.stock_parents || 0}</div>
+        <div class="sNum" id="sp-${c.id}">${c.stock_parents||0}</div>
         <button class="sBtn plus" onclick="updateStock('${c.id}','parents',1)">＋</button>
       </div>
     </div>
   </div>
-
   <div class="stock-total">合計 <strong>${total}</strong> 枚</div>
-
   <button class="expand-btn" onclick="toggleDetail('${c.id}')">▾ メモ・価格詳細</button>
   <div class="card-detail" id="detail-${c.id}">
-    ${isAdmin ? `
+    ${isAdmin?`
     <div>
       <div class="detail-label">メルカリ参考値（円）</div>
       <input class="detail-input" type="number" id="mercari-${c.id}" value="${c.mercari_price||''}" placeholder="例: 1200" onchange="saveMercari('${c.id}')">
-    </div>` : `
-    ${c.mercari_price ? `<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ¥${c.mercari_price.toLocaleString()}</div>` : ''}
-    `}
+    </div>`:`${mp?`<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ${mp}</div>`:''}` }
     <div>
       <div class="detail-label">メモ</div>
       <textarea class="detail-input" rows="2" id="memo-${c.id}" placeholder="メモ..." onchange="saveMemo('${c.id}')">${c.memo||''}</textarea>
@@ -831,286 +842,440 @@ function cardHTML(c) {
         <input class="detail-input" type="number" id="sprice-${c.id}" placeholder="価格">
       </div>
       <button class="save-shop-btn" onclick="saveShop('${c.id}')">記録する</button>
-      ${shopHistory.length > 0 ? `
-      <div class="shop-history">
-        ${shopHistory.slice().reverse().slice(0,5).map(s => `
-          <div class="shop-history-row">
-            <span class="shop-name-text">${s.name}</span>
-            <span class="shop-price-text">¥${s.price.toLocaleString()}</span>
-            <span class="shop-date-text">${s.date}</span>
-          </div>
-        `).join('')}
-      </div>` : ''}
+      ${shopHistoryHTML}
     </div>
   </div>
 </div>`;
 }
 
-// サマリー
 function renderSummary() {
-  const totalHome = cards.reduce((s,c) => s + (c.stock_home||0), 0);
-  const totalParents = cards.reduce((s,c) => s + (c.stock_parents||0), 0);
-  const totalAll = totalHome + totalParents;
-  const rareCards = cards.filter(c => c.rarity && c.rarity !== '-' && c.rarity !== '').length;
+  const th = cards.reduce((s,c)=>s+(c.stock_home||0),0);
+  const tp = cards.reduce((s,c)=>s+(c.stock_parents||0),0);
   document.getElementById('summaryBar').innerHTML = `
-    <div class="summary-item">
-      <div class="s-label">総枚数</div>
-      <div class="s-value">${totalAll}</div>
-    </div>
-    <div class="summary-item">
-      <div class="s-label">🏠 うちの家</div>
-      <div class="s-value">${totalHome}</div>
-    </div>
-    <div class="summary-item">
-      <div class="s-label">👵 実家</div>
-      <div class="s-value">${totalParents}</div>
-    </div>
-    <div class="summary-item">
-      <div class="s-label">種類数</div>
-      <div class="s-value">${cards.length}</div>
-    </div>
+    <div class="summary-item"><div class="s-label">総枚数</div><div class="s-value">${th+tp}</div></div>
+    <div class="summary-item"><div class="s-label">🏠 うちの家</div><div class="s-value">${th}</div></div>
+    <div class="summary-item"><div class="s-label">👵 実家</div><div class="s-value">${tp}</div></div>
+    <div class="summary-item"><div class="s-label">種類数</div><div class="s-value">${cards.length}</div></div>
   `;
 }
 
-// 在庫更新
+// ===== 在庫更新 =====
 async function updateStock(id, loc, delta) {
-  const card = cards.find(c => c.id === id);
+  const card = cards.find(c=>c.id===id);
   if (!card) return;
-  const field = loc === 'home' ? 'stock_home' : 'stock_parents';
-  const newVal = Math.max(0, (card[field] || 0) + delta);
-  card[field] = newVal;
-
-  // UI即時反映
-  const el = document.getElementById(loc === 'home' ? `sh-${id}` : `sp-${id}`);
-  if (el) el.textContent = newVal;
+  const field = loc==='home'?'stock_home':'stock_parents';
+  const nv = Math.max(0,(card[field]||0)+delta);
+  card[field] = nv;
+  const el = document.getElementById(loc==='home'?`sh-${id}`:`sp-${id}`);
+  if (el) el.textContent = nv;
   renderSummary();
-
-  // DB更新
-  try {
-    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: HEADERS,
-      body: JSON.stringify({ [field]: newVal })
-    });
-  } catch(e) { showToast('⚠️ 保存失敗'); }
+  try { await sbPatch('cards', id, {[field]: nv}); }
+  catch(e) { showToast('⚠️ 保存失敗'); }
 }
 
-// メモ保存
 async function saveMemo(id) {
   const val = document.getElementById(`memo-${id}`).value;
-  const card = cards.find(c => c.id === id);
+  const card = cards.find(c=>c.id===id);
   if (card) card.memo = val;
-  try {
-    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: HEADERS,
-      body: JSON.stringify({ memo: val })
-    });
-    showToast('メモを保存しました');
-  } catch(e) { showToast('⚠️ 保存失敗'); }
+  try { await sbPatch('cards', id, {memo: val}); showToast('メモを保存しました'); }
+  catch(e) { showToast('⚠️ 保存失敗'); }
 }
 
-// メルカリ値保存
 async function saveMercari(id) {
-  const val = parseInt(document.getElementById(`mercari-${id}`).value) || null;
-  const card = cards.find(c => c.id === id);
+  const val = parseInt(document.getElementById(`mercari-${id}`).value)||null;
+  const card = cards.find(c=>c.id===id);
   if (card) card.mercari_price = val;
-  try {
-    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: HEADERS,
-      body: JSON.stringify({ mercari_price: val })
-    });
-    showToast('価格を保存しました');
-    renderInventory();
-  } catch(e) { showToast('⚠️ 保存失敗'); }
+  try { await sbPatch('cards', id, {mercari_price: val}); showToast('価格を保存しました'); renderInventory(); }
+  catch(e) { showToast('⚠️ 保存失敗'); }
 }
 
-// カドショ価格保存
 async function saveShop(id) {
-  const nameEl = document.getElementById(`sname-${id}`);
-  const priceEl = document.getElementById(`sprice-${id}`);
-  const shopName = nameEl.value.trim();
-  const price = parseInt(priceEl.value);
-  if (!shopName || !price) { showToast('店名と価格を入力してください'); return; }
-
-  const card = cards.find(c => c.id === id);
-  const history = card.shop_history ? JSON.parse(card.shop_history) : [];
-  const today = new Date().toLocaleDateString('ja-JP', { month:'numeric', day:'numeric' });
-  history.push({ name: shopName, price, date: today });
-  card.shop_history = JSON.stringify(history);
-
+  const sn = document.getElementById(`sname-${id}`).value.trim();
+  const sp = parseInt(document.getElementById(`sprice-${id}`).value);
+  if (!sn||!sp) { showToast('店名と価格を入力してください'); return; }
+  const today = new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+  const card = cards.find(c=>c.id===id);
   try {
-    await fetch(`${SB_URL}/rest/v1/cards?id=eq.${id}`, {
-      method: 'PATCH',
-      headers: HEADERS,
-      body: JSON.stringify({ shop_history: card.shop_history })
+    const result = await sbPost('shop_prices', {
+      card_id: id, card_name: card?.name||'', shop_name: sn, price: sp, recorded_date: today
     });
-    nameEl.value = '';
-    priceEl.value = '';
-    showToast(`${shopName} ¥${price.toLocaleString()} を記録しました`);
+    if (result&&result[0]) shopPrices.unshift(result[0]);
+    document.getElementById(`sname-${id}`).value='';
+    document.getElementById(`sprice-${id}`).value='';
+    showToast(`${sn} ¥${sp.toLocaleString()} を記録しました`);
     renderInventory();
     renderShop();
   } catch(e) { showToast('⚠️ 保存失敗'); }
 }
 
-// カード追加
 async function addCard() {
   const name = document.getElementById('newName').value.trim();
-  const rarity = document.getElementById('newRarity').value || '-';
-  const mercari = parseInt(document.getElementById('newMercari').value) || null;
+  const rarity = document.getElementById('newRarity').value||'-';
+  const mercari = parseInt(document.getElementById('newMercari').value)||null;
   if (!name) { showToast('カード名を入力してください'); return; }
-
   try {
-    const result = await api('POST', 'cards', { name, rarity, mercari_price: mercari, stock_home: 0, stock_parents: 0 });
-    if (result && result[0]) {
-      cards.push(result[0]);
-      document.getElementById('newName').value = '';
-      document.getElementById('newMercari').value = '';
-      renderInventory();
-      showToast(`${name} を追加しました`);
-    }
+    const r = await sbPost('cards',{name,rarity,mercari_price:mercari,stock_home:0,stock_parents:0});
+    if (r&&r[0]) { cards.push(r[0]); document.getElementById('newName').value=''; document.getElementById('newMercari').value=''; renderInventory(); showToast(`${name} を追加しました`); }
   } catch(e) { showToast('⚠️ 追加失敗'); }
 }
 
-// デッキレンダリング
+// ===== デッキ =====
 function renderDecks() {
-  if (!decks || decks.length === 0) {
-    document.getElementById('deckList').innerHTML = `
-      <div class="empty"><div class="e-icon">🎴</div><p>デッキがまだ登録されていません</p></div>
-      ${isAdmin ? `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを登録する</button>` : ''}
-    `;
-    return;
-  }
+  const activeSales = sales.filter(s=>s.status==='active');
+  let html = '';
 
-  const html = decks.map(d => {
-    const dc = deckCards.filter(dc => dc.deck_id === d.id);
-    const totalQty = dc.reduce((s,r) => s + (r.quantity||0), 0);
-    const rows = dc.map(r => {
-      const card = cards.find(c => c.id === r.card_id);
-      return card ? `
-        <div class="deck-row">
-          <span>${card.name}</span>
-          <span class="deck-qty-badge">${r.quantity}枚</span>
-        </div>` : '';
-    }).join('');
-    return `
-      <div class="deck-card">
-        <div class="deck-card-header">
-          <h3>${d.name}</h3>
-          <span class="deck-count">${totalQty}/60</span>
-        </div>
-        <div class="deck-rows">${rows || '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>'}</div>
-      </div>`;
-  }).join('');
-
-  document.getElementById('deckList').innerHTML = html + (isAdmin ? `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを追加</button>` : '');
-}
-
-// カドショまとめ
-function renderShop() {
-  const cardsWithShop = cards.filter(c => c.shop_history && JSON.parse(c.shop_history).length > 0);
-
-  if (cardsWithShop.length === 0) {
-    document.getElementById('shopSummary').innerHTML = `
-      <div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません<br>在庫一覧のカードから記録できます</p></div>`;
-    return;
-  }
-
-  // 店舗ごとにまとめる
-  const shopMap = {};
-  cardsWithShop.forEach(c => {
-    const history = JSON.parse(c.shop_history);
-    history.forEach(s => {
-      if (!shopMap[s.name]) shopMap[s.name] = [];
-      shopMap[s.name].push({ cardName: c.name, price: s.price, date: s.date });
-    });
+  // 取引中バナー
+  activeSales.forEach(s => {
+    html += `
+    <div class="active-sale-banner">
+      <div class="sale-badge">🔥 取引中</div>
+      <h2>${s.deck_name}</h2>
+      <p>${s.sold_price ? `¥${s.sold_price.toLocaleString()}` : '価格未設定'} · ${new Date(s.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})}出品</p>
+      <div class="sale-actions">
+        <button class="sale-action-btn complete" onclick="openCompleteModal('${s.id}','${s.deck_name}')">✅ 取引完了</button>
+        <button class="sale-action-btn cancel" onclick="cancelSale('${s.id}')">取消</button>
+      </div>
+    </div>`;
   });
 
-  const html = Object.entries(shopMap).map(([shopName, items]) => `
-    <div class="shop-card">
-      <h3>🏪 ${shopName}</h3>
-      <div>
-        ${items.sort((a,b) => a.cardName.localeCompare(b.cardName,'ja')).map(i => `
-          <div class="shop-card-row">
-            <span class="shop-card-name">${i.cardName}</span>
-            <span class="shop-card-price">¥${i.price.toLocaleString()}</span>
-            <span class="shop-card-date">${i.date}</span>
-          </div>
-        `).join('')}
-      </div>
-    </div>
-  `).join('');
+  if (!decks.length) {
+    html += `<div class="empty"><div class="e-icon">🎴</div><p>デッキがまだ登録されていません</p></div>`;
+    if (isAdmin) html += `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを登録する</button>`;
+    document.getElementById('deckPage').innerHTML = html;
+    return;
+  }
 
-  document.getElementById('shopSummary').innerHTML = html;
+  decks.forEach(d => {
+    const dc = deckCards.filter(r=>r.deck_id===d.id);
+    const totalQty = dc.reduce((s,r)=>s+(r.quantity||0),0);
+    const isSelling = activeSales.some(s=>s.deck_id===d.id);
+
+    const rowsHTML = dc.map(r => {
+      const card = cards.find(c=>c.id===r.card_id);
+      const cname = card ? card.name : (r.card_name||'不明');
+      const needed = r.quantity||1;
+      const home = card ? (card.stock_home||0) : 0;
+      const parents = card ? (card.stock_parents||0) : 0;
+      const total = home + parents;
+      return { cname, needed, home, parents, total };
+    });
+
+    const deckRowsEl = rowsHTML.map(({cname,needed,home,parents,total}) => `
+      <div class="deck-row">
+        <span class="deck-row-name">${cname}</span>
+        <div class="deck-row-right">
+          <span class="deck-qty-badge">${needed}枚必要</span>
+          <span class="shortage-badge ok" id="sb-all-${d.id}-${cname.replace(/\s/g,'')}">${total>= needed?`✓${total}`:`-${needed-total}`}</span>
+        </div>
+      </div>`).join('');
+
+    html += `
+    <div class="deck-card" id="deck-${d.id}">
+      <div class="deck-card-header">
+        <h3>${isSelling?'🔥 ':''} ${d.name}</h3>
+        <span class="deck-count">${totalQty}/60枚</span>
+      </div>
+
+      <div class="shortage-tabs">
+        <button class="shortage-tab active" onclick="switchShortageTab('${d.id}','all',this)">🏠＋👵合計</button>
+        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','home',this)">🏠うちのみ</button>
+        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','parents',this)">👵実家のみ</button>
+      </div>
+
+      <div class="deck-rows" id="deckrows-${d.id}">
+        ${dc.map(r => {
+          const card = cards.find(c=>c.id===r.card_id);
+          const cname = card ? card.name : (r.card_name||'不明');
+          const needed = r.quantity||1;
+          const home = card?(card.stock_home||0):0;
+          const parents = card?(card.stock_parents||0):0;
+          const total = home+parents;
+          const diff = total - needed;
+          const cls = diff>=0?'ok':diff===-1?'warn':'ng';
+          const label = diff>=0?`✓ ${total}枚`:`不足 ${Math.abs(diff)}枚`;
+          return `
+          <div class="deck-row" data-home="${home}" data-parents="${parents}" data-needed="${needed}" data-name="${cname}">
+            <span class="deck-row-name">${cname}</span>
+            <div class="deck-row-right">
+              <span class="deck-qty-badge">${needed}枚</span>
+              <span class="shortage-badge ${cls}">${label}</span>
+            </div>
+          </div>`;
+        }).join('') || '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>'}
+      </div>
+
+      ${isAdmin ? `
+      <div class="deck-add-card">
+        <h4>＋ カードを追加</h4>
+        <div class="deck-search-wrap">
+          <input class="deck-search-input" type="text" placeholder="カード名で検索..."
+            oninput="searchDeckCard('${d.id}',this.value)"
+            onfocus="document.getElementById('dsr-${d.id}').classList.add('open')"
+            id="dsi-${d.id}">
+          <div class="deck-search-results" id="dsr-${d.id}"></div>
+        </div>
+        <div id="dsc-${d.id}"></div>
+        <div class="deck-add-row">
+          <input class="deck-qty-input" type="number" id="dqty-${d.id}" value="1" min="1" max="4">
+          <button class="deck-add-btn" onclick="addCardToDeck('${d.id}')">デッキに追加</button>
+        </div>
+      </div>
+      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🔥 メルカリに出品する</button>
+      ` : `
+      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🔥 メルカリに出品する</button>
+      `}
+    </div>`;
+  });
+
+  if (isAdmin) html += `<button class="add-deck-btn" onclick="addDeck()">＋ デッキを追加</button>`;
+  document.getElementById('deckPage').innerHTML = html;
 }
 
-// デッキ追加
+function switchShortageTab(deckId, mode, el) {
+  el.closest('.shortage-tabs').querySelectorAll('.shortage-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  const rows = document.querySelectorAll(`#deckrows-${deckId} .deck-row`);
+  rows.forEach(row => {
+    const home = parseInt(row.dataset.home)||0;
+    const parents = parseInt(row.dataset.parents)||0;
+    const needed = parseInt(row.dataset.needed)||1;
+    const stock = mode==='home'?home:mode==='parents'?parents:home+parents;
+    const diff = stock - needed;
+    const cls = diff>=0?'ok':diff===-1?'warn':'ng';
+    const label = diff>=0?`✓ ${stock}枚`:`不足 ${Math.abs(diff)}枚`;
+    const badge = row.querySelector('.shortage-badge');
+    if (badge) { badge.className=`shortage-badge ${cls}`; badge.textContent=label; }
+  });
+}
+
+function searchDeckCard(deckId, q) {
+  const res = document.getElementById(`dsr-${deckId}`);
+  if (!q.trim()) { res.classList.remove('open'); return; }
+  const matches = cards.filter(c=>c.name.includes(q)).slice(0,6);
+  if (!matches.length) { res.innerHTML='<div class="deck-search-item" style="color:var(--text2)">見つかりません</div>'; res.classList.add('open'); return; }
+  res.innerHTML = matches.map(c=>`
+    <div class="deck-search-item" onclick="selectDeckCard('${deckId}','${c.id}','${c.name}')">
+      ${c.name} <span style="color:var(--text2);font-size:11px;margin-left:4px;">${c.rarity||''}</span>
+    </div>`).join('');
+  res.classList.add('open');
+}
+
+function selectDeckCard(deckId, cardId, cardName) {
+  selectedDeckCardName[deckId] = { id: cardId, name: cardName };
+  document.getElementById(`dsr-${deckId}`).classList.remove('open');
+  document.getElementById(`dsi-${deckId}`).value = cardName;
+  document.getElementById(`dsc-${deckId}`).innerHTML = `<div class="selected-card-chip">✓ ${cardName}</div>`;
+}
+
+async function addCardToDeck(deckId) {
+  const sel = selectedDeckCardName[deckId];
+  if (!sel) { showToast('カードを選択してください'); return; }
+  const qty = parseInt(document.getElementById(`dqty-${deckId}`).value)||1;
+  try {
+    const existing = deckCards.find(r=>r.deck_id===deckId&&r.card_id===sel.id);
+    if (existing) {
+      const newQty = (existing.quantity||1)+qty;
+      await sbPatch('deck_cards', existing.id, {quantity: newQty});
+      existing.quantity = newQty;
+    } else {
+      const r = await sbPost('deck_cards',{deck_id:deckId,card_id:sel.id,card_name:sel.name,quantity:qty});
+      if (r&&r[0]) deckCards.push(r[0]);
+    }
+    selectedDeckCardName[deckId] = null;
+    document.getElementById(`dsi-${deckId}`).value='';
+    document.getElementById(`dsc-${deckId}`).innerHTML='';
+    document.getElementById(`dqty-${deckId}`).value='1';
+    showToast(`${sel.name} を追加しました`);
+    renderDecks();
+  } catch(e) { showToast('⚠️ 追加失敗'); }
+}
+
 async function addDeck() {
   const name = prompt('デッキ名を入力してください');
   if (!name) return;
   try {
-    const result = await api('POST', 'decks', { name });
-    if (result && result[0]) {
-      decks.push(result[0]);
-      renderDecks();
-      showToast(`デッキ「${name}」を追加しました`);
-    }
+    const r = await sbPost('decks',{name});
+    if (r&&r[0]) { decks.push(r[0]); renderDecks(); showToast(`デッキ「${name}」を追加しました`); }
   } catch(e) { showToast('⚠️ 追加失敗'); }
 }
 
-// 管理者トグル
+// ===== 出品・取引 =====
+function openListModal(deckId, deckName) {
+  pendingListDeckId = { id: deckId, name: deckName };
+  document.getElementById('listModalTitle').textContent = `「${deckName}」を出品しますか？`;
+  document.getElementById('listPrice').value = '';
+  document.getElementById('listModal').classList.add('open');
+}
+
+async function confirmList() {
+  if (!pendingListDeckId) return;
+  const price = parseInt(document.getElementById('listPrice').value)||null;
+  const { id: deckId, name: deckName } = pendingListDeckId;
+
+  // デッキ内カードの在庫をマイナス
+  const dc = deckCards.filter(r=>r.deck_id===deckId);
+  for (const r of dc) {
+    const card = cards.find(c=>c.id===r.card_id);
+    if (!card) continue;
+    const qty = r.quantity||1;
+    const newHome = Math.max(0,(card.stock_home||0)-qty);
+    card.stock_home = newHome;
+    await sbPatch('cards', card.id, {stock_home: newHome}).catch(()=>{});
+  }
+
+  try {
+    const r = await sbPost('sales',{deck_id:deckId,deck_name:deckName,status:'active',sold_price:price});
+    if (r&&r[0]) sales.unshift(r[0]);
+    closeModal('listModal');
+    showToast(`🔥 ${deckName} を出品しました！`);
+    renderInventory();
+    renderDecks();
+  } catch(e) { showToast('⚠️ 出品失敗'); }
+}
+
+function openCompleteModal(saleId, deckName) {
+  pendingCompleteId = saleId;
+  document.getElementById('completeModalDesc').textContent = `「${deckName}」の取引が完了しました。履歴に移動します。`;
+  document.getElementById('completeModal').classList.add('open');
+}
+
+async function confirmComplete() {
+  if (!pendingCompleteId) return;
+  try {
+    await sbPatch('sales', pendingCompleteId, {status:'completed'});
+    const s = sales.find(s=>s.id===pendingCompleteId);
+    if (s) s.status = 'completed';
+    closeModal('completeModal');
+    showToast('✅ 取引完了しました！');
+    renderDecks();
+    renderHistory();
+  } catch(e) { showToast('⚠️ 更新失敗'); }
+}
+
+async function cancelSale(saleId) {
+  try {
+    await sbDelete('sales', saleId);
+    sales = sales.filter(s=>s.id!==saleId);
+    showToast('出品を取消しました');
+    renderDecks();
+    renderHistory();
+  } catch(e) { showToast('⚠️ 取消失敗'); }
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('open');
+  pendingListDeckId = null;
+  pendingCompleteId = null;
+}
+
+// ===== カドショ =====
+function renderShop() {
+  if (!shopPrices.length) {
+    document.getElementById('shopPage').innerHTML = `<div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません<br>在庫一覧のカードから記録できます</p></div>`;
+    return;
+  }
+  // 店舗ごと最新価格でまとめ
+  const shopMap = {};
+  shopPrices.forEach(s => {
+    if (!shopMap[s.shop_name]) shopMap[s.shop_name] = {};
+    if (!shopMap[s.shop_name][s.card_name] || new Date(s.created_at) > new Date(shopMap[s.shop_name][s.card_name].created_at)) {
+      shopMap[s.shop_name][s.card_name] = s;
+    }
+  });
+  const html = Object.entries(shopMap).map(([shop, items]) => `
+    <div class="shop-card">
+      <h3>🏪 ${shop}</h3>
+      ${Object.values(items).sort((a,b)=>a.price-b.price).map(i=>`
+        <div class="shop-card-row">
+          <span class="shop-card-name">${i.card_name}</span>
+          <span class="shop-card-price">¥${i.price.toLocaleString()}</span>
+          <span class="shop-card-date">${i.recorded_date}</span>
+        </div>`).join('')}
+    </div>`).join('');
+  document.getElementById('shopPage').innerHTML = html;
+}
+
+// ===== 取引履歴 =====
+function renderHistory() {
+  const completed = sales.filter(s=>s.status==='completed');
+  if (!completed.length) {
+    document.getElementById('historyPage').innerHTML = `<div class="empty"><div class="e-icon">📋</div><p>取引履歴はまだありません</p></div>`;
+    return;
+  }
+  document.getElementById('historyPage').innerHTML = completed.map(s=>`
+    <div class="history-card">
+      <div class="history-card-header">
+        <h3>${s.deck_name}</h3>
+        <span class="history-date">${new Date(s.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'})}</span>
+      </div>
+      <span class="history-status completed">✅ 取引完了</span>
+      ${s.sold_price?`<div class="history-price">¥${s.sold_price.toLocaleString()}</div>`:''}
+    </div>`).join('');
+}
+
+// ===== UI操作 =====
 function toggleAdmin() {
   isAdmin = !isAdmin;
-  document.getElementById('adminBtn').classList.toggle('active', isAdmin);
-  document.getElementById('adminBtn').textContent = isAdmin ? '✓ 管理者' : '管理者モード';
-  document.getElementById('addForm').classList.toggle('open', isAdmin);
+  document.getElementById('adminBtn').classList.toggle('active',isAdmin);
+  document.getElementById('adminBtn').textContent = isAdmin?'✓ 管理者':'管理者モード';
+  document.getElementById('addForm').classList.toggle('open',isAdmin);
   renderInventory();
   renderDecks();
 }
-
-// フィルター・ソート
-function setFilter(val, el) {
-  currentFilter = val;
-  document.querySelectorAll('[data-filter]').forEach(e => e.classList.remove('active'));
+function setFilter(val,el) {
+  currentFilter=val;
+  document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
   renderInventory();
 }
-function setSort(val, el) {
-  currentSort = currentSort === val ? '' : val;
-  document.querySelectorAll('[data-sort]').forEach(e => e.classList.remove('active'));
+function setSort(val,el) {
+  currentSort = currentSort===val?'':val;
+  document.querySelectorAll('[data-sort]').forEach(e=>e.classList.remove('active'));
   if (currentSort) el.classList.add('active');
   renderInventory();
 }
-
-// 展開
 function toggleDetail(id) {
-  const el = document.getElementById(`detail-${id}`);
-  el.classList.toggle('open');
+  document.getElementById(`detail-${id}`).classList.toggle('open');
 }
-
-// ページ切替
 function switchPage(name, el) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(`page-${name}`).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  if (el.classList.contains('tab')) {
-    el.classList.add('active');
-    document.getElementById(`nav-${name}`).classList.add('active');
-  } else {
-    el.classList.add('active');
-    document.querySelectorAll('.tab')[['inventory','deck','shop'].indexOf(name)].classList.add('active');
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const tabs = ['inventory','deck','shop'];
+  const tabIdx = tabs.indexOf(name);
+  if (el) {
+    if (el.classList.contains('tab')) {
+      el.classList.add('active');
+    } else if (el.classList.contains('nav-btn')) {
+      el.classList.add('active');
+      if (tabIdx>=0) document.querySelectorAll('.tab')[tabIdx].classList.add('active');
+    }
   }
+  const navEl = document.getElementById(`nav-${name}`);
+  if (navEl) navEl.classList.add('active');
 }
-
-// トースト
+function openDrawer() {
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawerOverlay').classList.add('open');
+}
+function closeDrawer() {
+  document.getElementById('drawer').classList.remove('open');
+  document.getElementById('drawerOverlay').classList.remove('open');
+}
 function showToast(msg) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2000);
+  setTimeout(()=>t.classList.remove('show'),2200);
 }
+
+// 検索結果外クリックで閉じる
+document.addEventListener('click', e => {
+  document.querySelectorAll('.deck-search-results.open').forEach(el => {
+    if (!el.parentElement.contains(e.target)) el.classList.remove('open');
+  });
+});
 
 init();
 </script>
