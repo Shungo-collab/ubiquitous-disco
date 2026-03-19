@@ -1088,7 +1088,13 @@ function renderDecks() {
     <div class="deck-card" id="deck-${d.id}">
       <div class="deck-card-header">
         <h3>${isSelling?'🔥 ':''} ${d.name}</h3>
-        <span class="deck-count">${totalQty}/60枚</span>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span class="deck-count">${totalQty}/60枚</span>
+          ${isAdmin ? `
+          <button class="dc-btn" style="background:var(--accent-light);color:var(--accent);font-size:11px;width:auto;padding:0 8px;border-radius:8px;height:26px;" onclick="renameDeck('${d.id}','${d.name.replace(/'/g,"\\'")}')">✏️</button>
+          <button class="dc-btn trash" style="width:auto;padding:0 8px;border-radius:8px;height:26px;font-size:11px;" onclick="deleteDeck('${d.id}','${d.name.replace(/'/g,"\\'")}')">🗑 削除</button>
+          ` : ''}
+        </div>
       </div>
 
       <div class="shortage-tabs">
@@ -1231,6 +1237,31 @@ async function addCardToDeck(deckId) {
     showToast(`${sel.name} を追加しました`);
     renderDecks();
   } catch(e) { showToast('⚠️ 追加失敗'); }
+}
+
+async function renameDeck(deckId, currentName) {
+  const newName = prompt(`デッキ名を変更する`, currentName);
+  if (!newName || newName === currentName) return;
+  try {
+    await sbPatch('decks', deckId, {name: newName});
+    const deck = decks.find(d=>d.id===deckId);
+    if (deck) deck.name = newName;
+    showToast(`デッキ名を「${newName}」に変更しました`);
+    renderDecks();
+  } catch(e) { showToast('⚠️ 変更失敗'); }
+}
+
+async function deleteDeck(deckId, deckName) {
+  if (!confirm(`「${deckName}」を削除しますか？\nデッキ内のカード情報もすべて削除されます。`)) return;
+  try {
+    // deck_cardsを先に削除
+    const res = await fetch(`${SB_URL}/rest/v1/deck_cards?deck_id=eq.${deckId}`, { method:'DELETE', headers:H });
+    await sbDelete('decks', deckId);
+    decks = decks.filter(d=>d.id!==deckId);
+    deckCards = deckCards.filter(r=>r.deck_id!==deckId);
+    showToast(`「${deckName}」を削除しました`);
+    renderDecks();
+  } catch(e) { showToast('⚠️ 削除失敗'); }
 }
 
 async function addDeck() {
