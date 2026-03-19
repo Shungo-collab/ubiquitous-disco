@@ -430,6 +430,17 @@ body {
 }
 .add-deck-btn:active { background: var(--surface2); }
 
+/* デッキ内カード編集ボタン */
+.dc-btn {
+  width: 24px; height: 24px; border-radius: 50%; border: none;
+  font-size: 13px; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: transform 0.1s; padding: 0; line-height: 1;
+}
+.dc-btn:active { transform: scale(0.85); }
+.dc-btn.minus { background: var(--red-light); color: var(--red); font-size: 16px; font-weight: 300; }
+.dc-btn.plus { background: var(--green-light); color: var(--green); font-size: 16px; font-weight: 300; }
+.dc-btn.trash { background: var(--surface2); font-size: 12px; }
+
 /* ===== カドショページ ===== */
 .shop-page { padding: 10px 12px; display: flex; flex-direction: column; gap: 8px; }
 .shop-card {
@@ -1093,7 +1104,12 @@ function renderDecks() {
           <div class="deck-row" data-home="${home}" data-parents="${parents}" data-needed="${needed}" data-name="${cname}">
             <span class="deck-row-name">${cname}</span>
             <div class="deck-row-right">
-              <span class="deck-qty-badge">${needed}枚</span>
+              ${isAdmin ? `
+              <button class="dc-btn minus" onclick="updateDeckQty('${r.id}','${d.id}',-1)">−</button>
+              <span class="deck-qty-badge" id="dqb-${r.id}">${needed}枚</span>
+              <button class="dc-btn plus" onclick="updateDeckQty('${r.id}','${d.id}',1)">＋</button>
+              <button class="dc-btn trash" onclick="removeDeckCard('${r.id}','${d.id}')">🗑</button>
+              ` : `<span class="deck-qty-badge">${needed}枚</span>`}
               <span class="shortage-badge ${cls}">${label}</span>
             </div>
           </div>`;
@@ -1161,6 +1177,29 @@ function selectDeckCard(deckId, cardId, cardName) {
   document.getElementById(`dsr-${deckId}`).classList.remove('open');
   document.getElementById(`dsi-${deckId}`).value = cardName;
   document.getElementById(`dsc-${deckId}`).innerHTML = `<div class="selected-card-chip">✓ ${cardName}</div>`;
+}
+
+async function updateDeckQty(rowId, deckId, delta) {
+  const row = deckCards.find(r=>r.id===rowId);
+  if (!row) return;
+  const newQty = Math.max(1, (row.quantity||1)+delta);
+  row.quantity = newQty;
+  const el = document.getElementById(`dqb-${rowId}`);
+  if (el) el.textContent = `${newQty}枚`;
+  try {
+    await sbPatch('deck_cards', rowId, {quantity: newQty});
+    renderDecks();
+  } catch(e) { showToast('⚠️ 更新失敗'); }
+}
+
+async function removeDeckCard(rowId, deckId) {
+  if (!confirm('このカードをデッキから削除しますか？')) return;
+  try {
+    await sbDelete('deck_cards', rowId);
+    deckCards = deckCards.filter(r=>r.id!==rowId);
+    showToast('削除しました');
+    renderDecks();
+  } catch(e) { showToast('⚠️ 削除失敗'); }
 }
 
 async function addCardToDeck(deckId) {
