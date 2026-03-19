@@ -1177,30 +1177,50 @@ function renderDecks() {
       </div>
 
       <div class="deck-rows" id="deckrows-${d.id}">
-        ${dc.map(r => {
-          const card = cards.find(c=>c.id===r.card_id);
-          const cname = card ? card.name : (r.card_name||'不明');
-          const needed = r.quantity||1;
-          const home = card?(card.stock_home||0):0;
-          const parents = card?(card.stock_parents||0):0;
-          const total = home+parents;
-          const diff = total - needed;
-          const cls = diff>=0?'ok':diff===-1?'warn':'ng';
-          const label = diff>=0?`✓ ${total}枚`:`不足 ${Math.abs(diff)}枚`;
-          return `
-          <div class="deck-row" data-home="${home}" data-parents="${parents}" data-needed="${needed}" data-name="${cname}">
-            <span class="deck-row-name">${cname}</span>
-            <div class="deck-row-right">
-              ${isAdmin ? `
-              <button class="dc-btn minus" onclick="updateDeckQty('${r.id}','${d.id}',-1)">−</button>
-              <span class="deck-qty-badge" id="dqb-${r.id}">${needed}枚</span>
-              <button class="dc-btn plus" onclick="updateDeckQty('${r.id}','${d.id}',1)">＋</button>
-              <button class="dc-btn trash" onclick="removeDeckCard('${r.id}','${d.id}')">🗑</button>
-              ` : `<span class="deck-qty-badge">${needed}枚</span>`}
-              <span class="shortage-badge ${cls}">${label}</span>
-            </div>
-          </div>`;
-        }).join('') || '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>'}
+        ${(() => {
+          const rows = dc.map(r => {
+            const card = cards.find(c=>c.id===r.card_id);
+            const cname = card ? card.name : (r.card_name||'不明');
+            const needed = r.quantity||1;
+            const home = card?(card.stock_home||0):0;
+            const parents = card?(card.stock_parents||0):0;
+            const total = home+parents;
+            const diff = total - needed;
+            return { r, card, cname, needed, home, parents, total, diff };
+          });
+          const ngRows = rows.filter(x=>x.diff<0);
+          const okRows = rows.filter(x=>x.diff>=0);
+
+          const rowHTML = (x) => `
+            <div class="deck-row" data-home="${x.home}" data-parents="${x.parents}" data-needed="${x.needed}" data-name="${x.cname}">
+              <span class="deck-row-name">${x.cname}</span>
+              <div class="deck-row-right">
+                ${isAdmin ? `
+                <button class="dc-btn minus" onclick="updateDeckQty('${x.r.id}','${d.id}',-1)">−</button>
+                <span class="deck-qty-badge" id="dqb-${x.r.id}">${x.needed}枚</span>
+                <button class="dc-btn plus" onclick="updateDeckQty('${x.r.id}','${d.id}',1)">＋</button>
+                <button class="dc-btn trash" onclick="removeDeckCard('${x.r.id}','${d.id}')">🗑</button>
+                ` : `<span class="deck-qty-badge">${x.needed}枚</span>`}
+                <span class="shortage-badge ${x.diff>=0?'ok':x.diff===-1?'warn':'ng'}">${x.diff>=0?`✓ ${x.total}枚`:`不足 ${Math.abs(x.diff)}枚`}</span>
+              </div>
+            </div>`;
+
+          if (!rows.length) return '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>';
+
+          let html = '';
+          if (ngRows.length > 0) {
+            html += `<div style="background:var(--red-light);border-radius:8px;padding:4px 8px;margin-bottom:4px;font-size:10px;font-weight:700;color:var(--red);">⚠️ 不足 ${ngRows.length}種</div>`;
+            html += ngRows.map(rowHTML).join('');
+          }
+          if (okRows.length > 0) {
+            html += ngRows.length > 0 ? `
+              <details style="margin-top:4px;">
+                <summary style="font-size:11px;color:var(--text2);cursor:pointer;padding:4px 0;font-weight:700;list-style:none;">▸ 充足カード ${okRows.length}種</summary>
+                ${okRows.map(rowHTML).join('')}
+              </details>` : okRows.map(rowHTML).join('');
+          }
+          return html;
+        })()}
       </div>
 
       ${isAdmin ? `
@@ -1450,105 +1470,140 @@ function renderMercari() {
 
   if (!activeSales.length) {
     document.getElementById('mercariPage').innerHTML = `
-      <div class="empty"><div class="e-icon">🔥</div><p>現在取引中のデッキはありません</p></div>`;
+      <div style="padding:10px 12px;">
+        <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:20px;color:white;text-align:center;">
+          <div style="font-size:48px;margin-bottom:12px;">🔥</div>
+          <div style="font-size:16px;font-weight:900;margin-bottom:6px;">取引中のデッキはありません</div>
+          <div style="font-size:12px;opacity:0.7;">デッキタブから出品してください</div>
+        </div>
+      </div>`;
     return;
   }
 
-  // 取引中デッキで使うカードの必要枚数を集計
-  const needed = {}; // card_id → 必要合計枚数
+  // 取引中デッキで使うカードの必要枚数を集計（デッキ別）
+  const neededTotal = {};
+  const neededByDeck = {};
   activeSales.forEach(s => {
+    neededByDeck[s.deck_id] = {};
     const dc = deckCards.filter(r=>r.deck_id===s.deck_id);
     dc.forEach(r => {
-      if (!needed[r.card_id]) needed[r.card_id] = 0;
-      needed[r.card_id] += (r.quantity||1);
+      if (!neededTotal[r.card_id]) neededTotal[r.card_id] = 0;
+      neededTotal[r.card_id] += (r.quantity||1);
+      neededByDeck[s.deck_id][r.card_id] = (r.quantity||1);
     });
   });
 
   // 不足カードを計算
   const shortages = [];
-  Object.entries(needed).forEach(([cardId, total]) => {
+  Object.entries(neededTotal).forEach(([cardId, total]) => {
     const card = cards.find(c=>c.id===cardId);
     if (!card) return;
-    const have = (card.stock_home||0) + (card.stock_parents||0);
-    shortages.push({ card, needed: total, have, diff: have - total });
+    const have = (card.stock_home||0)+(card.stock_parents||0);
+    shortages.push({ card, needed: total, have, diff: have-total });
   });
-  shortages.sort((a,b) => a.diff - b.diff); // 不足が多い順
-
+  shortages.sort((a,b)=>a.diff-b.diff);
   const ngList = shortages.filter(s=>s.diff<0);
   const okList = shortages.filter(s=>s.diff>=0);
+  const totalShortage = Math.abs(ngList.reduce((s,r)=>s+r.diff,0));
 
-  // ヘッダー
-  const totalNeeded = Object.values(needed).reduce((s,v)=>s+v,0);
-  let html = `
-    <div class="mercari-header-card">
-      <h2>🔥 メルカリ出品管理</h2>
-      <div class="mercari-stats">
-        <div class="mercari-stat">
-          <div class="ms-val">${activeSales.length}</div>
-          <div class="ms-label">取引中</div>
-        </div>
-        <div class="mercari-stat">
-          <div class="ms-val">${ngList.length}</div>
-          <div class="ms-label">不足種類</div>
-        </div>
-        <div class="mercari-stat">
-          <div class="ms-val">${Math.abs(ngList.reduce((s,r)=>s+r.diff,0))}</div>
-          <div class="ms-label">不足合計枚数</div>
-        </div>
-      </div>
-    </div>`;
+  let html = `<div style="padding:10px 12px;display:flex;flex-direction:column;gap:10px;">`;
 
-  // 不足カードアラート
+  // ===== ヘッダーカード =====
   html += `
-    <div class="shortage-alert">
-      <div class="shortage-alert-header">
-        <h3>⚠️ 不足カード</h3>
-        <span class="shortage-count-badge">${ngList.length}種</span>
+  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:16px;color:white;">
+    <div style="font-size:11px;opacity:0.6;font-weight:700;letter-spacing:1px;margin-bottom:6px;">MERCARI 出品管理</div>
+    <div style="display:flex;gap:0;margin-bottom:0;">
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#f97316;">${activeSales.length}</div>
+        <div style="font-size:10px;opacity:0.6;">取引中</div>
       </div>
-      ${ngList.length === 0 ? `<div style="text-align:center;padding:12px;color:var(--green);font-weight:700;font-size:13px;">✅ すべて充足しています！</div>` :
-        ngList.map(s=>`
-          <div class="shortage-row">
-            <span class="shortage-row-name">${s.card.name}</span>
-            <div class="shortage-row-detail">
-              <span class="shortage-row-nums">必要${s.needed}枚 / 所持${s.have}枚</span>
-              <span class="shortage-row-diff ng">不足 ${Math.abs(s.diff)}枚</span>
-            </div>
-          </div>`).join('')
-      }
-      ${okList.length > 0 ? `
-        <details style="margin-top:8px;">
-          <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:4px 0;">充足カード ${okList.length}種を見る</summary>
-          ${okList.map(s=>`
-            <div class="shortage-row">
-              <span class="shortage-row-name">${s.card.name}</span>
-              <div class="shortage-row-detail">
-                <span class="shortage-row-nums">必要${s.needed}枚 / 所持${s.have}枚</span>
-                <span class="shortage-row-diff ok">✓ ${s.have}枚</span>
-              </div>
-            </div>`).join('')}
-        </details>` : ''}
-    </div>`;
+      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:${ngList.length>0?'#f87171':'#4ade80'};">${ngList.length}</div>
+        <div style="font-size:10px;opacity:0.6;">不足種類</div>
+      </div>
+      <div style="flex:1;text-align:center;padding:8px 0;">
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:${totalShortage>0?'#f87171':'#4ade80'};">${totalShortage}</div>
+        <div style="font-size:10px;opacity:0.6;">不足合計枚数</div>
+      </div>
+    </div>
+  </div>`;
 
-  // 取引中デッキ一覧
-  html += `<div style="font-size:12px;font-weight:700;color:var(--text2);padding:4px 2px;">取引中のデッキ</div>`;
+  // ===== 不足カードブロック =====
+  if (ngList.length === 0) {
+    html += `
+    <div style="background:var(--green-light);border-radius:14px;padding:16px;text-align:center;">
+      <div style="font-size:28px;margin-bottom:6px;">✅</div>
+      <div style="font-size:14px;font-weight:900;color:var(--green);">すべて充足しています！</div>
+    </div>`;
+  } else {
+    html += `
+    <div style="background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1.5px solid var(--red-light);">
+      <div style="background:var(--red);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:white;font-weight:900;font-size:14px;">⚠️ 不足カード</div>
+        <div style="background:rgba(255,255,255,0.25);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;font-family:'DM Mono',monospace;">${ngList.length}種 / ${totalShortage}枚不足</div>
+      </div>
+      ${ngList.map((s,i)=>`
+        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<ngList.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.card.name}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;">必要${s.needed}枚 → 所持${s.have}枚</div>
+          </div>
+          <div style="background:var(--red);color:white;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">
+            −${Math.abs(s.diff)}枚
+          </div>
+        </div>`).join('')}
+    </div>`;
+  }
+
+  // 充足カード（折りたたみ）
+  if (okList.length > 0) {
+    html += `
+    <details>
+      <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:6px 2px;font-weight:700;list-style:none;">
+        ▸ 充足カード ${okList.length}種を確認する
+      </summary>
+      <div style="background:var(--surface);border-radius:12px;margin-top:6px;overflow:hidden;border:1px solid var(--border);">
+        ${okList.map((s,i)=>`
+          <div style="display:flex;align-items:center;padding:10px 14px;border-bottom:${i<okList.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
+            <div style="flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.card.name}</div>
+            <div style="background:var(--green-light);color:var(--green);border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;font-family:'DM Mono',monospace;white-space:nowrap;">
+              ✓ ${s.have}枚
+            </div>
+          </div>`).join('')}
+      </div>
+    </details>`;
+  }
+
+  // ===== 取引中デッキ一覧 =====
+  html += `<div style="font-size:11px;font-weight:700;color:var(--text2);padding:4px 2px;letter-spacing:0.5px;">取引中のデッキ ${activeSales.length}件</div>`;
+
   activeSales.forEach(s => {
     const date = new Date(s.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+    // このデッキで不足してるカード数
+    const deckNg = Object.entries(neededByDeck[s.deck_id]||{}).filter(([cid,qty])=>{
+      const card = cards.find(c=>c.id===cid);
+      if (!card) return false;
+      return (card.stock_home||0)+(card.stock_parents||0) < qty;
+    }).length;
+
     html += `
-      <div class="mercari-deck-card">
-        <div class="mercari-deck-header">
-          <div>
-            <div class="mercari-deck-name">${s.deck_name}</div>
-            <div class="mercari-deck-date">${date} 出品</div>
-          </div>
-          ${s.sold_price ? `<div class="mercari-deck-price">¥${s.sold_price.toLocaleString()}</div>` : ''}
+    <div style="background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--border);">
+      <div style="background:linear-gradient(135deg,#7f1d1d,#991b1b);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div style="color:white;font-size:15px;font-weight:900;">${s.deck_name}</div>
+          <div style="color:rgba(255,255,255,0.7);font-size:11px;margin-top:2px;">${date}出品 ${s.sold_price?`· ¥${s.sold_price.toLocaleString()}`:''}</div>
         </div>
-        <div class="mercari-deck-actions">
-          <button class="mercari-action-btn complete" onclick="openCompleteModal('${s.id}','${s.deck_name}')">✅ 取引完了</button>
-          <button class="mercari-action-btn cancel" onclick="cancelSale('${s.id}')">取消</button>
-        </div>
-      </div>`;
+        ${deckNg>0?`<div style="background:rgba(255,255,255,0.2);color:white;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;">不足${deckNg}種</div>`:
+        `<div style="background:rgba(255,255,255,0.2);color:white;border-radius:20px;padding:4px 10px;font-size:11px;font-weight:700;">✓ 充足</div>`}
+      </div>
+      <div style="display:flex;gap:8px;padding:12px 14px;">
+        <button onclick="openCompleteModal('${s.id}','${s.deck_name}')" style="flex:1;background:var(--green);color:white;border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">✅ 取引完了</button>
+        <button onclick="cancelSale('${s.id}')" style="flex:1;background:var(--surface2);color:var(--text);border:none;border-radius:10px;padding:12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">取消</button>
+      </div>
+    </div>`;
   });
 
+  html += `</div>`;
   document.getElementById('mercariPage').innerHTML = html;
 }
 
