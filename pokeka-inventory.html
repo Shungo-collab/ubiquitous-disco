@@ -929,7 +929,15 @@ function cardHTML(c) {
     <div class="shop-entry">
       <div class="detail-label">🏪 カドショ価格を記録</div>
       <div class="shop-fields">
-        <input class="detail-input" type="text" id="sname-${c.id}" placeholder="店名（例：アメニティ）">
+        <select class="detail-input" id="sname-${c.id}">
+          <option value="">店名を選択...</option>
+          <option value="アメニティードリーム 立川店">アメニティードリーム 立川店</option>
+          <option value="カードショップ 竜星のPAO 立川店">竜星のPAO 立川店</option>
+          <option value="フルコンプ 立川南口店">フルコンプ 立川南口店</option>
+          <option value="BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店">BOOKOFF SB 八王子店</option>
+          <option value="BOOKOFF ヴィータモールせいせき店">BOOKOFF せいせき店</option>
+          <option value="駿河屋 立川店">駿河屋 立川店</option>
+        </select>
         <input class="detail-input" type="number" id="sprice-${c.id}" placeholder="価格">
       </div>
       <button class="save-shop-btn" onclick="saveShop('${c.id}')">記録する</button>
