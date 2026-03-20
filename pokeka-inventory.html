@@ -893,6 +893,10 @@ body {
     <h3 id="listModalTitle">出品しますか？</h3>
     <p id="listModalDesc">このデッキをメルカリに出品します。在庫から自動でマイナスされます。</p>
     <input class="modal-input" type="number" id="listPrice" placeholder="売値（円）を入力">
+    <div id="listStockPreview" style="background:var(--red-light);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;display:none;">
+      <div style="font-weight:700;color:var(--red);margin-bottom:6px;">⚠️ 以下の在庫がマイナスされます</div>
+      <div id="listStockList"></div>
+    </div>
     <div class="modal-btns">
       <button class="modal-btn confirm" onclick="confirmList()">🔥 出品・取引開始</button>
       <button class="modal-btn cancel" onclick="closeModal('listModal')">キャンセル</button>
@@ -1163,6 +1167,7 @@ function cardHTML(c) {
           <option value="">店名を選択...</option>
           <option value="アメニティードリーム 立川店">アメニティードリーム 立川店</option>
           <option value="カードショップ 竜星のPAO 立川店">竜星のPAO 立川店</option>
+          <option value="カードショップ 竜星のPAO 多摩境店">竜星のPAO 多摩境店</option>
           <option value="フルコンプ 立川南口店">フルコンプ 立川南口店</option>
           <option value="BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店">BOOKOFF SB 八王子店</option>
           <option value="BOOKOFF ヴィータモールせいせき店">BOOKOFF せいせき店</option>
@@ -1610,6 +1615,28 @@ function openListModal(deckId, deckName) {
   pendingListDeckId = { id: deckId, name: deckName };
   document.getElementById('listModalTitle').textContent = `「${deckName}」を出品しますか？`;
   document.getElementById('listPrice').value = '';
+
+  // 在庫マイナスプレビューを生成
+  const dc = deckCards.filter(r=>r.deck_id===deckId);
+  const preview = document.getElementById('listStockPreview');
+  const list = document.getElementById('listStockList');
+  if (dc.length > 0) {
+    const rows = dc.map(r => {
+      const card = cards.find(c=>c.id===r.card_id);
+      if (!card) return '';
+      const qty = r.quantity||1;
+      const after = Math.max(0,(card.stock_home||0)-qty);
+      return `<div style="display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px solid rgba(220,38,38,0.15);">
+        <span style="color:var(--text)">${card.name}</span>
+        <span style="font-family:'DM Mono',monospace;font-weight:700;color:var(--red);">${card.stock_home||0} → ${after}枚</span>
+      </div>`;
+    }).join('');
+    list.innerHTML = rows;
+    preview.style.display = 'block';
+  } else {
+    preview.style.display = 'none';
+  }
+
   document.getElementById('listModal').classList.add('open');
 }
 
