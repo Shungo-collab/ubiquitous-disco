@@ -1814,6 +1814,11 @@ function renderMercari() {
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.card.name}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;">必要${s.needed}枚 → 所持${s.have}枚</div>
           </div>
+          ${s.card.image_url ? `
+          <button onclick="openImageModal('${s.card.image_url}','${s.card.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')"
+            style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;line-height:1;">
+            🃏
+          </button>` : ''}
           <div style="background:var(--red);color:white;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">
             −${Math.abs(s.diff)}枚
           </div>
