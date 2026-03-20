@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSH6 総復習クイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root { --bg: #0f0f14; --card: #1a1a24; --border: #2a2a3a; --accent1: #9b59ff; --accent2: #ff59a0; --text: #f0f0f0; --sub: #888; --correct: #2ecc71; --wrong: #e74c3c; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 28px; padding: 0 8px; }
+  .breakdown { margin-bottom: 28px; text-align: left; }
+  .breakdown-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--sub); margin-bottom: 16px; text-align: center; }
+  .chapter-item { margin-bottom: 12px; }
+  .chapter-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .chapter-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .chapter-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">PSH6 · FINAL QUIZ</div>
+    <div class="title">総復習クイズ</div>
+    <div class="subtitle">今日学んだことを確認しよう！全5問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 5</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 5問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+      <div id="chapters"></div>
+    </div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+const allQuestions = [
+  {
+    chapter: 'Figmaの強み',
+    q: "Figmaが現場のWebデザインで広く使われている最大の理由はどれですか？",
+    opts: ["完全無料で使えるから","URLを共有するだけでチームがリアルタイムに共同作業できるから","AIが自動でデザインしてくれるから","Photoshopより高機能だから"],
+    ans: 1,
+    exp: "FigmaはブラウザだけでURLを送るだけでチーム全員が同じファイルをリアルタイムで確認・編集できます。従来はデザインファイルをメールで送り合い「どれが最新版？」という混乱が日常でした。Figmaはその問題を根本から解決したことで、現在のWebデザイン現場でスタンダードなツールになっています。インストール不要・どのOSでも動く点も現場に浸透した大きな理由です！"
+  },
+  {
+    chapter: 'スタイル',
+    q: "Figmaのスタイルを登録しておく最大のメリットはどれですか？",
+    opts: ["ファイルのサイズが小さくなる","色や書体を変更したいとき、1か所変えるだけで全体に反映できる","デザインが自動で完成する","ファイルのバックアップが自動で取られる"],
+    ans: 1,
+    exp: "スタイルの最大のメリットは「一括変更」です。例えばメインカラーをスタイル登録しておけば、クライアントから「やっぱり青をもう少し濃くして」と言われたとき、スタイルを1か所変えるだけで100か所のパーツが一瞬で変わります。スタイルを使わないと100か所を手作業で変える羽目になります。現場でスタイルが必須とされている理由がこれです！"
+  },
+  {
+    chapter: 'コンポーネント',
+    q: "コンポーネントとは何ですか？",
+    opts: ["デザインの背景色のこと","繰り返し使うパーツをひとつの型として登録したもの","Figmaのプラグインの名前","画像をトリミングする機能"],
+    ans: 1,
+    exp: "コンポーネントは「繰り返し使うパーツの型」です。例えばヘッダーをコンポーネント化しておけば、ロゴを変更したいとき「メインコンポーネント」を1か所変えるだけで全ページのヘッダーが一瞬で変わります。ボタン・カード・ナビゲーションなど、同じパーツが何度も登場するWebサイトではコンポーネントが不可欠です！"
+  },
+  {
+    chapter: 'コンポーネント',
+    q: "メインコンポーネントのデザインを変更するとどうなりますか？",
+    opts: ["変更したメインコンポーネントだけ変わる","ファイルが壊れる","全てのインスタンス（複製）に変更が一括で反映される","変更が自動的に元に戻る"],
+    ans: 2,
+    exp: "メインコンポーネントを変えると、そこから作ったインスタンス（複製）すべてに変更が反映されます。これがコンポーネントの最大の強みです。例えばサイト内に同じボタンが50個あっても、メインコンポーネントを1回変えれば50個が全部一瞬で変わります。ただしインスタンスに個別変更を加えると、その部分だけメインコンポーネントの変更が反映されなくなるので注意！"
+  },
+  {
+    chapter: 'スタイル・コンポーネント共通',
+    q: "スタイルとコンポーネント、両方に共通する最大のメリットはどれですか？",
+    opts: ["デザインが自動生成される","1か所変えるだけで全体に反映できる一括変更","ファイルのサイズが小さくなる","コーディングが不要になる"],
+    ans: 1,
+    exp: "スタイルもコンポーネントも「一括変更」が最大の共通メリットです。スタイルは色・書体の一括変更、コンポーネントはパーツの一括変更を実現します。現場では「クライアントからの修正依頼に素早く対応できること」がデザイナーの評価に直結します。スタイルとコンポーネントをしっかり使いこなすことで、修正作業の時間を大幅に短縮できます。今日学んだことが現場で直接活きてきます！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+const chapterResults = {};
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION 0${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${o}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  if (!chapterResults[q.chapter]) chapterResults[q.chapter] = { correct: 0, total: 0 };
+  chapterResults[q.chapter].total++;
+  if (isCorrect) chapterResults[q.chapter].correct++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('result-score').textContent = `${score} / ${questions.length}`;
+
+  const msgs = [
+    "0問正解！実はこれがいちばんラッキーかもしれない。人間の脳は「間違えた瞬間」に強い感情が動き、その体験が記憶として深く刻まれます（エラー駆動学習）。正解し続けるより、間違えて「あ、そういうことか！」と気づく経験の方が長期記憶に残るんです。今日の間違いは、次回の確実な正解になる。今日ここに来てくれただけで、もう十分すごい！",
+    "1問正解！今日初めてスタイルやコンポーネントに触れて、最後まで一緒に進んでくれた。それだけで本当にえらい！1問取れたってことは、確実に理解が始まってる。頑張っててとってもえらいです！次回が楽しみ！",
+    "2問正解！半分以上取れた！スタイルとコンポーネントの考え方、ちゃんと頭に入ってきてる証拠。今日ここに来て手を動かしてくれたこと、それだけでもう十分すごい。頑張っててとってもえらいです！",
+    "3問正解！しっかり聞けてた！今日の内容、自分のものになってきてる。頑張っててとってもえらいです！今日ここに来て、真剣に取り組んでくれたこと、それが一番大事！この調子で次回も来てね！",
+    "4問正解！ほぼ完璧！今日の内容しっかり自分のものになってる。スタイルもコンポーネントも理解できてる。頑張っててとってもえらいです！今日ここに来て最後まで諦めずに取り組んでくれた。最高です！",
+    "満点！完璧！！今日学んだスタイル・コンポーネント・インスタンス、全部理解できてる。今日ここに来て、手を動かして、最後まで頑張ってくれた。それがもう最高にえらい！！自信を持って次も来てね！！この調子で絶対にデザイナーになれる！！"
+  ];
+  document.getElementById('result-msg').textContent = msgs[score];
+
+  if (!isRetryMode) {
+    const ch = document.getElementById('chapters');
+    ch.innerHTML = '';
+    Object.entries(chapterResults).forEach(([name, res]) => {
+      const pct = Math.round((res.correct / res.total) * 100);
+      ch.innerHTML += `<div class="chapter-item"><div class="chapter-label"><span>${name}</span><span>${res.correct}/${res.total}</span></div><div class="chapter-bar"><div class="chapter-fill" style="width:${pct}%"></div></div></div>`;
+    });
+  }
+
+  const wrongBtn = document.getElementById('retry-wrong-btn');
+  if (wrongIndices.length > 0 && !isRetryMode) wrongBtn.classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; isRetryMode = false;
+  Object.keys(chapterResults).forEach(k => delete chapterResults[k]);
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
