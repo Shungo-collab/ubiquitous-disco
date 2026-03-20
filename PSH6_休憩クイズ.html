@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PSH6 休憩クイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --text: #f0f0f0;
+    --sub: #888;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 32px; padding: 0 8px; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">PSH6 · BREAK QUIZ</div>
+    <div class="title">休憩クイズ</div>
+    <div class="subtitle">前半の内容を振り返ろう！全3問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 3</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 3問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+const allQuestions = [
+  {
+    q: "Figmaでスタイルを登録する目的として正しいのはどれですか？",
+    opts: ["デザインファイルのサイズを小さくするため","同じ色や書体を使いまわして、変更が必要なときに一括で変えられるようにするため","自動でデザインが完成するようにするため","ファイルをクラウドに保存するため"],
+    ans: 1,
+    exp: "スタイルを登録しておくと、同じ色・書体を複数のパーツに使いまわせます。さらに最大のメリットは「一括変更」です。例えばメインカラーを登録しておけば、クライアントから「やっぱりもう少し濃い青に」と言われたとき、スタイルを1か所変えるだけで全体に反映されます。プロの現場では必須の機能です！"
+  },
+  {
+    q: "Figmaの文字スタイルに登録できる情報として正しいのはどれですか？",
+    opts: ["テキストの内容（文章）だけ","フォントの色だけ","フォントの種類・サイズ・太さ・行間などまとめて","テキストの配置位置だけ"],
+    ans: 2,
+    exp: "文字スタイルには「フォントの種類・サイズ・ウェイト（太さ）・行間」などをまとめて登録できます。例えば「見出し用：Bold・36px・行間1.5」をスタイルとして登録しておけば、新しい見出しを作るたびに毎回設定し直す手間がなくなります。チームで作業するときも、全員が同じスタイルを使うことでデザインの統一感が保てます！"
+  },
+  {
+    q: "文字スタイルの名前として、現場で使いやすいのはどれですか？",
+    opts: ["山田太郎","h1タグ用/36px","2026年3月19日","ラーメン"],
+    ans: 1,
+    exp: "「h1タグ用/36px」のように、用途とサイズがわかる名前が正解です。スラッシュで区切ることでFigma上で階層管理もできます。「山田太郎」「2026年3月19日」では後から見たとき何のスタイルか全くわかりません。「ラーメン」は食べたくなるかもしれませんがFigmaとは関係ありません。🍜 チームで作業するとき、わかりやすい命名規則はとても重要です！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION 0${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${o}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('result-score').textContent = `${score} / ${questions.length}`;
+
+  const msgs = {
+    0: "0問正解！実はこれがいちばんラッキーかもしれない。人間の脳は「間違えた瞬間」に強い感情が動き、その体験が記憶として深く刻まれます（エラー駆動学習）。今日の間違いは、次回の確実な正解になる。後半もそのまま参加してね！",
+    1: "1問正解！ここに来て、手を動かして参加してくれた。それだけでもう十分すごい！1問取れたってことは、理解の種はもう植わってる。後半でさらに伸ばしていこう！",
+    2: "2問正解！しっかり前半を聞けてた証拠！あと1問で満点だったけど、その悔しさが記憶に残る。頑張っててとってもえらいです！後半も全力でいこう！",
+    3: "満点！完璧！前半の内容バッチリ理解できてる。今日ここに来て、真剣に取り組んでくれた。それがもう最高にえらい！後半もこの調子で絶対いける！自信を持っていこう！！"
+  };
+  document.getElementById('result-msg').textContent = msgs[score];
+
+  const wrongBtn = document.getElementById('retry-wrong-btn');
+  if (wrongIndices.length > 0 && !isRetryMode) wrongBtn.classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; isRetryMode = false;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  document.getElementById('subtitle') && (document.getElementById('subtitle').textContent = `間違えた${questions.length}問に再挑戦！`);
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
