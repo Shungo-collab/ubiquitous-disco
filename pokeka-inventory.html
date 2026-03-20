@@ -601,7 +601,105 @@ body {
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ボトムナビ */
+.search-input.hidden { display: none; }
+.filter-row.hidden { display: none; }
+
+/* 検索行 */
+.search-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.search-input {
+  flex: 1;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 14px;
+  font-size: 14px;
+  font-family: inherit;
+  background: var(--surface2);
+  outline: none;
+  transition: border-color 0.15s;
+  margin-bottom: 0;
+}
+.search-input:focus { border-color: var(--accent); background: white; }
+
+.filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  background: var(--surface2);
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 9px 12px;
+  font-size: 12px;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  white-space: nowrap;
+  color: var(--text2);
+  transition: all 0.15s;
+  flex-shrink: 0;
+}
+.filter-btn.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+}
+
+/* フィルターシート（下からにゅっと出る） */
+.filter-sheet-overlay {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 200; opacity: 0; pointer-events: none; transition: opacity 0.25s;
+}
+.filter-sheet-overlay.open { opacity: 1; pointer-events: all; }
+
+.filter-sheet {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: var(--surface); border-radius: 20px 20px 0 0;
+  z-index: 201; padding: 20px 16px 40px;
+  transform: translateY(100%); transition: transform 0.3s cubic-bezier(0.32,0.72,0,1);
+  max-height: 80vh; overflow-y: auto;
+}
+.filter-sheet.open { transform: translateY(0); }
+
+.filter-sheet-handle {
+  width: 36px; height: 4px; background: var(--border);
+  border-radius: 2px; margin: 0 auto 18px;
+}
+.filter-sheet h3 {
+  font-size: 14px; font-weight: 900; margin-bottom: 14px; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.5px;
+}
+.filter-section { margin-bottom: 18px; }
+.filter-section-title {
+  font-size: 11px; font-weight: 700; color: var(--text2);
+  margin-bottom: 8px; letter-spacing: 0.5px;
+}
+.filter-chips {
+  display: flex; flex-wrap: wrap; gap: 7px;
+}
+.filter-chip-item {
+  border: 1.5px solid var(--border); border-radius: 20px;
+  padding: 7px 14px; font-size: 13px; font-weight: 700;
+  font-family: inherit; background: var(--surface2);
+  cursor: pointer; transition: all 0.15s; color: var(--text);
+}
+.filter-chip-item.active {
+  background: var(--accent); color: white; border-color: var(--accent);
+}
+.filter-chip-item.active-sort {
+  background: var(--surface); color: var(--accent); border-color: var(--accent);
+}
+.filter-reset-btn {
+  width: 100%; background: var(--surface2); border: none; border-radius: 12px;
+  padding: 13px; font-size: 13px; font-weight: 700; font-family: inherit;
+  cursor: pointer; color: var(--text2); margin-top: 4px;
+}
+.filter-reset-btn:active { opacity: 0.7; }
+
+.filter-row { display: none; } /* 旧フィルター行は非表示 */
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: var(--surface); border-top: 1px solid var(--border);
@@ -654,20 +752,50 @@ body {
       <button class="menu-btn" onclick="openDrawer()">☰</button>
     </div>
   </div>
-  <input class="search-input" type="text" placeholder="カード名で検索..." id="searchInput" oninput="renderInventory()">
-  <div class="filter-row">
-    <button class="chip active" data-filter="all" onclick="setFilter('all',this)">すべて</button>
-    <button class="chip" data-cat="ポケモン" onclick="setCat('ポケモン',this)">🐾 ポケモン</button>
-    <button class="chip" data-cat="グッズ" onclick="setCat('グッズ',this)">🎒 グッズ</button>
-    <button class="chip" data-cat="サポート" onclick="setCat('サポート',this)">👤 サポート</button>
-    <button class="chip" data-cat="スタジアム" onclick="setCat('スタジアム',this)">🏟 スタジアム</button>
-    <button class="chip" data-cat="エネルギー" onclick="setCat('エネルギー',this)">⚡ エネルギー</button>
-    <button class="chip" data-filter="rare" onclick="setFilter('rare',this)">レア以上</button>
-    <button class="chip" data-filter="stock" onclick="setFilter('stock',this)">在庫あり</button>
-    <button class="chip" data-filter="nostock" onclick="setFilter('nostock',this)">在庫なし</button>
-    <button class="chip" data-sort="price" onclick="setSort('price',this)">高値順</button>
-    <button class="chip" data-sort="name" onclick="setSort('name',this)">名前順</button>
+  <div class="search-row" id="searchRow">
+    <input class="search-input" type="text" placeholder="カード名で検索..." id="searchInput" oninput="renderInventory()">
+    <button class="filter-btn" id="filterBtn" onclick="openFilterSheet()">▼ 絞込</button>
   </div>
+  <div class="filter-row" id="filterRow"></div>
+</div>
+
+<!-- フィルターシート -->
+<div class="filter-sheet-overlay" id="filterSheetOverlay" onclick="closeFilterSheet()"></div>
+<div class="filter-sheet" id="filterSheet">
+  <div class="filter-sheet-handle"></div>
+
+  <div class="filter-section">
+    <div class="filter-section-title">カテゴリ</div>
+    <div class="filter-chips">
+      <button class="filter-chip-item active" data-cat="" onclick="sheetSetCat('',this)">すべて</button>
+      <button class="filter-chip-item" data-cat="ポケモン" onclick="sheetSetCat('ポケモン',this)">🐾 ポケモン</button>
+      <button class="filter-chip-item" data-cat="グッズ" onclick="sheetSetCat('グッズ',this)">🎒 グッズ</button>
+      <button class="filter-chip-item" data-cat="ポケモンの道具" onclick="sheetSetCat('ポケモンの道具',this)">🔧 道具</button>
+      <button class="filter-chip-item" data-cat="サポート" onclick="sheetSetCat('サポート',this)">👤 サポート</button>
+      <button class="filter-chip-item" data-cat="スタジアム" onclick="sheetSetCat('スタジアム',this)">🏟 スタジアム</button>
+      <button class="filter-chip-item" data-cat="エネルギー" onclick="sheetSetCat('エネルギー',this)">⚡ エネルギー</button>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-section-title">在庫</div>
+    <div class="filter-chips">
+      <button class="filter-chip-item active" data-filter="all" onclick="sheetSetFilter('all',this)">すべて</button>
+      <button class="filter-chip-item" data-filter="stock" onclick="sheetSetFilter('stock',this)">在庫あり</button>
+      <button class="filter-chip-item" data-filter="nostock" onclick="sheetSetFilter('nostock',this)">在庫なし</button>
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <div class="filter-section-title">並び替え</div>
+    <div class="filter-chips">
+      <button class="filter-chip-item active-sort" data-sort="" onclick="sheetSetSort('',this)">デフォルト</button>
+      <button class="filter-chip-item" data-sort="price" onclick="sheetSetSort('price',this)">高値順</button>
+      <button class="filter-chip-item" data-sort="name" onclick="sheetSetSort('name',this)">名前順</button>
+    </div>
+  </div>
+
+  <button class="filter-reset-btn" onclick="resetFilters()">🔄 リセット</button>
 </div>
 
 <div class="tabs">
@@ -696,6 +824,7 @@ body {
       <select class="form-select" id="newCategory">
         <option value="グッズ">🎒 グッズ</option>
         <option value="ポケモン">🐾 ポケモン</option>
+        <option value="ポケモンの道具">🔧 ポケモンの道具</option>
         <option value="サポート">👤 サポート</option>
         <option value="スタジアム">🏟 スタジアム</option>
         <option value="エネルギー">⚡ エネルギー</option>
@@ -783,6 +912,17 @@ body {
   </div>
 </div>
 
+<!-- 画像モーダル -->
+<div class="modal-overlay" id="imageModalOverlay" onclick="closeImageModal()" style="align-items:center;justify-content:center;">
+  <div style="background:var(--surface);border-radius:16px;padding:16px;width:90%;max-width:400px;position:relative;" onclick="event.stopPropagation()">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+      <div id="imageModalTitle" style="font-size:14px;font-weight:700;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;"></div>
+      <button onclick="closeImageModal()" style="background:var(--surface2);border:none;border-radius:50%;width:28px;height:28px;font-size:16px;cursor:pointer;flex-shrink:0;margin-left:8px;">✕</button>
+    </div>
+    <img id="imageModalImg" src="" style="width:100%;border-radius:10px;object-fit:contain;max-height:60vh;">
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <div class="bottom-nav">
@@ -860,8 +1000,8 @@ async function init() {
 }
 
 // ===== 在庫レンダリング =====
-const CAT_ORDER = ['ポケモン','グッズ','サポート','スタジアム','エネルギー'];
-const CAT_ICON = { 'ポケモン':'🐾','グッズ':'🎒','サポート':'👤','スタジアム':'🏟','エネルギー':'⚡' };
+const CAT_ORDER = ['ポケモン','グッズ','ポケモンの道具','サポート','スタジアム','エネルギー'];
+const CAT_ICON = { 'ポケモン':'🐾','グッズ':'🎒','ポケモンの道具':'🔧','サポート':'👤','スタジアム':'🏟','エネルギー':'⚡' };
 
 function renderInventory() {
   const q = document.getElementById('searchInput').value.toLowerCase();
@@ -951,14 +1091,31 @@ function cardHTML(c) {
         <select class="detail-input" id="ecat-${c.id}">
           <option value="ポケモン" ${cat==='ポケモン'?'selected':''}>🐾 ポケモン</option>
           <option value="グッズ" ${cat==='グッズ'?'selected':''}>🎒 グッズ</option>
+          <option value="ポケモンの道具" ${cat==='ポケモンの道具'?'selected':''}>🔧 ポケモンの道具</option>
           <option value="サポート" ${cat==='サポート'?'selected':''}>👤 サポート</option>
           <option value="スタジアム" ${cat==='スタジアム'?'selected':''}>🏟 スタジアム</option>
           <option value="エネルギー" ${cat==='エネルギー'?'selected':''}>⚡ エネルギー</option>
         </select>
       </div>
       <input class="detail-input" type="number" id="mercari-${c.id}" value="${c.mercari_price||''}" placeholder="メルカリ値（円）">
+      <div>
+        <div class="detail-label" style="margin-bottom:6px;">📷 カード画像</div>
+        ${c.image_url ? `<img src="${c.image_url}" style="width:100%;max-height:180px;object-fit:contain;border-radius:8px;margin-bottom:8px;background:var(--surface2);">` : ''}
+        <label style="display:block;width:100%;background:var(--accent);color:white;border-radius:8px;padding:9px;text-align:center;font-size:12px;font-weight:700;cursor:pointer;">
+          📷 ${c.image_url ? '画像を変更' : '画像をアップロード'}
+          <input type="file" accept="image/*" style="display:none;" onchange="uploadCardImage('${c.id}', this)">
+        </label>
+        ${c.image_url ? `<button class="save-shop-btn" style="background:var(--red);margin-top:6px;width:100%;" onclick="deleteCardImage('${c.id}')">🗑 画像を削除</button>` : ''}
+        <div id="img-uploading-${c.id}" style="display:none;text-align:center;font-size:12px;color:var(--text2);padding:6px;">アップロード中...</div>
+      </div>
       <button class="save-shop-btn" style="background:var(--ace);" onclick="saveCardEdit('${c.id}')">保存する</button>
-    </div>` : `${mp?`<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ${mp}</div>`:''}`;
+    </div>` : `
+    ${c.image_url ? `<div onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')">
+      <img src="${c.image_url}" style="width:100%;max-height:220px;object-fit:contain;border-radius:10px;background:var(--surface2);cursor:pointer;">
+      <div style="text-align:center;font-size:11px;color:var(--text2);margin-top:4px;">👆 タップで拡大</div>
+    </div>` : ''}
+    ${mp?`<div style="font-size:13px;color:var(--red);font-weight:700;font-family:'DM Mono',monospace;">メルカリ参考値: ${mp}</div>`:''}
+    `;
 
   return `
 <div class="card-item" id="card-${c.id}">
@@ -1009,6 +1166,9 @@ function cardHTML(c) {
           <option value="フルコンプ 立川南口店">フルコンプ 立川南口店</option>
           <option value="BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店">BOOKOFF SB 八王子店</option>
           <option value="BOOKOFF ヴィータモールせいせき店">BOOKOFF せいせき店</option>
+          <option value="BOOKOFF 武蔵小金井店">BOOKOFF 武蔵小金井店</option>
+          <option value="BOOKOFF SUPER BAZAAR 多摩永山店">BOOKOFF SB 多摩永山店</option>
+          <option value="文教堂TRADING CARD 南大沢店">文教堂TC 南大沢店</option>
           <option value="駿河屋 立川店">駿河屋 立川店</option>
         </select>
         <input class="detail-input" type="number" id="sprice-${c.id}" placeholder="価格">
@@ -1078,6 +1238,85 @@ async function saveShop(id) {
     renderInventory();
     renderShop();
   } catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// ===== 画像アップロード =====
+async function uploadCardImage(cardId, input) {
+  const file = input.files[0];
+  if (!file) return;
+
+  const uploadingEl = document.getElementById(`img-uploading-${cardId}`);
+  if (uploadingEl) uploadingEl.style.display = 'block';
+
+  try {
+    const ext = file.name.split('.').pop();
+    const path = `cards/${cardId}.${ext}`;
+
+    // 既存画像を削除
+    await fetch(`${SB_URL}/storage/v1/object/card-images/${path}`, {
+      method: 'DELETE',
+      headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+    });
+
+    // アップロード
+    const res = await fetch(`${SB_URL}/storage/v1/object/card-images/${path}`, {
+      method: 'POST',
+      headers: {
+        'apikey': SB_KEY,
+        'Authorization': `Bearer ${SB_KEY}`,
+        'Content-Type': file.type,
+        'x-upsert': 'true'
+      },
+      body: file
+    });
+    if (!res.ok) throw new Error(await res.text());
+
+    const imageUrl = `${SB_URL}/storage/v1/object/public/card-images/${path}?t=${Date.now()}`;
+    await sbPatch('cards', cardId, { image_url: imageUrl });
+    const card = cards.find(c => c.id === cardId);
+    if (card) card.image_url = imageUrl;
+    showToast('📷 画像をアップロードしました');
+    renderInventory();
+  } catch(e) {
+    showToast('⚠️ アップロード失敗');
+    console.error(e);
+  } finally {
+    if (uploadingEl) uploadingEl.style.display = 'none';
+  }
+}
+
+async function deleteCardImage(cardId) {
+  if (!confirm('画像を削除しますか？')) return;
+  try {
+    const card = cards.find(c => c.id === cardId);
+    if (card?.image_url) {
+      const path = card.image_url.split('/card-images/')[1]?.split('?')[0];
+      if (path) {
+        await fetch(`${SB_URL}/storage/v1/object/card-images/${path}`, {
+          method: 'DELETE',
+          headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}` }
+        });
+      }
+      card.image_url = null;
+    }
+    await sbPatch('cards', cardId, { image_url: null });
+    showToast('画像を削除しました');
+    renderInventory();
+  } catch(e) { showToast('⚠️ 削除失敗'); }
+}
+
+function openImageModal(url, name) {
+  const overlay = document.getElementById('imageModalOverlay');
+  const img = document.getElementById('imageModalImg');
+  const title = document.getElementById('imageModalTitle');
+  if (overlay && img) {
+    img.src = url;
+    if (title) title.textContent = name;
+    overlay.classList.add('open');
+  }
+}
+function closeImageModal() {
+  document.getElementById('imageModalOverlay')?.classList.remove('open');
 }
 
 async function saveCardEdit(id) {
@@ -1629,27 +1868,59 @@ function toggleAdmin() {
   renderInventory();
   renderDecks();
 }
-function setFilter(val,el) {
-  currentFilter=val;
-  currentCat='';
-  document.querySelectorAll('[data-filter],[data-cat],[data-sort]').forEach(e=>e.classList.remove('active'));
+
+// フィルターシート
+function openFilterSheet() {
+  document.getElementById('filterSheet').classList.add('open');
+  document.getElementById('filterSheetOverlay').classList.add('open');
+}
+function closeFilterSheet() {
+  document.getElementById('filterSheet').classList.remove('open');
+  document.getElementById('filterSheetOverlay').classList.remove('open');
+}
+function sheetSetCat(val, el) {
+  currentCat = val;
+  document.querySelectorAll('[data-cat]').forEach(e=>e.classList.remove('active'));
   el.classList.add('active');
+  updateFilterBtnState();
   renderInventory();
 }
-function setCat(val,el) {
-  currentCat = currentCat===val?'':val;
-  currentFilter='all';
-  document.querySelectorAll('[data-filter],[data-cat],[data-sort]').forEach(e=>e.classList.remove('active'));
-  if (currentCat) el.classList.add('active');
-  else document.querySelector('[data-filter="all"]').classList.add('active');
+function sheetSetFilter(val, el) {
+  currentFilter = val;
+  document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  updateFilterBtnState();
   renderInventory();
 }
-function setSort(val,el) {
-  currentSort = currentSort===val?'':val;
-  document.querySelectorAll('[data-sort]').forEach(e=>e.classList.remove('active'));
-  if (currentSort) el.classList.add('active');
+function sheetSetSort(val, el) {
+  currentSort = val;
+  document.querySelectorAll('[data-sort]').forEach(e=>e.classList.remove('active','active-sort'));
+  el.classList.add('active-sort');
+  updateFilterBtnState();
   renderInventory();
 }
+function resetFilters() {
+  currentCat=''; currentFilter='all'; currentSort='';
+  document.querySelectorAll('[data-cat]').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-cat=""]')?.classList.add('active');
+  document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-filter="all"]')?.classList.add('active');
+  document.querySelectorAll('[data-sort]').forEach(e=>e.classList.remove('active','active-sort'));
+  document.querySelector('[data-sort=""]')?.classList.add('active-sort');
+  updateFilterBtnState();
+  renderInventory();
+}
+function updateFilterBtnState() {
+  const isActive = currentCat!=='' || currentFilter!=='all' || currentSort!=='';
+  const btn = document.getElementById('filterBtn');
+  if (btn) {
+    btn.classList.toggle('active', isActive);
+    btn.textContent = isActive ? '▼ 絞込中' : '▼ 絞込';
+  }
+}
+function setFilter(val,el) { sheetSetFilter(val,el); }
+function setCat(val,el) { sheetSetCat(val,el); }
+function setSort(val,el) { sheetSetSort(val,el); }
 function toggleDetail(id) {
   document.getElementById(`detail-${id}`).classList.toggle('open');
 }
@@ -1670,6 +1941,11 @@ function switchPage(name, el) {
   }
   const navEl = document.getElementById(`nav-${name}`);
   if (navEl) navEl.classList.add('active');
+
+  // 在庫一覧のときだけ検索・フィルターを表示
+  const isInventory = name === 'inventory';
+  const searchRow = document.getElementById('searchRow');
+  if (searchRow) searchRow.style.display = isInventory ? 'flex' : 'none';
 }
 function openDrawer() {
   document.getElementById('drawer').classList.add('open');
