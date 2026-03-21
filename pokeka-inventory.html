@@ -648,6 +648,27 @@ body {
   border-color: var(--accent);
 }
 
+/* 通知バナー */
+.notif-banner {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 500;
+  background: linear-gradient(135deg, #dc2626, #b91c1c);
+  color: white; padding: 14px 16px;
+  transform: translateY(-100%);
+  transition: transform 0.4s cubic-bezier(0.32,0.72,0,1);
+  box-shadow: 0 4px 20px rgba(220,38,38,0.4);
+}
+.notif-banner.show { transform: translateY(0); }
+.notif-banner-inner { display: flex; align-items: center; gap: 12px; }
+.notif-banner-icon { font-size: 28px; flex-shrink: 0; }
+.notif-banner-text { flex: 1; }
+.notif-banner-title { font-size: 14px; font-weight: 900; margin-bottom: 2px; }
+.notif-banner-sub { font-size: 11px; opacity: 0.85; }
+.notif-banner-close {
+  background: rgba(255,255,255,0.2); border: none; border-radius: 50%;
+  width: 28px; height: 28px; color: white; font-size: 14px; cursor: pointer;
+  flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+}
+
 /* フィルターシート（下からにゅっと出る） */
 .filter-sheet-overlay {
   position: fixed; inset: 0; background: rgba(0,0,0,0.4);
@@ -743,6 +764,18 @@ body {
 </style>
 </head>
 <body>
+
+<!-- 通知バナー -->
+<div class="notif-banner" id="notifBanner">
+  <div class="notif-banner-inner">
+    <div class="notif-banner-icon">🔥</div>
+    <div class="notif-banner-text">
+      <div class="notif-banner-title" id="notifTitle"></div>
+      <div class="notif-banner-sub" id="notifSub">メルカリタブで不足カードを確認してね！</div>
+    </div>
+    <button class="notif-banner-close" onclick="closeBanner()">✕</button>
+  </div>
+</div>
 
 <div class="header">
   <div class="header-top">
@@ -998,6 +1031,7 @@ async function init() {
     renderMercari();
     renderShop();
     renderHistory();
+    startNotifPolling();
   } catch(e) {
     document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">⚠️</div><p>読み込みエラー<br>${e.message}</p></div>`;
   }
@@ -1174,6 +1208,7 @@ function cardHTML(c) {
           <option value="BOOKOFF 武蔵小金井店">BOOKOFF 武蔵小金井店</option>
           <option value="BOOKOFF SUPER BAZAAR 多摩永山店">BOOKOFF SB 多摩永山店</option>
           <option value="文教堂TRADING CARD 南大沢店">文教堂TC 南大沢店</option>
+          <option value="TSUTAYA Trading Card 府中駅前">TSUTAYA TC 府中駅前</option>
           <option value="駿河屋 立川店">駿河屋 立川店</option>
         </select>
         <input class="detail-input" type="number" id="sprice-${c.id}" placeholder="価格">
@@ -1640,6 +1675,64 @@ function openListModal(deckId, deckName) {
   document.getElementById('listModal').classList.add('open');
 }
 
+// ===== 通知システム =====
+let lastNotifCheck = new Date().toISOString();
+let notifPollTimer = null;
+
+async function startNotifPolling() {
+  // 5秒ごとに新しい通知をチェック
+  notifPollTimer = setInterval(async () => {
+    try {
+      const res = await fetch(
+        `${SB_URL}/rest/v1/notifications?created_at=gt.${lastNotifCheck}&is_read=eq.false&order=created_at.desc`,
+        { headers: H }
+      );
+      const notifs = await res.json();
+      if (notifs && notifs.length > 0) {
+        const latest = notifs[0];
+        showBanner(latest.message, latest.deck_name, latest.id);
+        lastNotifCheck = new Date().toISOString();
+        // 既読にする
+        notifs.forEach(n => {
+          fetch(`${SB_URL}/rest/v1/notifications?id=eq.${n.id}`, {
+            method: 'PATCH', headers: H,
+            body: JSON.stringify({ is_read: true })
+          }).catch(()=>{});
+        });
+      }
+    } catch(e) {}
+  }, 5000);
+}
+
+async function sendNotif(deckName) {
+  try {
+    await sbPost('notifications', {
+      message: `🔥 ${deckName} が購入されました！`,
+      deck_name: deckName,
+      is_read: false
+    });
+  } catch(e) {}
+}
+
+function showBanner(message, deckName, id) {
+  const banner = document.getElementById('notifBanner');
+  document.getElementById('notifTitle').textContent = message;
+  document.getElementById('notifSub').textContent = 'メルカリタブで不足カードを確認してね！';
+  banner.classList.add('show');
+  // タップでメルカリタブへ
+  banner.onclick = (e) => {
+    if (e.target.classList.contains('notif-banner-close')) return;
+    switchPage('mercari', document.querySelectorAll('.tab')[2]);
+    closeBanner();
+  };
+  // 8秒後に自動で閉じる
+  setTimeout(() => closeBanner(), 8000);
+}
+
+function closeBanner() {
+  document.getElementById('notifBanner').classList.remove('show');
+}
+
 async function confirmList() {
   if (!pendingListDeckId) return;
   const price = parseInt(document.getElementById('listPrice').value)||null;
@@ -1661,8 +1754,10 @@ async function confirmList() {
     if (r&&r[0]) sales.unshift(r[0]);
     closeModal('listModal');
     showToast(`🔥 ${deckName} を出品しました！`);
+    await sendNotif(deckName);
     renderInventory();
     renderDecks();
+    renderMercari();
   } catch(e) { showToast('⚠️ 出品失敗'); }
 }
 
