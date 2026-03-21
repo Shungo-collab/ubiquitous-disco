@@ -923,15 +923,15 @@ body {
 <!-- 出品確認モーダル -->
 <div class="modal-overlay" id="listModal">
   <div class="modal">
-    <h3 id="listModalTitle">出品しますか？</h3>
-    <p id="listModalDesc">このデッキをメルカリに出品します。在庫から自動でマイナスされます。</p>
+    <h3 id="listModalTitle">売れましたか？</h3>
+    <p id="listModalDesc">在庫から自動でマイナスされます。</p>
     <input class="modal-input" type="number" id="listPrice" placeholder="売値（円）を入力">
     <div id="listStockPreview" style="background:var(--red-light);border-radius:10px;padding:10px;margin-bottom:12px;font-size:12px;display:none;">
       <div style="font-weight:700;color:var(--red);margin-bottom:6px;">⚠️ 以下の在庫がマイナスされます</div>
       <div id="listStockList"></div>
     </div>
     <div class="modal-btns">
-      <button class="modal-btn confirm" onclick="confirmList()">🔥 出品・取引開始</button>
+      <button class="modal-btn confirm" onclick="confirmList()">🎉 売れた！取引開始</button>
       <button class="modal-btn cancel" onclick="closeModal('listModal')">キャンセル</button>
     </div>
   </div>
@@ -1518,9 +1518,9 @@ function renderDecks() {
           <button class="deck-add-btn" onclick="addCardToDeck('${d.id}')">デッキに追加</button>
         </div>
       </div>
-      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🔥 メルカリに出品する</button>
+      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🎉 売れた！</button>
       ` : `
-      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🔥 メルカリに出品する</button>
+      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🎉 売れた！</button>
       `}
     </div>`;
   });
@@ -1648,7 +1648,7 @@ async function addDeck() {
 // ===== 出品・取引 =====
 function openListModal(deckId, deckName) {
   pendingListDeckId = { id: deckId, name: deckName };
-  document.getElementById('listModalTitle').textContent = `「${deckName}」を出品しますか？`;
+  document.getElementById('listModalTitle').textContent = `「${deckName}」が売れましたか？`;
   document.getElementById('listPrice').value = '';
 
   // 在庫マイナスプレビューを生成
@@ -1676,32 +1676,32 @@ function openListModal(deckId, deckName) {
 }
 
 // ===== 通知システム =====
-let lastNotifCheck = new Date().toISOString();
 let notifPollTimer = null;
 
+async function checkUnreadNotifs() {
+  try {
+    const res = await fetch(
+      `${SB_URL}/rest/v1/notifications?is_read=eq.false&order=created_at.desc&limit=1`,
+      { headers: H }
+    );
+    const notifs = await res.json();
+    if (notifs && notifs.length > 0) {
+      const latest = notifs[0];
+      showBanner(latest.message, latest.deck_name);
+      // 既読にする
+      fetch(`${SB_URL}/rest/v1/notifications?is_read=eq.false`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify({ is_read: true })
+      }).catch(()=>{});
+    }
+  } catch(e) {}
+}
+
 async function startNotifPolling() {
-  // 5秒ごとに新しい通知をチェック
-  notifPollTimer = setInterval(async () => {
-    try {
-      const res = await fetch(
-        `${SB_URL}/rest/v1/notifications?created_at=gt.${lastNotifCheck}&is_read=eq.false&order=created_at.desc`,
-        { headers: H }
-      );
-      const notifs = await res.json();
-      if (notifs && notifs.length > 0) {
-        const latest = notifs[0];
-        showBanner(latest.message, latest.deck_name, latest.id);
-        lastNotifCheck = new Date().toISOString();
-        // 既読にする
-        notifs.forEach(n => {
-          fetch(`${SB_URL}/rest/v1/notifications?id=eq.${n.id}`, {
-            method: 'PATCH', headers: H,
-            body: JSON.stringify({ is_read: true })
-          }).catch(()=>{});
-        });
-      }
-    } catch(e) {}
-  }, 5000);
+  // 起動時にまず未読チェック
+  await checkUnreadNotifs();
+  // 以降10秒ごとにチェック
+  notifPollTimer = setInterval(checkUnreadNotifs, 10000);
 }
 
 async function sendNotif(deckName) {
@@ -1753,7 +1753,7 @@ async function confirmList() {
     const r = await sbPost('sales',{deck_id:deckId,deck_name:deckName,status:'active',sold_price:price});
     if (r&&r[0]) sales.unshift(r[0]);
     closeModal('listModal');
-    showToast(`🔥 ${deckName} を出品しました！`);
+    showToast(`🎉 ${deckName} が売れました！`);
     await sendNotif(deckName);
     renderInventory();
     renderDecks();
