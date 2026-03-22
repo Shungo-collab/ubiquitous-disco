@@ -960,7 +960,7 @@ body {
             </div>
           </button>
           <button onclick="selectStockLocation('parents')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;">
-            <span style="font-size:32px;">👵</span>
+            <span style="font-size:32px;">🏡</span>
             <div style="text-align:left;">
               <div>実家</div>
               <div style="font-size:12px;color:var(--text2);font-weight:500;margin-top:2px;">お母さんの在庫に追加</div>
@@ -1348,7 +1348,7 @@ function cardHTML(c) {
       </div>
     </div>
     <div class="stock-box">
-      <div class="stock-box-label">👵 実家</div>
+      <div class="stock-box-label">🏡 実家</div>
       <div class="stock-control">
         <button class="sBtn minus" onclick="changeStock('${c.id}','parents',-1)">−</button>
         <div class="sNum" id="sp-${c.id}">${c.stock_parents||0}</div>
@@ -1399,7 +1399,7 @@ function renderSummary() {
   document.getElementById('summaryBar').innerHTML = `
     <div class="summary-item"><div class="s-label">総枚数</div><div class="s-value">${th+tp}</div></div>
     <div class="summary-item"><div class="s-label">🏠 菜摘家</div><div class="s-value">${th}</div></div>
-    <div class="summary-item"><div class="s-label">👵 実家</div><div class="s-value">${tp}</div></div>
+    <div class="summary-item"><div class="s-label">🏡 実家</div><div class="s-value">${tp}</div></div>
     <div class="summary-item"><div class="s-label">種類数</div><div class="s-value">${cards.length}</div></div>
   `;
 }
@@ -1646,9 +1646,9 @@ function renderDecks() {
       </div>
 
       <div class="shortage-tabs">
-        <button class="shortage-tab active" onclick="switchShortageTab('${d.id}','all',this)">🏠＋👵合計</button>
+        <button class="shortage-tab active" onclick="switchShortageTab('${d.id}','all',this)">🏠＋🏡合計</button>
         <button class="shortage-tab" onclick="switchShortageTab('${d.id}','home',this)">🏠うちのみ</button>
-        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','parents',this)">👵実家のみ</button>
+        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','parents',this)">🏡実家のみ</button>
       </div>
 
       <div class="deck-rows" id="deckrows-${d.id}">
@@ -2036,7 +2036,7 @@ function updateBreadcrumb(step) {
   if (step === 'step1') { sep1.style.display='none'; bcLoc.style.display='none'; }
   else {
     sep1.style.display='inline'; bcLoc.style.display='inline';
-    bcLoc.textContent = currentStockLocation==='home'?'🏠 菜摘家':'👵 実家';
+    bcLoc.textContent = currentStockLocation==='home'?'🏠 菜摘家':'🏡 実家';
     bcLoc.style.cssText = 'font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;display:inline;' + (step==='step15'?active:done);
   }
 
@@ -2103,11 +2103,9 @@ function selectShop(shopName) {
 function selectStockLocation(loc) {
   currentStockLocation = loc;
   shopSelectedCards = {};
-  currentShopCat = "不足";
+  currentShopCat = '不足';
   document.getElementById('shopStep15').style.display = 'none';
   document.getElementById('shopStep2').style.display = 'block';
-  document.getElementById('shopStep2Title').textContent = currentShopName;
-  document.getElementById('shopLocationBadge').textContent = loc === 'home' ? '🏠 菜摘家' : '👵 実家';
   renderShopCardList();
   updateBreadcrumb('step2');
 }
@@ -2213,7 +2211,7 @@ function goToShopConfirm() {
 
 function renderConfirmScreen() {
   document.getElementById('confirmShopName').textContent = '🏪 ' + currentShopName;
-  const locLabel = currentStockLocation === 'home' ? '🏠 菜摘家' : '👵 実家';
+  const locLabel = currentStockLocation === 'home' ? '🏠 菜摘家' : '🏡 実家';
   document.getElementById('confirmLocation').textContent = locLabel;
 
   const items = Object.entries(shopSelectedCards);
