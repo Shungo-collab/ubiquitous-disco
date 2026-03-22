@@ -46,6 +46,12 @@ body {
   top: 0;
   z-index: 100;
   box-shadow: var(--shadow-md);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.header.hidden {
+  transform: translateY(-110%);
+  opacity: 0;
+  pointer-events: none;
 }
 .header-top {
   display: flex;
@@ -736,6 +742,12 @@ body {
   background: var(--surface); border-top: 1px solid var(--border);
   display: flex; padding: 6px 0 8px; z-index: 100;
   box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+.bottom-nav.hidden {
+  transform: translateY(110%);
+  opacity: 0;
+  pointer-events: none;
 }
 .nav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -1999,8 +2011,8 @@ function showShopTop() {
   document.getElementById('shopTop').style.display = 'block';
   document.getElementById('shopRecord').style.display = 'none';
   document.getElementById('shopListSection').style.display = 'none';
-  document.querySelector('.header').style.display = 'flex';
-  document.querySelector('.bottom-nav').style.display = 'flex';
+  document.querySelector('.header').classList.remove('hidden');
+  document.querySelector('.bottom-nav').classList.remove('hidden');
   currentShopName = ''; shopPriceInputs = {};
 }
 const SHOP_LIST = [
@@ -2065,8 +2077,8 @@ function showShopRecord() {
   document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep25').style.display = 'none';
   document.getElementById('shopStep3').style.display = 'none';
-  document.querySelector('.header').style.display = 'none';
-  document.querySelector('.bottom-nav').style.display = 'none';
+  document.querySelector('.header').classList.add('hidden');
+  document.querySelector('.bottom-nav').classList.add('hidden');
   updateBreadcrumb('step1');
   // 店舗ボタンを動的生成
   const list = document.getElementById('shopBtnList');
