@@ -933,14 +933,43 @@ body {
         </div>
       </div>
 
-      <!-- STEP2: カード価格入力 -->
-      <div id="shopStep2" style="display:none;">
-        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <!-- STEP1.5: 在庫追加先選択 -->
+      <div id="shopStep15" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:20px;">
           <button onclick="backToStep1()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 戻る</button>
+          <div style="font-size:14px;font-weight:900;" id="shopStep15Title"></div>
+        </div>
+        <div style="text-align:center;padding:10px 0 20px;">
+          <div style="font-size:16px;font-weight:900;margin-bottom:4px;">購入した場合、どちらの在庫に追加しますか？</div>
+          <div style="font-size:13px;color:var(--text2);">購入しなかった場合は後で選べます</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <button onclick="selectStockLocation('home')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:32px;">🏠</span>
+            <div style="text-align:left;">
+              <div>菜摘家</div>
+              <div style="font-size:12px;color:var(--text2);font-weight:500;margin-top:2px;">俺・菜摘の在庫に追加</div>
+            </div>
+          </button>
+          <button onclick="selectStockLocation('parents')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:16px;padding:20px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;">
+            <span style="font-size:32px;">👵</span>
+            <div style="text-align:left;">
+              <div>実家</div>
+              <div style="font-size:12px;color:var(--text2);font-weight:500;margin-top:2px;">お母さんの在庫に追加</div>
+            </div>
+          </button>
+        </div>
+      </div>
+
+      <!-- STEP2: カード価格＋購入枚数入力 -->
+      <div id="shopStep2" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+          <button onclick="backToStep15()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 戻る</button>
           <div>
             <div style="font-size:12px;color:var(--text2);">記録中のお店</div>
             <div style="font-size:14px;font-weight:900;" id="shopStep2Title"></div>
           </div>
+          <div id="shopLocationBadge" style="margin-left:auto;background:var(--accent-light);color:var(--accent);border-radius:20px;padding:4px 10px;font-size:12px;font-weight:700;white-space:nowrap;"></div>
         </div>
         <div style="background:var(--red-light);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--red);">
           ⚠️ 不足中のカードを先に表示しています
@@ -1249,7 +1278,7 @@ function cardHTML(c) {
   </div>
   <div class="stock-grid">
     <div class="stock-box">
-      <div class="stock-box-label">🏠 うちの家</div>
+      <div class="stock-box-label">🏠 菜摘家</div>
       <div class="stock-control">
         <button class="sBtn minus" onclick="changeStock('${c.id}','home',-1)">−</button>
         <div class="sNum" id="sh-${c.id}">${c.stock_home||0}</div>
@@ -1307,7 +1336,7 @@ function renderSummary() {
   const tp = cards.reduce((s,c)=>s+(c.stock_parents||0),0);
   document.getElementById('summaryBar').innerHTML = `
     <div class="summary-item"><div class="s-label">総枚数</div><div class="s-value">${th+tp}</div></div>
-    <div class="summary-item"><div class="s-label">🏠 うちの家</div><div class="s-value">${th}</div></div>
+    <div class="summary-item"><div class="s-label">🏠 菜摘家</div><div class="s-value">${th}</div></div>
     <div class="summary-item"><div class="s-label">👵 実家</div><div class="s-value">${tp}</div></div>
     <div class="summary-item"><div class="s-label">種類数</div><div class="s-value">${cards.length}</div></div>
   `;
@@ -1956,14 +1985,30 @@ function showShopList() {
 let currentShopName = '';
 let shopPriceInputs = {}; // cardId → 入力価格
 
+let currentStockLocation = 'home';
+
 function selectShop(shopName) {
   currentShopName = shopName;
   shopPriceInputs = {};
   document.getElementById('shopStep1').style.display = 'none';
-  document.getElementById('shopStep2').style.display = 'block';
+  document.getElementById('shopStep15').style.display = 'block';
+  document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep3').style.display = 'none';
-  document.getElementById('shopStep2Title').textContent = shopName;
+  document.getElementById('shopStep15Title').textContent = '🏪 ' + shopName;
+}
+
+function selectStockLocation(loc) {
+  currentStockLocation = loc;
+  document.getElementById('shopStep15').style.display = 'none';
+  document.getElementById('shopStep2').style.display = 'block';
+  document.getElementById('shopStep2Title').textContent = currentShopName;
+  document.getElementById('shopLocationBadge').textContent = loc === 'home' ? '🏠 菜摘家' : '👵 実家';
   renderShopCardList();
+}
+
+function backToStep15() {
+  document.getElementById('shopStep2').style.display = 'none';
+  document.getElementById('shopStep15').style.display = 'block';
 }
 
 function renderShopCardList() {
@@ -2022,10 +2067,25 @@ function renderShopCardList() {
           なし
         </button>
       </div>
+      <div style="display:flex;align-items:center;gap:8px;background:var(--accent-light);border-radius:10px;padding:10px 12px;margin-top:8px;">
+        <span style="font-size:13px;font-weight:700;color:var(--accent);flex:1;">購入枚数</span>
+        <button onclick="changeBuyQty('${c.id}',-1)" style="width:34px;height:34px;border-radius:50%;border:none;background:white;color:var(--accent);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">−</button>
+        <div id="buy-qty-${c.id}" style="font-size:22px;font-weight:900;font-family:'DM Mono',monospace;min-width:32px;text-align:center;color:var(--accent);">0</div>
+        <button onclick="changeBuyQty('${c.id}',1)" style="width:34px;height:34px;border-radius:50%;border:none;background:var(--accent);color:white;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;">＋</button>
+        <span style="font-size:12px;color:var(--accent);opacity:0.7;">枚</span>
+      </div>
     </div>`;
   }).join('');
 
   document.getElementById('shopCardList').innerHTML = html;
+}
+
+function changeBuyQty(cardId, delta) {
+  const el = document.getElementById(`buy-qty-${cardId}`);
+  if (!el) return;
+  const current = parseInt(el.textContent)||0;
+  const newVal = Math.max(0, current + delta);
+  el.textContent = newVal;
 }
 
 function markNoStock(cardId) {
@@ -2039,9 +2099,9 @@ async function submitShopPrices() {
   btn.textContent = '保存中...'; btn.disabled = true;
 
   const today = new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
-  const entries = Object.entries(shopPriceInputs).filter(([,v])=>v!==null&&v!==undefined);
+  const stockField = currentStockLocation === 'home' ? 'stock_home' : 'stock_parents';
 
-  // 価格が入力されたカードだけ保存
+  // 価格が入力されたカードを収集
   const priceEntries = [];
   document.getElementById('shopCardList').querySelectorAll('input[type=number]').forEach(input => {
     const cardId = input.id.replace('sp-input-','');
@@ -2049,7 +2109,16 @@ async function submitShopPrices() {
     if (val && val > 0) priceEntries.push({ cardId, price: val });
   });
 
+  // 購入枚数が入力されたカードを収集
+  const buyEntries = [];
+  document.getElementById('shopCardList').querySelectorAll('[id^="buy-qty-"]').forEach(el => {
+    const cardId = el.id.replace('buy-qty-','');
+    const qty = parseInt(el.textContent)||0;
+    if (qty > 0) buyEntries.push({ cardId, qty });
+  });
+
   try {
+    // カドショ価格を保存
     for (const { cardId, price } of priceEntries) {
       const card = cards.find(c=>c.id===cardId);
       const result = await sbPost('shop_prices', {
@@ -2058,12 +2127,25 @@ async function submitShopPrices() {
       });
       if (result&&result[0]) shopPrices.unshift(result[0]);
     }
+
+    // 購入分の在庫を追加
+    for (const { cardId, qty } of buyEntries) {
+      const card = cards.find(c=>c.id===cardId);
+      if (!card) continue;
+      const newVal = (card[stockField]||0) + qty;
+      card[stockField] = newVal;
+      await sbPatch('cards', cardId, { [stockField]: newVal }).catch(()=>{});
+    }
+
+    const locLabel = currentStockLocation === 'home' ? '菜摘家' : '実家';
+    const buyTotal = buyEntries.reduce((s,e)=>s+e.qty, 0);
     document.getElementById('shopStep2').style.display = 'none';
     document.getElementById('shopStep3').style.display = 'block';
     document.getElementById('shopStep3Desc').textContent =
-      `${currentShopName} で ${priceEntries.length}種類の価格を記録しました！`;
+      `${currentShopName} で ${priceEntries.length}種類の価格を記録しました！${buyTotal > 0 ? `\n${locLabel}の在庫に合計${buyTotal}枚追加しました🎉` : ''}`;
     btn.textContent = '✅ 記録する'; btn.disabled = false;
     renderShop();
+    if (buyTotal > 0) { renderInventory(); renderSummary(); }
   } catch(e) {
     showToast('⚠️ 保存失敗');
     btn.textContent = '✅ 記録する'; btn.disabled = false;
