@@ -2061,7 +2061,10 @@ function renderShopCardList() {
   if (currentShopCat === '不足') {
     filtered = cards.filter(c => shortageIds.has(c.id));
   } else {
-    filtered = cards.filter(c => (c.category||'グッズ') === currentShopCat);
+    const inCat = cards.filter(c => (c.category||'グッズ') === currentShopCat);
+    const shortage = inCat.filter(c => shortageIds.has(c.id));
+    const others = inCat.filter(c => !shortageIds.has(c.id));
+    filtered = [...shortage, ...others];
   }
 
   updateShopSelectedDisplay();
