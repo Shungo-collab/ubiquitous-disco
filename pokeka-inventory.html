@@ -2141,7 +2141,7 @@ function updateShopSelectedDisplay() {
   }).join('');
 }
 
-function changeBuyQtyfunction changeBuyQty(cardId, delta) {
+function changeBuyQty(cardId, delta) {
   const el = document.getElementById(`buy-qty-${cardId}`);
   if (!el) return;
   const current = parseInt(el.textContent)||0;
