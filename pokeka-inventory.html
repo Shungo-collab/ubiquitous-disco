@@ -922,7 +922,19 @@ body {
 
     <!-- 記録セクション -->
     <div id="shopRecord" style="display:none;">
-      <button onclick="showShopTop()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:16px;">← 戻る</button>
+
+      <!-- パンくずリスト -->
+      <div style="display:flex;align-items:center;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
+        <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);">← 戻る</button>
+        <span style="color:var(--border);margin:0 2px;">|</span>
+        <span id="bc-shop" onclick="confirmEditShop()" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;"></span>
+        <span id="bc-sep1" style="color:var(--text2);font-size:12px;display:none;">›</span>
+        <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;display:none;"></span>
+        <span id="bc-sep2" style="color:var(--text2);font-size:12px;display:none;">›</span>
+        <span id="bc-card" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:none;"></span>
+        <span id="bc-sep3" style="color:var(--text2);font-size:12px;display:none;">›</span>
+        <span id="bc-confirm" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:none;"></span>
+      </div>
 
       <!-- STEP1: 店舗選択 -->
       <div id="shopStep1">
@@ -2019,6 +2031,45 @@ const SHOP_LIST = [
   '駿河屋 立川店'
 ];
 
+function updateBreadcrumb(step) {
+  const active = 'background:var(--accent);color:white;';
+  const done = 'background:var(--surface2);color:var(--text);';
+  const none = 'background:none;color:var(--text2);';
+
+  const bcShop = document.getElementById('bc-shop');
+  const bcLoc = document.getElementById('bc-loc');
+  const bcCard = document.getElementById('bc-card');
+  const bcConfirm = document.getElementById('bc-confirm');
+  const sep1 = document.getElementById('bc-sep1');
+  const sep2 = document.getElementById('bc-sep2');
+  const sep3 = document.getElementById('bc-sep3');
+
+  // お店
+  bcShop.textContent = currentShopName ? '🏪 ' + currentShopName.replace('カードショップ ','').replace(' 立川店','立川').replace(' 多摩境店','多摩境') : '🏪 お店';
+  bcShop.style.cssText = 'font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;' + (step==='step1'?active:currentShopName?done:none);
+
+  // 場所
+  if (step === 'step1') { sep1.style.display='none'; bcLoc.style.display='none'; }
+  else {
+    sep1.style.display='inline'; bcLoc.style.display='inline';
+    bcLoc.textContent = currentStockLocation==='home'?'🏠 菜摘家':'👵 実家';
+    bcLoc.style.cssText = 'font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;display:inline;' + (step==='step15'?active:done);
+  }
+
+  // カード
+  const cardCount = Object.keys(shopSelectedCards).length;
+  if (step==='step1'||step==='step15') { sep2.style.display='none'; bcCard.style.display='none'; }
+  else {
+    sep2.style.display='inline'; bcCard.style.display='inline';
+    bcCard.textContent = '🃏 カード' + (cardCount>0?` ${cardCount}件`:'');
+    bcCard.style.cssText = 'font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:inline;' + (step==='step2'?active:done);
+  }
+
+  // 確認
+  if (step==='step25') { sep3.style.display='inline'; bcConfirm.style.display='inline'; bcConfirm.textContent='📋 確認'; bcConfirm.style.cssText='font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:inline;'+active; }
+  else { sep3.style.display='none'; bcConfirm.style.display='none'; }
+}
+
 function showShopRecord() {
   document.getElementById('shopTop').style.display = 'none';
   document.getElementById('shopRecord').style.display = 'block';
@@ -2062,6 +2113,7 @@ function selectShop(shopName) {
   document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep3').style.display = 'none';
   document.getElementById('shopStep15Title').textContent = '🏪 ' + shopName;
+  updateBreadcrumb('step15');
 }
 
 function selectStockLocation(loc) {
@@ -2073,6 +2125,7 @@ function selectStockLocation(loc) {
   document.getElementById('shopStep2Title').textContent = currentShopName;
   document.getElementById('shopLocationBadge').textContent = loc === 'home' ? '🏠 菜摘家' : '👵 実家';
   renderShopCardList();
+  updateBreadcrumb('step2');
 }
 
 function backToStep15() {
@@ -2171,6 +2224,7 @@ function goToShopConfirm() {
   renderConfirmScreen();
   document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep25').style.display = 'block';
+  updateBreadcrumb('step25');
 }
 
 function renderConfirmScreen() {
@@ -2183,7 +2237,7 @@ function renderConfirmScreen() {
   document.getElementById('confirmCardList').innerHTML = items.map(([cid, data]) => {
     const card = cards.find(c=>c.id===cid);
     totalBuy += data.buyQty||0;
-    return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2);">
+    return `<div id="confirm-row-${cid}" style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--surface2);">
       ${card?.image_url?`<img src="${card.image_url}" style="width:36px;height:36px;object-fit:contain;border-radius:6px;background:var(--surface2);flex-shrink:0;">`:`<div style="width:36px;height:36px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;">🃏</div>`}
       <div style="flex:1;min-width:0;">
         <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${card?.name||'不明'}</div>
@@ -2191,7 +2245,7 @@ function renderConfirmScreen() {
       </div>
       <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
         <button onclick="confirmChangeBuy('${cid}',-1)" style="width:28px;height:28px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);font-size:16px;cursor:pointer;">−</button>
-        <span style="font-size:15px;font-weight:900;font-family:'DM Mono',monospace;min-width:24px;text-align:center;">${data.buyQty||0}</span>
+        <span id="confirm-qty-${cid}" style="font-size:15px;font-weight:900;font-family:'DM Mono',monospace;min-width:24px;text-align:center;">${data.buyQty||0}</span>
         <button onclick="confirmChangeBuy('${cid}',1)" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--accent);color:white;font-size:16px;cursor:pointer;">＋</button>
         <button onclick="confirmDeleteCard('${cid}')" style="width:28px;height:28px;border-radius:50%;border:none;background:var(--red-light);color:var(--red);font-size:14px;cursor:pointer;">🗑</button>
       </div>
@@ -2205,17 +2259,29 @@ function confirmChangeBuy(cardId, delta) {
   if (!shopSelectedCards[cardId]) return;
   const newQty = Math.max(0, (shopSelectedCards[cardId].buyQty||0) + delta);
   shopSelectedCards[cardId].buyQty = newQty;
-  renderConfirmScreen();
+  // 枚数表示だけ直接更新（再描画なし）
+  const el = document.getElementById('confirm-qty-'+cardId);
+  if (el) el.textContent = newQty;
+  // 合計も更新
+  const total = Object.values(shopSelectedCards).reduce((s,d)=>s+(d.buyQty||0),0);
+  const totalEl = document.getElementById('confirmTotal');
+  if (totalEl) totalEl.textContent = total + '枚';
 }
 
 function confirmDeleteCard(cardId) {
   delete shopSelectedCards[cardId];
   if (Object.keys(shopSelectedCards).length === 0) {
-    backToStep2();
+    document.getElementById('shopStep25').style.display = 'none';
+    document.getElementById('shopStep2').style.display = 'block';
     showToast('カードがなくなったので入力画面に戻りました');
     return;
   }
-  renderConfirmScreen();
+  // DOM直接削除
+  const row = document.getElementById('confirm-row-'+cardId);
+  if (row) row.remove();
+  const total = Object.values(shopSelectedCards).reduce((s,d)=>s+(d.buyQty||0),0);
+  const totalEl = document.getElementById('confirmTotal');
+  if (totalEl) totalEl.textContent = total + '枚';
 }
 
 function confirmEditCards() {
@@ -2315,11 +2381,17 @@ async function submitShopPrices() {
 
     const locLabel = currentStockLocation === 'home' ? '菜摘家' : '実家';
     const buyTotal = buyEntries.reduce((s,e)=>s+e.qty, 0);
-    document.getElementById('shopStep2').style.display = 'none';
+    // 全STEPを非表示にしてSTEP3だけ表示
+    ['shopStep1','shopStep15','shopStep2','shopStep25'].forEach(id => {
+      document.getElementById(id).style.display = 'none';
+    });
     document.getElementById('shopStep3').style.display = 'block';
     document.getElementById('shopStep3Desc').textContent =
       `${currentShopName} で ${priceEntries.length}種類の価格を記録しました！${buyTotal > 0 ? `\n${locLabel}の在庫に合計${buyTotal}枚追加しました🎉` : ''}`;
-    btn.textContent = '✅ 記録する'; btn.disabled = false;
+    // ページトップへスクロール
+    document.getElementById('shopRecord').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    btn.textContent = '✅ これで記録する'; btn.disabled = false;
+    shopSelectedCards = {};
     renderShop();
     if (buyTotal > 0) { renderInventory(); renderSummary(); }
   } catch(e) {
