@@ -928,23 +928,8 @@ body {
       <div id="shopStep1">
         <div style="font-size:16px;font-weight:900;margin-bottom:4px;">どのお店に行きましたか？</div>
         <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">1店舗ずつ記録していきます</div>
-        <div style="display:flex;flex-direction:column;gap:10px;">
-          ${[
-            'アメニティードリーム 立川店',
-            'カードショップ 竜星のPAO 立川店',
-            'カードショップ 竜星のPAO 多摩境店',
-            'フルコンプ 立川南口店',
-            'BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店',
-            'BOOKOFF ヴィータモールせいせき店',
-            'BOOKOFF 武蔵小金井店',
-            'BOOKOFF SUPER BAZAAR 多摩永山店',
-            '文教堂TRADING CARD 南大沢店',
-            'TSUTAYA Trading Card 府中駅前',
-            '駿河屋 立川店'
-          ].map(s=>`
-            <button onclick="selectShop('${s}')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;">
-              🏪 ${s}
-            </button>`).join('')}
+        <div style="display:flex;flex-direction:column;gap:10px;" id="shopBtnList">
+          <!-- JSで生成 -->
         </div>
       </div>
 
@@ -1925,6 +1910,20 @@ function showShopTop() {
   document.getElementById('shopListSection').style.display = 'none';
   currentShopName = ''; shopPriceInputs = {};
 }
+const SHOP_LIST = [
+  'アメニティードリーム 立川店',
+  'カードショップ 竜星のPAO 立川店',
+  'カードショップ 竜星のPAO 多摩境店',
+  'フルコンプ 立川南口店',
+  'BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店',
+  'BOOKOFF ヴィータモールせいせき店',
+  'BOOKOFF 武蔵小金井店',
+  'BOOKOFF SUPER BAZAAR 多摩永山店',
+  '文教堂TRADING CARD 南大沢店',
+  'TSUTAYA Trading Card 府中駅前',
+  '駿河屋 立川店'
+];
+
 function showShopRecord() {
   document.getElementById('shopTop').style.display = 'none';
   document.getElementById('shopRecord').style.display = 'block';
@@ -1932,6 +1931,19 @@ function showShopRecord() {
   document.getElementById('shopStep1').style.display = 'block';
   document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep3').style.display = 'none';
+  // 店舗ボタンを動的生成
+  const list = document.getElementById('shopBtnList');
+  list.innerHTML = SHOP_LIST.map(s => {
+    const btn = document.createElement('button');
+    btn.textContent = '🏪 ' + s;
+    btn.style.cssText = 'width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;';
+    btn.onclick = () => selectShop(s);
+    return btn.outerHTML;
+  }).join('');
+  // イベントを再バインド
+  list.querySelectorAll('button').forEach((btn, i) => {
+    btn.onclick = () => selectShop(SHOP_LIST[i]);
+  });
 }
 function showShopList() {
   document.getElementById('shopTop').style.display = 'none';
