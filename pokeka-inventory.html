@@ -935,23 +935,17 @@ body {
     <!-- 記録セクション -->
     <div id="shopRecord" style="display:none;">
 
-      <!-- パンくずリスト -->
-      <div style="margin-bottom:12px;padding-top:8px;">
-        <!-- 1行目：終了・お店・場所 -->
-        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
-          <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">← 終了</button>
-          <span style="color:var(--border);margin:0 4px;">|</span>
-          <span id="bc-shop" onclick="confirmEditShop()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;"></span>
-          <span id="bc-sep1" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
-          <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;display:none;flex-shrink:0;"></span>
-        </div>
-        <!-- 2行目：カード・確認 -->
-        <div style="display:flex;align-items:center;gap:4px;padding-left:2px;">
-          <span id="bc-sep2" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
-          <span id="bc-card" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
-          <span id="bc-sep3" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
-          <span id="bc-confirm" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
-        </div>
+      <!-- パンくずリスト（1行） -->
+      <div style="display:flex;align-items:center;gap:6px;padding:10px 0 12px;overflow:hidden;">
+        <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:12px;color:var(--text2);flex-shrink:0;white-space:nowrap;">← 終了</button>
+        <span style="color:var(--border);flex-shrink:0;">|</span>
+        <span id="bc-shop" onclick="confirmEditShop()" style="font-size:12px;font-weight:900;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:110px;flex-shrink:1;"></span>
+        <span id="bc-sep1" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+        <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:12px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;display:none;flex-shrink:0;"></span>
+        <span id="bc-sep2" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+        <span id="bc-card" style="font-size:12px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
+        <span id="bc-sep3" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+        <span id="bc-confirm" style="font-size:12px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
       </div>
 
       <!-- STEP1: 店舗選択 -->
@@ -1002,10 +996,18 @@ body {
           </button>
         </div>
 
-        <!-- カテゴリタブ -->
-        <div style="position:relative;margin-bottom:12px;">
-          <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;" id="shopCatTabs"></div>
-          <div style="position:absolute;right:0;top:0;bottom:4px;width:32px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none;"></div>
+        <!-- カテゴリ ドロップダウン -->
+        <div style="margin-bottom:10px;">
+          <select id="shopCatSelect" onchange="switchShopCat(this.value)"
+            style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 14px center;">
+            <option value="不足">⚠️ 不足中のカード</option>
+            <option value="ポケモン">🐾 ポケモン</option>
+            <option value="グッズ">🎒 グッズ</option>
+            <option value="ポケモンの道具">🔧 ポケモンの道具</option>
+            <option value="サポート">👤 サポート</option>
+            <option value="スタジアム">🏟 スタジアム</option>
+            <option value="エネルギー">⚡ エネルギー</option>
+          </select>
         </div>
 
         <!-- カード選択エリア -->
@@ -1013,6 +1015,8 @@ body {
           ⚠️ 不足中のカードを先に表示
         </div>
         <div id="shopCardList" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <!-- ページネーション -->
+        <div id="shopPagination" style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:16px;"></div>
       </div>
 
       <!-- STEP2.5: 確認画面 -->
@@ -2124,6 +2128,8 @@ let shopPriceInputs = {};
 let currentShopCat = '不足';
 let shopSelectedCards = {};
 let currentStockLocation = 'home';
+let currentShopPage = 0;
+const SHOP_PAGE_SIZE = 10;
 
 function selectShop(shopName) {
   currentShopName = shopName;
@@ -2166,15 +2172,9 @@ function renderShopCardList() {
     return need > 0 && have < need;
   }).map(c=>c.id));
 
-  // カテゴリタブ
-  const cats = ['不足', ...CAT_ORDER];
-  const tabsEl = document.getElementById('shopCatTabs');
-  if (tabsEl) {
-    tabsEl.innerHTML = cats.map(cat => {
-      const active = currentShopCat===cat;
-      return `<button onclick="switchShopCat('${cat}')" style="white-space:nowrap;border:1.5px solid ${active?'var(--accent)':'var(--border)'};border-radius:20px;padding:6px 14px;font-size:12px;font-weight:700;font-family:inherit;background:${active?'var(--accent)':'var(--surface)'};color:${active?'white':'var(--text2)'};cursor:pointer;">${cat==='不足'?'⚠️ 不足':(CAT_ICON[cat]||'')+' '+cat}</button>`;
-    }).join('');
-  }
+  // ドロップダウン同期
+  const sel = document.getElementById('shopCatSelect');
+  if (sel) sel.value = currentShopCat;
 
   // 表示カード絞り込み
   let filtered;
@@ -2189,7 +2189,12 @@ function renderShopCardList() {
 
   updateShopSelectedDisplay();
 
-  const html = filtered.map(c => {
+  // ページネーション
+  const totalPages = Math.ceil(filtered.length / SHOP_PAGE_SIZE);
+  if (currentShopPage >= totalPages) currentShopPage = 0;
+  const paged = filtered.slice(currentShopPage * SHOP_PAGE_SIZE, (currentShopPage + 1) * SHOP_PAGE_SIZE);
+
+  const html = paged.map(c => {
     const have = (c.stock_home||0)+(c.stock_parents||0);
     const need = neededTotal[c.id]||0;
     const isShort = shortageIds.has(c.id);
@@ -2232,6 +2237,24 @@ function renderShopCardList() {
   }).join('') || '<div style="text-align:center;padding:30px;color:var(--text2);">このカテゴリにカードがありません</div>';
 
   document.getElementById('shopCardList').innerHTML = html;
+
+  // ページネーションUI
+  const pgEl = document.getElementById('shopPagination');
+  if (pgEl) {
+    if (totalPages <= 1) { pgEl.innerHTML = ''; }
+    else {
+      pgEl.innerHTML = `
+        <button onclick="shopGoPage(${currentShopPage-1})" ${currentShopPage===0?'disabled':''} style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;opacity:${currentShopPage===0?'0.4':'1'};">← 前</button>
+        <span style="font-size:13px;font-weight:700;color:var(--text2);">${currentShopPage+1} / ${totalPages}</span>
+        <button onclick="shopGoPage(${currentShopPage+1})" ${currentShopPage>=totalPages-1?'disabled':''} style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 16px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;opacity:${currentShopPage>=totalPages-1?'0.4':'1'};">次 →</button>
+      `;
+    }
+  }
+}
+
+function shopGoPage(page) {
+  currentShopPage = page;
+  renderShopCardList();
 }
 
 function goToShopConfirm() {
@@ -2318,7 +2341,7 @@ function confirmEditShop() {
   currentShopName = '';
 }
 
-function switchShopCat(cat) { currentShopCat = cat; renderShopCardList(); }
+function switchShopCat(cat) { currentShopCat = cat; currentShopPage = 0; renderShopCardList(); }
 
 function addShopCard(cardId) {
   const priceEl = document.getElementById('sp-input-'+cardId);
