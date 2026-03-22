@@ -2014,7 +2014,7 @@ function showShopTop() {
   document.getElementById('shopListSection').style.display = 'none';
   document.querySelector('.header').classList.remove('hidden');
   document.querySelector('.bottom-nav').classList.remove('hidden');
-  document.getElementById('shopPageInner').style.padding = '12px';
+
   currentShopName = ''; shopPriceInputs = {};
 }
 const SHOP_LIST = [
@@ -2088,7 +2088,7 @@ function showShopRecord() {
   document.getElementById('shopStep3').style.display = 'none';
   document.querySelector('.header').classList.add('hidden');
   document.querySelector('.bottom-nav').classList.add('hidden');
-  document.getElementById('shopPageInner').style.padding = '0';
+
   updateBreadcrumb('step1');
   // 店舗ボタンを動的生成
   const list = document.getElementById('shopBtnList');
