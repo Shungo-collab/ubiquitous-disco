@@ -905,7 +905,7 @@ body {
 
 <!-- カドショページ -->
 <div class="page" id="page-shop">
-  <div style="padding:12px;">
+  <div id="shopPageInner" style="padding:12px;">
 
     <!-- トップ：2択ボタン -->
     <div id="shopTop">
@@ -936,16 +936,17 @@ body {
     <div id="shopRecord" style="display:none;">
 
       <!-- パンくずリスト -->
-      <div style="display:flex;align-items:center;gap:4px;margin-bottom:16px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px;">
-        <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);">← 戻る</button>
-        <span style="color:var(--border);margin:0 2px;">|</span>
-        <span id="bc-shop" onclick="confirmEditShop()" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;"></span>
-        <span id="bc-sep1" style="color:var(--text2);font-size:12px;display:none;">›</span>
-        <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;display:none;"></span>
-        <span id="bc-sep2" style="color:var(--text2);font-size:12px;display:none;">›</span>
-        <span id="bc-card" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:none;"></span>
-        <span id="bc-sep3" style="color:var(--text2);font-size:12px;display:none;">›</span>
-        <span id="bc-confirm" style="font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;white-space:nowrap;display:none;"></span>
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-top:8px;">
+        <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">← 終了</button>
+        <div style="flex:1;display:flex;align-items:center;gap:3px;overflow:hidden;">
+          <span id="bc-shop" onclick="confirmEditShop()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;"></span>
+          <span id="bc-sep1" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+          <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;display:none;flex-shrink:0;"></span>
+          <span id="bc-sep2" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+          <span id="bc-card" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
+          <span id="bc-sep3" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
+          <span id="bc-confirm" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
+        </div>
       </div>
 
       <!-- STEP1: 店舗選択 -->
@@ -2013,6 +2014,7 @@ function showShopTop() {
   document.getElementById('shopListSection').style.display = 'none';
   document.querySelector('.header').classList.remove('hidden');
   document.querySelector('.bottom-nav').classList.remove('hidden');
+  document.getElementById('shopPageInner').style.padding = '12px';
   currentShopName = ''; shopPriceInputs = {};
 }
 const SHOP_LIST = [
@@ -2042,8 +2044,15 @@ function updateBreadcrumb(step) {
   const sep2 = document.getElementById('bc-sep2');
   const sep3 = document.getElementById('bc-sep3');
 
-  // お店
-  bcShop.textContent = currentShopName ? '🏪 ' + currentShopName.replace('カードショップ ','').replace(' 立川店','立川').replace(' 多摩境店','多摩境') : '🏪 お店';
+  // お店（短縮）
+  const shortName = currentShopName
+    .replace('カードショップ ','').replace('BOOKOFF SUPER BAZAAR ','BOOKOFF ')
+    .replace('BOOKOFF ','BO ').replace(' 立川店','立川').replace(' 多摩境店','多摩境')
+    .replace(' 南大沢店','南大沢').replace(' 武蔵小金井店','武蔵小金井')
+    .replace(' 多摩永山店','多摩永山').replace(' せいせき店','せいせき')
+    .replace(' 八王子店','八王子').replace('TSUTAYA Trading Card ','TSUTAYA ')
+    .replace(' 府中駅前','府中').replace(' 立川店','立川').replace('文教堂TRADING CARD ','文教堂 ');
+  bcShop.textContent = currentShopName ? '🏪 ' + shortName : '🏪 お店';
   bcShop.style.cssText = 'font-size:12px;font-weight:700;border-radius:20px;padding:4px 10px;cursor:pointer;white-space:nowrap;' + (step==='step1'?active:currentShopName?done:none);
 
   // 場所
@@ -2079,6 +2088,7 @@ function showShopRecord() {
   document.getElementById('shopStep3').style.display = 'none';
   document.querySelector('.header').classList.add('hidden');
   document.querySelector('.bottom-nav').classList.add('hidden');
+  document.getElementById('shopPageInner').style.padding = '0';
   updateBreadcrumb('step1');
   // 店舗ボタンを動的生成
   const list = document.getElementById('shopBtnList');
