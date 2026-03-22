@@ -980,9 +980,9 @@ body {
             <div id="shopSelectedItems" style="display:flex;flex-direction:column;gap:4px;"></div>
           </div>
 
-          <!-- 記録するボタン（固定） -->
-          <button onclick="submitShopPrices()" id="shopSubmitBtn" style="width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(22,163,74,0.3);">
-            ✅ まとめて記録する
+          <!-- 確認画面へボタン（固定） -->
+          <button onclick="goToShopConfirm()" id="shopSubmitBtn" style="width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(37,99,235,0.3);">
+            確認画面へ →
           </button>
         </div>
 
@@ -994,6 +994,43 @@ body {
           ⚠️ 不足中のカードを先に表示
         </div>
         <div id="shopCardList" style="display:flex;flex-direction:column;gap:10px;"></div>
+      </div>
+
+      <!-- STEP2.5: 確認画面 -->
+      <div id="shopStep25" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <button onclick="backToStep2()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 修正する</button>
+          <div style="font-size:16px;font-weight:900;">内容を確認してください</div>
+        </div>
+
+        <!-- お店・場所 -->
+        <div style="background:var(--surface);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
+          <div style="display:flex;gap:10px;align-items:center;">
+            <span style="font-size:24px;">🏪</span>
+            <div>
+              <div style="font-size:14px;font-weight:900;" id="confirmShopName"></div>
+              <div style="font-size:13px;color:var(--text2);margin-top:2px;" id="confirmLocation"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- カード一覧 -->
+        <div style="background:var(--surface);border-radius:14px;padding:14px;margin-bottom:12px;border:1px solid var(--border);">
+          <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:10px;">記録するカード</div>
+          <div id="confirmCardList" style="display:flex;flex-direction:column;gap:8px;"></div>
+        </div>
+
+        <!-- 合計 -->
+        <div style="background:var(--accent-light);border-radius:14px;padding:14px;margin-bottom:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;">
+            <span style="font-size:14px;font-weight:700;color:var(--accent);">合計購入枚数</span>
+            <span style="font-size:24px;font-weight:900;font-family:'DM Mono',monospace;color:var(--accent);" id="confirmTotal">0枚</span>
+          </div>
+        </div>
+
+        <button onclick="submitShopPrices()" id="shopFinalBtn" style="width:100%;background:var(--green);color:white;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+          ✅ まちがいなければ完了
+        </button>
       </div>
 
       <!-- STEP3: 完了 -->
@@ -2112,6 +2149,44 @@ function renderShopCardList() {
   }).join('') || '<div style="text-align:center;padding:30px;color:var(--text2);">このカテゴリにカードがありません</div>';
 
   document.getElementById('shopCardList').innerHTML = html;
+}
+
+function goToShopConfirm() {
+  if (Object.keys(shopSelectedCards).length === 0) {
+    showToast('カードを1枚以上追加してください');
+    return;
+  }
+  // 確認画面に情報をセット
+  document.getElementById('confirmShopName').textContent = currentShopName;
+  const locLabel = currentStockLocation === 'home' ? '🏠 菜摘家に追加' : '👵 実家に追加';
+  document.getElementById('confirmLocation').textContent = locLabel;
+
+  // カード一覧
+  const items = Object.entries(shopSelectedCards);
+  let totalBuy = 0;
+  document.getElementById('confirmCardList').innerHTML = items.map(([cid, data]) => {
+    const card = cards.find(c=>c.id===cid);
+    totalBuy += data.buyQty||0;
+    return `<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--surface2);">
+      <div style="display:flex;align-items:center;gap:8px;">
+        ${card?.image_url?`<img src="${card.image_url}" style="width:32px;height:32px;object-fit:contain;border-radius:6px;background:var(--surface2);">`:'<div style="width:32px;height:32px;border-radius:6px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:16px;">🃏</div>'}
+        <span style="font-size:13px;font-weight:700;">${card?.name||'不明'}</span>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-size:12px;font-family:'DM Mono',monospace;font-weight:700;">${data.price?'¥'+data.price.toLocaleString():'価格なし'}</div>
+        ${data.buyQty>0?`<div style="font-size:11px;color:var(--accent);font-weight:700;">+${data.buyQty}枚購入</div>`:'<div style="font-size:11px;color:var(--text2);">購入なし</div>'}
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('confirmTotal').textContent = totalBuy + '枚';
+  document.getElementById('shopStep2').style.display = 'none';
+  document.getElementById('shopStep25').style.display = 'block';
+}
+
+function backToStep2() {
+  document.getElementById('shopStep25').style.display = 'none';
+  document.getElementById('shopStep2').style.display = 'block';
 }
 
 function switchShopCat(cat) { currentShopCat = cat; renderShopCardList(); }
