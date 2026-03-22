@@ -721,6 +721,16 @@ body {
 .filter-reset-btn:active { opacity: 0.7; }
 
 .filter-row { display: none; } /* 旧フィルター行は非表示 */
+/* 在庫保存ボタン */
+.save-stock-btn {
+  width: 100%; background: var(--accent); color: white; border: none;
+  border-radius: 10px; padding: 13px; font-size: 14px; font-weight: 900;
+  font-family: inherit; cursor: pointer; margin-top: 6px;
+  transition: all 0.15s; letter-spacing: 0.3px;
+  box-shadow: 0 3px 10px rgba(37,99,235,0.3);
+}
+.save-stock-btn:active { transform: scale(0.97); opacity: 0.9; }
+
 .bottom-nav {
   position: fixed; bottom: 0; left: 0; right: 0;
   background: var(--surface); border-top: 1px solid var(--border);
@@ -829,13 +839,6 @@ body {
   </div>
 
   <button class="filter-reset-btn" onclick="resetFilters()">🔄 リセット</button>
-</div>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchPage('inventory',this)">在庫一覧</button>
-  <button class="tab" onclick="switchPage('deck',this)">デッキ</button>
-  <button class="tab" onclick="switchPage('mercari',this)">メルカリ</button>
-  <button class="tab" onclick="switchPage('shop',this)">カドショ</button>
 </div>
 
 <!-- 在庫ページ -->
@@ -1172,21 +1175,24 @@ function cardHTML(c) {
     <div class="stock-box">
       <div class="stock-box-label">🏠 うちの家</div>
       <div class="stock-control">
-        <button class="sBtn minus" onclick="updateStock('${c.id}','home',-1)">−</button>
+        <button class="sBtn minus" onclick="changeStock('${c.id}','home',-1)">−</button>
         <div class="sNum" id="sh-${c.id}">${c.stock_home||0}</div>
-        <button class="sBtn plus" onclick="updateStock('${c.id}','home',1)">＋</button>
+        <button class="sBtn plus" onclick="changeStock('${c.id}','home',1)">＋</button>
       </div>
     </div>
     <div class="stock-box">
       <div class="stock-box-label">👵 実家</div>
       <div class="stock-control">
-        <button class="sBtn minus" onclick="updateStock('${c.id}','parents',-1)">−</button>
+        <button class="sBtn minus" onclick="changeStock('${c.id}','parents',-1)">−</button>
         <div class="sNum" id="sp-${c.id}">${c.stock_parents||0}</div>
-        <button class="sBtn plus" onclick="updateStock('${c.id}','parents',1)">＋</button>
+        <button class="sBtn plus" onclick="changeStock('${c.id}','parents',1)">＋</button>
       </div>
     </div>
   </div>
-  <div class="stock-total">合計 <strong>${total}</strong> 枚</div>
+  <div class="stock-total">合計 <strong id="st-${c.id}">${total}</strong> 枚</div>
+  <button class="save-stock-btn" id="ssb-${c.id}" onclick="saveStock('${c.id}')" style="display:none;">
+    💾 在庫を保存する
+  </button>
   <button class="expand-btn" onclick="toggleDetail('${c.id}')">▾ メモ・価格詳細${isAdmin?' / 編集':''}</button>
   <div class="card-detail" id="detail-${c.id}">
     ${adminEditHTML}
@@ -1231,8 +1237,8 @@ function renderSummary() {
   `;
 }
 
-// ===== 在庫更新 =====
-async function updateStock(id, loc, delta) {
+// ===== 在庫変更（ローカルのみ） =====
+function changeStock(id, loc, delta) {
   const card = cards.find(c=>c.id===id);
   if (!card) return;
   const field = loc==='home'?'stock_home':'stock_parents';
@@ -1240,9 +1246,32 @@ async function updateStock(id, loc, delta) {
   card[field] = nv;
   const el = document.getElementById(loc==='home'?`sh-${id}`:`sp-${id}`);
   if (el) el.textContent = nv;
+  const total = (card.stock_home||0)+(card.stock_parents||0);
+  const st = document.getElementById(`st-${id}`);
+  if (st) st.textContent = total;
+  // 保存ボタンを表示
+  const btn = document.getElementById(`ssb-${id}`);
+  if (btn) btn.style.display = 'block';
   renderSummary();
-  try { await sbPatch('cards', id, {[field]: nv}); }
-  catch(e) { showToast('⚠️ 保存失敗'); }
+}
+
+// ===== 在庫保存（DB書き込み） =====
+async function saveStock(id) {
+  const card = cards.find(c=>c.id===id);
+  if (!card) return;
+  const btn = document.getElementById(`ssb-${id}`);
+  if (btn) { btn.textContent = '保存中...'; btn.disabled = true; }
+  try {
+    await sbPatch('cards', id, {
+      stock_home: card.stock_home||0,
+      stock_parents: card.stock_parents||0
+    });
+    if (btn) { btn.style.display = 'none'; btn.textContent = '💾 在庫を保存する'; btn.disabled = false; }
+    showToast('✅ 保存しました');
+  } catch(e) {
+    if (btn) { btn.textContent = '💾 在庫を保存する'; btn.disabled = false; }
+    showToast('⚠️ 保存失敗');
+  }
 }
 
 async function saveMemo(id) {
@@ -2054,21 +2083,10 @@ function toggleDetail(id) {
 function switchPage(name, el) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
   document.getElementById(`page-${name}`).classList.add('active');
-  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  const tabs = ['inventory','deck','mercari','shop'];
-  const tabIdx = tabs.indexOf(name);
-  if (el) {
-    if (el.classList.contains('tab')) {
-      el.classList.add('active');
-    } else if (el.classList.contains('nav-btn')) {
-      el.classList.add('active');
-      if (tabIdx>=0) document.querySelectorAll('.tab')[tabIdx].classList.add('active');
-    }
-  }
+  if (el && el.classList && el.classList.contains('nav-btn')) el.classList.add('active');
   const navEl = document.getElementById(`nav-${name}`);
   if (navEl) navEl.classList.add('active');
-
   // 在庫一覧のときだけ検索・フィルターを表示
   const isInventory = name === 'inventory';
   const searchRow = document.getElementById('searchRow');
