@@ -936,12 +936,17 @@ body {
     <div id="shopRecord" style="display:none;">
 
       <!-- パンくずリスト -->
-      <div style="display:flex;align-items:center;gap:6px;margin-bottom:12px;padding-top:8px;">
-        <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">← 終了</button>
-        <div style="flex:1;display:flex;align-items:center;gap:3px;overflow:hidden;">
-          <span id="bc-shop" onclick="confirmEditShop()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:90px;overflow:hidden;text-overflow:ellipsis;"></span>
+      <div style="margin-bottom:12px;padding-top:8px;">
+        <!-- 1行目：終了・お店・場所 -->
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:4px;">
+          <button onclick="showShopTop()" style="background:none;border:none;padding:0;cursor:pointer;font-size:13px;color:var(--text2);flex-shrink:0;">← 終了</button>
+          <span style="color:var(--border);margin:0 4px;">|</span>
+          <span id="bc-shop" onclick="confirmEditShop()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;max-width:120px;overflow:hidden;text-overflow:ellipsis;"></span>
           <span id="bc-sep1" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
           <span id="bc-loc" onclick="confirmEditLocation()" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;cursor:pointer;white-space:nowrap;display:none;flex-shrink:0;"></span>
+        </div>
+        <!-- 2行目：カード・確認 -->
+        <div style="display:flex;align-items:center;gap:4px;padding-left:2px;">
           <span id="bc-sep2" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
           <span id="bc-card" style="font-size:11px;font-weight:700;border-radius:20px;padding:3px 8px;white-space:nowrap;display:none;flex-shrink:0;"></span>
           <span id="bc-sep3" style="color:var(--text2);font-size:11px;display:none;flex-shrink:0;">›</span>
@@ -998,7 +1003,10 @@ body {
         </div>
 
         <!-- カテゴリタブ -->
-        <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;" id="shopCatTabs"></div>
+        <div style="position:relative;margin-bottom:12px;">
+          <div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none;" id="shopCatTabs"></div>
+          <div style="position:absolute;right:0;top:0;bottom:4px;width:32px;background:linear-gradient(to right,transparent,var(--bg));pointer-events:none;"></div>
+        </div>
 
         <!-- カード選択エリア -->
         <div style="background:var(--red-light);border-radius:10px;padding:8px 12px;margin-bottom:10px;font-size:11px;font-weight:700;color:var(--red);">
