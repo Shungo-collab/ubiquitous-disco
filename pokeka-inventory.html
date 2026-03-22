@@ -893,8 +893,68 @@ body {
 
 <!-- カドショページ -->
 <div class="page" id="page-shop">
-  <div class="shop-page" id="shopPage">
-    <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+  <!-- カドショ記録ウィザード -->
+  <div id="shopWizard" style="padding:12px;">
+
+    <!-- STEP1: 店舗選択 -->
+    <div id="shopStep1">
+      <div style="text-align:center;padding:20px 0 16px;">
+        <div style="font-size:32px;margin-bottom:8px;">🏪</div>
+        <div style="font-size:18px;font-weight:900;margin-bottom:4px;">どのお店に行きましたか？</div>
+        <div style="font-size:13px;color:var(--text2);">1店舗ずつ記録していきます</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;" id="shopBtnList">
+        ${['アメニティードリーム 立川店','カードショップ 竜星のPAO 立川店','カードショップ 竜星のPAO 多摩境店','フルコンプ 立川南口店','BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店','BOOKOFF ヴィータモールせいせき店','BOOKOFF 武蔵小金井店','BOOKOFF SUPER BAZAAR 多摩永山店','文教堂TRADING CARD 南大沢店','TSUTAYA Trading Card 府中駅前','駿河屋 立川店'].map(s=>`
+          <button onclick="selectShop('${s}')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;transition:all 0.15s;" onmousedown="this.style.background='var(--accent-light)'" onmouseup="this.style.background='var(--surface)'" ontouchstart="this.style.background='var(--accent-light)'" ontouchend="this.style.background='var(--surface)'">
+            🏪 ${s}
+          </button>`).join('')}
+      </div>
+    </div>
+
+    <!-- STEP2: カード価格入力 -->
+    <div id="shopStep2" style="display:none;">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button onclick="backToStep1()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 戻る</button>
+        <div>
+          <div style="font-size:12px;color:var(--text2);">記録中のお店</div>
+          <div style="font-size:14px;font-weight:900;" id="shopStep2Title"></div>
+        </div>
+      </div>
+
+      <div style="background:var(--red-light);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--red);">
+        ⚠️ 不足中のカードを先に表示しています
+      </div>
+
+      <div id="shopCardList" style="display:flex;flex-direction:column;gap:10px;"></div>
+
+      <button onclick="submitShopPrices()" id="shopSubmitBtn" style="width:100%;background:var(--green);color:white;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;margin-top:16px;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+        ✅ 記録する
+      </button>
+    </div>
+
+    <!-- STEP3: 完了 -->
+    <div id="shopStep3" style="display:none;text-align:center;padding:40px 20px;">
+      <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+      <div style="font-size:20px;font-weight:900;margin-bottom:8px;">記録完了！</div>
+      <div style="font-size:14px;color:var(--text2);margin-bottom:24px;" id="shopStep3Desc"></div>
+      <button onclick="backToStep1()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;">
+        🏪 別のお店も記録する
+      </button>
+      <button onclick="switchPage('mercari',document.getElementById('nav-mercari'))" style="width:100%;background:var(--surface2);color:var(--text);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">
+        📊 不足カードを確認する
+      </button>
+    </div>
+
+  </div>
+
+  <!-- 過去の記録を見る -->
+  <div style="padding:0 12px 12px;">
+    <details>
+      <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:8px 0;font-weight:700;list-style:none;">▸ 過去のカドショ記録を見る</summary>
+      <div class="shop-page" id="shopPage" style="padding:0;margin-top:8px;">
+        <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+      </div>
+    </details>
   </div>
 </div>
 
@@ -1829,6 +1889,132 @@ function closeModal(id) {
 }
 
 // ===== カドショ =====
+// ===== カドショウィザード =====
+let currentShopName = '';
+let shopPriceInputs = {}; // cardId → 入力価格
+
+function selectShop(shopName) {
+  currentShopName = shopName;
+  shopPriceInputs = {};
+  document.getElementById('shopStep1').style.display = 'none';
+  document.getElementById('shopStep2').style.display = 'block';
+  document.getElementById('shopStep3').style.display = 'none';
+  document.getElementById('shopStep2Title').textContent = shopName;
+  renderShopCardList();
+}
+
+function renderShopCardList() {
+  // 不足カードを計算
+  const activeSales = sales.filter(s=>s.status==='active');
+  const neededTotal = {};
+  activeSales.forEach(s => {
+    deckCards.filter(r=>r.deck_id===s.deck_id).forEach(r => {
+      if (!neededTotal[r.card_id]) neededTotal[r.card_id] = 0;
+      neededTotal[r.card_id] += (r.quantity||1);
+    });
+  });
+
+  // 不足カードを先に、その他は後
+  const shortage = cards.filter(c => {
+    const have = (c.stock_home||0)+(c.stock_parents||0);
+    const need = neededTotal[c.id]||0;
+    return need > 0 && have < need;
+  });
+  const others = cards.filter(c => !shortage.includes(c));
+
+  const sorted = [...shortage, ...others];
+
+  const html = sorted.map(c => {
+    const have = (c.stock_home||0)+(c.stock_parents||0);
+    const need = neededTotal[c.id]||0;
+    const isShort = need > 0 && have < need;
+    const diff = have - need;
+
+    // 前回この店の価格
+    const lastPrice = shopPrices.filter(s=>s.card_id===c.id&&s.shop_name===currentShopName)
+      .sort((a,b)=>new Date(b.created_at)-new Date(a.created_at))[0];
+
+    return `
+    <div style="background:var(--surface);border-radius:14px;padding:14px;border:${isShort?'1.5px solid var(--red-light)':'1px solid var(--border)'};">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+        ${c.image_url ? `<img src="${c.image_url}" style="width:44px;height:44px;object-fit:contain;border-radius:8px;background:var(--surface2);flex-shrink:0;">` :
+          `<div style="width:44px;height:44px;border-radius:8px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;">🃏</div>`}
+        <div style="flex:1;min-width:0;">
+          <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+          <div style="display:flex;gap:6px;margin-top:3px;flex-wrap:wrap;">
+            ${isShort ? `<span style="background:var(--red-light);color:var(--red);border-radius:20px;padding:2px 8px;font-size:10px;font-weight:700;">不足${Math.abs(diff)}枚</span>` : ''}
+            <span style="background:var(--surface2);color:var(--text2);border-radius:20px;padding:2px 8px;font-size:10px;">所持${have}枚</span>
+            ${lastPrice ? `<span style="background:var(--green-light);color:var(--green);border-radius:20px;padding:2px 8px;font-size:10px;">前回¥${lastPrice.price.toLocaleString()}</span>` : ''}
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div style="flex:1;display:flex;align-items:center;background:var(--surface2);border-radius:10px;padding:0 12px;border:1.5px solid var(--border);">
+          <span style="font-size:14px;color:var(--text2);margin-right:4px;">¥</span>
+          <input type="number" placeholder="${lastPrice?lastPrice.price:'価格なし'}" id="sp-input-${c.id}"
+            style="flex:1;border:none;background:transparent;font-size:16px;font-weight:700;font-family:'DM Mono',monospace;padding:12px 0;outline:none;width:100%;"
+            oninput="shopPriceInputs['${c.id}']=(this.value?parseInt(this.value):null)">
+        </div>
+        <button onclick="markNoStock('${c.id}')" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:12px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;white-space:nowrap;color:var(--text2);">
+          なし
+        </button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('shopCardList').innerHTML = html;
+}
+
+function markNoStock(cardId) {
+  shopPriceInputs[cardId] = null;
+  const input = document.getElementById(`sp-input-${cardId}`);
+  if (input) { input.value = ''; input.placeholder = 'なし'; input.style.color = 'var(--text2)'; }
+}
+
+async function submitShopPrices() {
+  const btn = document.getElementById('shopSubmitBtn');
+  btn.textContent = '保存中...'; btn.disabled = true;
+
+  const today = new Date().toLocaleDateString('ja-JP',{month:'numeric',day:'numeric'});
+  const entries = Object.entries(shopPriceInputs).filter(([,v])=>v!==null&&v!==undefined);
+
+  // 価格が入力されたカードだけ保存
+  const priceEntries = [];
+  document.getElementById('shopCardList').querySelectorAll('input[type=number]').forEach(input => {
+    const cardId = input.id.replace('sp-input-','');
+    const val = parseInt(input.value);
+    if (val && val > 0) priceEntries.push({ cardId, price: val });
+  });
+
+  try {
+    for (const { cardId, price } of priceEntries) {
+      const card = cards.find(c=>c.id===cardId);
+      const result = await sbPost('shop_prices', {
+        card_id: cardId, card_name: card?.name||'',
+        shop_name: currentShopName, price, recorded_date: today
+      });
+      if (result&&result[0]) shopPrices.unshift(result[0]);
+    }
+    document.getElementById('shopStep2').style.display = 'none';
+    document.getElementById('shopStep3').style.display = 'block';
+    document.getElementById('shopStep3Desc').textContent =
+      `${currentShopName} で ${priceEntries.length}種類の価格を記録しました！`;
+    btn.textContent = '✅ 記録する'; btn.disabled = false;
+    renderShop();
+  } catch(e) {
+    showToast('⚠️ 保存失敗');
+    btn.textContent = '✅ 記録する'; btn.disabled = false;
+  }
+}
+
+function backToStep1() {
+  document.getElementById('shopStep1').style.display = 'block';
+  document.getElementById('shopStep2').style.display = 'none';
+  document.getElementById('shopStep3').style.display = 'none';
+  currentShopName = '';
+  shopPriceInputs = {};
+}
+
 function renderShop() {
   if (!shopPrices.length) {
     document.getElementById('shopPage').innerHTML = `<div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません<br>在庫一覧のカードから記録できます</p></div>`;
