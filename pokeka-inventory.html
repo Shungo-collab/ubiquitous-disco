@@ -973,13 +973,11 @@ body {
       <div id="shopStep2" style="display:none;">
         <!-- 固定ヘッダー -->
         <div style="position:sticky;top:0;background:var(--bg);padding:6px 0;z-index:10;">
-
           <!-- 選択済みカード一覧 -->
           <div id="shopSelectedList" style="display:none;background:var(--surface);border-radius:12px;padding:10px 12px;margin-bottom:8px;border:1px solid var(--border);">
             <div style="font-size:11px;font-weight:700;color:var(--text2);margin-bottom:6px;">✅ 記録済み</div>
             <div id="shopSelectedItems" style="display:flex;flex-direction:column;gap:4px;"></div>
           </div>
-
           <!-- 確認画面へボタン（固定） -->
           <button onclick="goToShopConfirm()" id="shopSubmitBtn" style="width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:900;font-family:inherit;cursor:pointer;box-shadow:0 3px 10px rgba(37,99,235,0.3);">
             確認画面へ →
