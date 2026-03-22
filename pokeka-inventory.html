@@ -893,68 +893,101 @@ body {
 
 <!-- カドショページ -->
 <div class="page" id="page-shop">
-  <!-- カドショ記録ウィザード -->
-  <div id="shopWizard" style="padding:12px;">
+  <div style="padding:12px;">
 
-    <!-- STEP1: 店舗選択 -->
-    <div id="shopStep1">
-      <div style="text-align:center;padding:20px 0 16px;">
-        <div style="font-size:32px;margin-bottom:8px;">🏪</div>
-        <div style="font-size:18px;font-weight:900;margin-bottom:4px;">どのお店に行きましたか？</div>
-        <div style="font-size:13px;color:var(--text2);">1店舗ずつ記録していきます</div>
+    <!-- トップ：2択ボタン -->
+    <div id="shopTop">
+      <div style="text-align:center;padding:24px 0 20px;">
+        <div style="font-size:36px;margin-bottom:10px;">🏪</div>
+        <div style="font-size:19px;font-weight:900;margin-bottom:4px;">カドショ</div>
+        <div style="font-size:13px;color:var(--text2);">記録・一覧を選んでください</div>
       </div>
-      <div style="display:flex;flex-direction:column;gap:10px;" id="shopBtnList">
-        ${['アメニティードリーム 立川店','カードショップ 竜星のPAO 立川店','カードショップ 竜星のPAO 多摩境店','フルコンプ 立川南口店','BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店','BOOKOFF ヴィータモールせいせき店','BOOKOFF 武蔵小金井店','BOOKOFF SUPER BAZAAR 多摩永山店','文教堂TRADING CARD 南大沢店','TSUTAYA Trading Card 府中駅前','駿河屋 立川店'].map(s=>`
-          <button onclick="selectShop('${s}')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;transition:all 0.15s;" onmousedown="this.style.background='var(--accent-light)'" onmouseup="this.style.background='var(--surface)'" ontouchstart="this.style.background='var(--accent-light)'" ontouchend="this.style.background='var(--surface)'">
-            🏪 ${s}
-          </button>`).join('')}
+      <div style="display:flex;flex-direction:column;gap:12px;">
+        <button onclick="showShopRecord()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:16px;padding:20px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;box-shadow:0 4px 12px rgba(37,99,235,0.25);">
+          <span style="font-size:28px;">📝</span>
+          <div style="text-align:left;">
+            <div>カドショ巡回を記録する</div>
+            <div style="font-size:12px;opacity:0.8;font-weight:500;margin-top:2px;">行ってきたお店の価格を入力</div>
+          </div>
+        </button>
+        <button onclick="showShopList()" style="width:100%;background:var(--surface);color:var(--text);border:1.5px solid var(--border);border-radius:16px;padding:20px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;display:flex;align-items:center;gap:12px;">
+          <span style="font-size:28px;">📊</span>
+          <div style="text-align:left;">
+            <div>価格一覧を見る</div>
+            <div style="font-size:12px;color:var(--text2);font-weight:500;margin-top:2px;">店舗ごとの最新価格を確認</div>
+          </div>
+        </button>
       </div>
     </div>
 
-    <!-- STEP2: カード価格入力 -->
-    <div id="shopStep2" style="display:none;">
-      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
-        <button onclick="backToStep1()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 戻る</button>
-        <div>
-          <div style="font-size:12px;color:var(--text2);">記録中のお店</div>
-          <div style="font-size:14px;font-weight:900;" id="shopStep2Title"></div>
+    <!-- 記録セクション -->
+    <div id="shopRecord" style="display:none;">
+      <button onclick="showShopTop()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:16px;">← 戻る</button>
+
+      <!-- STEP1: 店舗選択 -->
+      <div id="shopStep1">
+        <div style="font-size:16px;font-weight:900;margin-bottom:4px;">どのお店に行きましたか？</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px;">1店舗ずつ記録していきます</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          ${[
+            'アメニティードリーム 立川店',
+            'カードショップ 竜星のPAO 立川店',
+            'カードショップ 竜星のPAO 多摩境店',
+            'フルコンプ 立川南口店',
+            'BOOKOFF SUPER BAZAAR イトーヨーカドー八王子店',
+            'BOOKOFF ヴィータモールせいせき店',
+            'BOOKOFF 武蔵小金井店',
+            'BOOKOFF SUPER BAZAAR 多摩永山店',
+            '文教堂TRADING CARD 南大沢店',
+            'TSUTAYA Trading Card 府中駅前',
+            '駿河屋 立川店'
+          ].map(s=>`
+            <button onclick="selectShop('${s}')" style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;text-align:left;">
+              🏪 ${s}
+            </button>`).join('')}
         </div>
       </div>
 
-      <div style="background:var(--red-light);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--red);">
-        ⚠️ 不足中のカードを先に表示しています
+      <!-- STEP2: カード価格入力 -->
+      <div id="shopStep2" style="display:none;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+          <button onclick="backToStep1()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;">← 戻る</button>
+          <div>
+            <div style="font-size:12px;color:var(--text2);">記録中のお店</div>
+            <div style="font-size:14px;font-weight:900;" id="shopStep2Title"></div>
+          </div>
+        </div>
+        <div style="background:var(--red-light);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-size:12px;font-weight:700;color:var(--red);">
+          ⚠️ 不足中のカードを先に表示しています
+        </div>
+        <div id="shopCardList" style="display:flex;flex-direction:column;gap:10px;"></div>
+        <button onclick="submitShopPrices()" id="shopSubmitBtn" style="width:100%;background:var(--green);color:white;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;margin-top:16px;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
+          ✅ 記録する
+        </button>
       </div>
 
-      <div id="shopCardList" style="display:flex;flex-direction:column;gap:10px;"></div>
-
-      <button onclick="submitShopPrices()" id="shopSubmitBtn" style="width:100%;background:var(--green);color:white;border:none;border-radius:14px;padding:16px;font-size:16px;font-weight:900;font-family:inherit;cursor:pointer;margin-top:16px;box-shadow:0 4px 12px rgba(22,163,74,0.3);">
-        ✅ 記録する
-      </button>
+      <!-- STEP3: 完了 -->
+      <div id="shopStep3" style="display:none;text-align:center;padding:40px 20px;">
+        <div style="font-size:64px;margin-bottom:16px;">🎉</div>
+        <div style="font-size:20px;font-weight:900;margin-bottom:8px;">記録完了！</div>
+        <div style="font-size:14px;color:var(--text2);margin-bottom:24px;" id="shopStep3Desc"></div>
+        <button onclick="backToStep1()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;">
+          🏪 別のお店も記録する
+        </button>
+        <button onclick="switchPage('mercari',document.getElementById('nav-mercari'))" style="width:100%;background:var(--surface2);color:var(--text);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">
+          📊 不足カードを確認する
+        </button>
+      </div>
     </div>
 
-    <!-- STEP3: 完了 -->
-    <div id="shopStep3" style="display:none;text-align:center;padding:40px 20px;">
-      <div style="font-size:64px;margin-bottom:16px;">🎉</div>
-      <div style="font-size:20px;font-weight:900;margin-bottom:8px;">記録完了！</div>
-      <div style="font-size:14px;color:var(--text2);margin-bottom:24px;" id="shopStep3Desc"></div>
-      <button onclick="backToStep1()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:10px;">
-        🏪 別のお店も記録する
-      </button>
-      <button onclick="switchPage('mercari',document.getElementById('nav-mercari'))" style="width:100%;background:var(--surface2);color:var(--text);border:none;border-radius:14px;padding:16px;font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;">
-        📊 不足カードを確認する
-      </button>
-    </div>
-
-  </div>
-
-  <!-- 過去の記録を見る -->
-  <div style="padding:0 12px 12px;">
-    <details>
-      <summary style="font-size:12px;color:var(--text2);cursor:pointer;padding:8px 0;font-weight:700;list-style:none;">▸ 過去のカドショ記録を見る</summary>
-      <div class="shop-page" id="shopPage" style="padding:0;margin-top:8px;">
+    <!-- 一覧セクション -->
+    <div id="shopListSection" style="display:none;">
+      <button onclick="showShopTop()" style="background:var(--surface2);border:none;border-radius:10px;padding:8px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;margin-bottom:16px;">← 戻る</button>
+      <div class="shop-page" id="shopPage">
         <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
       </div>
-    </details>
+    </div>
+
   </div>
 </div>
 
@@ -1038,9 +1071,6 @@ body {
   </button>
   <button class="nav-btn" id="nav-shop" onclick="switchPage('shop',this)">
     <span class="nav-icon">🏪</span>カドショ
-  </button>
-  <button class="nav-btn" id="nav-history" onclick="switchPage('history',this)">
-    <span class="nav-icon">📋</span>履歴
   </button>
 </div>
 
@@ -1889,6 +1919,27 @@ function closeModal(id) {
 }
 
 // ===== カドショ =====
+function showShopTop() {
+  document.getElementById('shopTop').style.display = 'block';
+  document.getElementById('shopRecord').style.display = 'none';
+  document.getElementById('shopListSection').style.display = 'none';
+  currentShopName = ''; shopPriceInputs = {};
+}
+function showShopRecord() {
+  document.getElementById('shopTop').style.display = 'none';
+  document.getElementById('shopRecord').style.display = 'block';
+  document.getElementById('shopListSection').style.display = 'none';
+  document.getElementById('shopStep1').style.display = 'block';
+  document.getElementById('shopStep2').style.display = 'none';
+  document.getElementById('shopStep3').style.display = 'none';
+}
+function showShopList() {
+  document.getElementById('shopTop').style.display = 'none';
+  document.getElementById('shopRecord').style.display = 'none';
+  document.getElementById('shopListSection').style.display = 'block';
+  renderShop();
+}
+
 // ===== カドショウィザード =====
 let currentShopName = '';
 let shopPriceInputs = {}; // cardId → 入力価格
