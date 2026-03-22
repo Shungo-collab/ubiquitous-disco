@@ -2000,8 +2000,9 @@ function showShopList() {
 
 // ===== カドショウィザード =====
 let currentShopName = '';
-let shopPriceInputs = {}; // cardId → 入力価格
-
+let shopPriceInputs = {};
+let currentShopCat = '不足';
+let shopSelectedCards = {};
 let currentStockLocation = 'home';
 
 function selectShop(shopName) {
@@ -2029,9 +2030,6 @@ function backToStep15() {
   document.getElementById('shopStep2').style.display = 'none';
   document.getElementById('shopStep15').style.display = 'block';
 }
-
-let currentShopCat = '不足';
-let shopSelectedCards = {};
 
 function renderShopCardList() {
   const activeSales = sales.filter(s=>s.status==='active');
