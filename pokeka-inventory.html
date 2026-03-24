@@ -1135,6 +1135,21 @@ body {
   </div>
 </div>
 
+<!-- 価格編集モーダル -->
+<div class="modal-overlay" id="editPriceModal">
+  <div class="modal">
+    <h3 id="editPriceTitle">価格を編集</h3>
+    <div style="display:flex;align-items:center;background:var(--surface2);border-radius:10px;padding:0 14px;border:1.5px solid var(--border);margin-bottom:16px;">
+      <span style="font-size:16px;color:var(--text2);margin-right:6px;">¥</span>
+      <input type="number" id="editPriceInput" style="flex:1;border:none;background:transparent;font-size:22px;font-weight:900;font-family:'DM Mono',monospace;padding:14px 0;outline:none;width:100%;">
+    </div>
+    <div class="modal-btns">
+      <button class="modal-btn confirm" onclick="saveEditPrice()">💾 保存する</button>
+      <button class="modal-btn cancel" onclick="closeModal('editPriceModal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- 取引完了モーダル -->
 <div class="modal-overlay" id="completeModal">
   <div class="modal">
@@ -2453,10 +2468,9 @@ function backToStep1() {
 
 function renderShop() {
   if (!shopPrices.length) {
-    document.getElementById('shopPage').innerHTML = `<div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません<br>在庫一覧のカードから記録できます</p></div>`;
+    document.getElementById('shopPage').innerHTML = `<div class="empty"><div class="e-icon">🏪</div><p>まだカドショ価格が記録されていません</p></div>`;
     return;
   }
-  // 店舗ごと最新価格でまとめ
   const shopMap = {};
   shopPrices.forEach(s => {
     if (!shopMap[s.shop_name]) shopMap[s.shop_name] = {};
@@ -2468,13 +2482,37 @@ function renderShop() {
     <div class="shop-card">
       <h3>🏪 ${shop}</h3>
       ${Object.values(items).sort((a,b)=>a.price-b.price).map(i=>`
-        <div class="shop-card-row">
+        <div class="shop-card-row" id="spr-${i.id}">
           <span class="shop-card-name">${i.card_name}</span>
           <span class="shop-card-price">¥${i.price.toLocaleString()}</span>
           <span class="shop-card-date">${i.recorded_date}</span>
+          <button onclick="editShopPrice('${i.id}','${i.card_name}',${i.price})" style="background:none;border:none;font-size:14px;cursor:pointer;padding:2px 4px;flex-shrink:0;">✏️</button>
         </div>`).join('')}
     </div>`).join('');
   document.getElementById('shopPage').innerHTML = html;
+}
+
+let editingShopPriceId = null;
+
+function editShopPrice(id, cardName, currentPrice) {
+  editingShopPriceId = id;
+  document.getElementById('editPriceTitle').textContent = `${cardName} の価格を編集`;
+  document.getElementById('editPriceInput').value = currentPrice;
+  document.getElementById('editPriceModal').classList.add('open');
+  setTimeout(() => document.getElementById('editPriceInput').focus(), 100);
+}
+
+async function saveEditPrice() {
+  const newPrice = parseInt(document.getElementById('editPriceInput').value);
+  if (!newPrice || newPrice <= 0) { showToast('正しい価格を入力してください'); return; }
+  try {
+    await sbPatch('shop_prices', editingShopPriceId, { price: newPrice });
+    const record = shopPrices.find(s=>s.id===editingShopPriceId);
+    if (record) record.price = newPrice;
+    closeModal('editPriceModal');
+    showToast('✅ 価格を更新しました');
+    renderShop();
+  } catch(e) { showToast('⚠️ 更新失敗'); }
 }
 
 // ===== メルカリページ =====
