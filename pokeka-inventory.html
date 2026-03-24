@@ -2528,7 +2528,7 @@ function renderMercari() {
     });
   });
 
-  // 不足カード
+  // 不足カード計算
   const shortages = [];
   Object.entries(neededTotal).forEach(([cardId, total]) => {
     const card = cards.find(c=>c.id===cardId);
@@ -2540,19 +2540,17 @@ function renderMercari() {
   const ngList = shortages.filter(s=>s.diff<0);
   const totalShortage = Math.abs(ngList.reduce((s,r)=>s+r.diff,0));
 
-  // 残りわずかカード（5枚以下・不足除く）
-  const lowStock = cards.filter(c => {
-    const have = (c.stock_home||0)+(c.stock_parents||0);
-    const isShort = ngList.some(s=>s.card.id===c.id);
-    return have <= 5 && have > 0 && !isShort;
-  }).sort((a,b)=>((a.stock_home||0)+(a.stock_parents||0))-((b.stock_home||0)+(b.stock_parents||0)));
-
-  // 在庫0のカード（不足除く）
+  // 在庫0（不足除く）
   const zeroStock = cards.filter(c => {
     const have = (c.stock_home||0)+(c.stock_parents||0);
-    const isShort = ngList.some(s=>s.card.id===c.id);
-    return have === 0 && !isShort;
+    return have === 0 && !ngList.some(s=>s.card.id===c.id);
   });
+
+  // 残りわずか（1〜5枚・不足除く・在庫0除く）
+  const lowStock = cards.filter(c => {
+    const have = (c.stock_home||0)+(c.stock_parents||0);
+    return have >= 1 && have <= 5 && !ngList.some(s=>s.card.id===c.id);
+  }).sort((a,b)=>((a.stock_home||0)+(a.stock_parents||0))-((b.stock_home||0)+(b.stock_parents||0)));
 
   let html = `<div style="padding:10px 12px;display:flex;flex-direction:column;gap:12px;">`;
 
@@ -2563,26 +2561,22 @@ function renderMercari() {
     <div style="display:flex;gap:0;">
       <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
         <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#f87171;">${ngList.length}</div>
-        <div style="font-size:10px;opacity:0.6;">不足中</div>
+        <div style="font-size:10px;opacity:0.6;">🔴 不足中</div>
       </div>
       <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
-        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#fbbf24;">${lowStock.length}</div>
-        <div style="font-size:10px;opacity:0.6;">残りわずか</div>
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#94a3b8;">${zeroStock.length}</div>
+        <div style="font-size:10px;opacity:0.6;">⚫ 在庫0</div>
       </div>
       <div style="flex:1;text-align:center;padding:8px 0;">
-        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#94a3b8;">${zeroStock.length}</div>
-        <div style="font-size:10px;opacity:0.6;">在庫0</div>
+        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#fbbf24;">${lowStock.length}</div>
+        <div style="font-size:10px;opacity:0.6;">🟡 残りわずか</div>
       </div>
     </div>
   </div>`;
 
-  // 不足カード
+  // 🔴 不足中
   if (ngList.length === 0) {
-    html += `
-    <div style="background:var(--green-light);border-radius:14px;padding:16px;text-align:center;">
-      <div style="font-size:28px;margin-bottom:6px;">✅</div>
-      <div style="font-size:14px;font-weight:900;color:var(--green);">不足カードはありません！</div>
-    </div>`;
+    html += `<div style="background:var(--green-light);border-radius:14px;padding:16px;text-align:center;"><div style="font-size:28px;margin-bottom:6px;">✅</div><div style="font-size:14px;font-weight:900;color:var(--green);">不足カードはありません！</div></div>`;
   } else {
     html += `
     <div style="background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid var(--red-light);">
@@ -2596,61 +2590,33 @@ function renderMercari() {
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.card.name}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;">必要${s.needed}枚 / 所持${s.have}枚</div>
           </div>
-          ${s.card.image_url?`<button onclick="openImageModal('${s.card.image_url}','${s.card.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
+          ${s.card.image_url?`<button onclick="openImageModal('${s.card.image_url}','${s.card.name.replace(/'/g,"\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
           <div style="background:var(--red);color:white;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">−${Math.abs(s.diff)}枚</div>
         </div>`).join('')}
     </div>`;
   }
 
-  // 在庫0のカード（不足除く）
-
-  // ヘッダー
-  html += `
-  <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);border-radius:16px;padding:16px;color:white;">
-    <div style="font-size:11px;opacity:0.6;font-weight:700;letter-spacing:1px;margin-bottom:8px;">在庫アラート</div>
-    <div style="display:flex;gap:0;">
-      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
-        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#f87171;">${ngList.length}</div>
-        <div style="font-size:10px;opacity:0.6;">不足中</div>
-      </div>
-      <div style="flex:1;text-align:center;border-right:1px solid rgba(255,255,255,0.15);padding:8px 0;">
-        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#fbbf24;">${lowStock.length}</div>
-        <div style="font-size:10px;opacity:0.6;">残りわずか</div>
-      </div>
-      <div style="flex:1;text-align:center;padding:8px 0;">
-        <div style="font-size:28px;font-weight:900;font-family:'DM Mono',monospace;color:#94a3b8;">${zeroStock.length}</div>
-        <div style="font-size:10px;opacity:0.6;">在庫0</div>
-      </div>
-    </div>
-  </div>`;
-
-  // 不足カード
-  if (ngList.length === 0) {
+  // ⚫ 在庫0
+  if (zeroStock.length > 0) {
     html += `
-    <div style="background:var(--green-light);border-radius:14px;padding:16px;text-align:center;">
-      <div style="font-size:28px;margin-bottom:6px;">✅</div>
-      <div style="font-size:14px;font-weight:900;color:var(--green);">不足カードはありません！</div>
-    </div>`;
-  } else {
-    html += `
-    <div style="background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid var(--red-light);">
-      <div style="background:var(--red);padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="color:white;font-weight:900;font-size:14px;">🔴 不足中</div>
-        <div style="background:rgba(255,255,255,0.25);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${ngList.length}種 / ${totalShortage}枚</div>
+    <div style="background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid var(--surface2);">
+      <div style="background:#374151;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
+        <div style="color:white;font-weight:900;font-size:14px;">⚫ 在庫0</div>
+        <div style="background:rgba(255,255,255,0.25);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${zeroStock.length}種</div>
       </div>
-      ${ngList.map((s,i)=>`
-        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<ngList.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
+      ${zeroStock.map((c,i)=>`
+        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<zeroStock.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.card.name}</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:2px;font-family:'DM Mono',monospace;">必要${s.needed}枚 / 所持${s.have}枚</div>
+            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px;">次回補充してください</div>
           </div>
-          ${s.card.image_url?`<button onclick="openImageModal('${s.card.image_url}','${s.card.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
-          <div style="background:var(--red);color:white;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">−${Math.abs(s.diff)}枚</div>
+          ${c.image_url?`<button onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
+          <div style="background:var(--surface2);color:var(--text2);border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">0枚</div>
         </div>`).join('')}
     </div>`;
   }
 
-  // 残りわずか（5枚以下）
+  // 🟡 残りわずか
   if (lowStock.length > 0) {
     html += `
     <div style="background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid #fef3c7;">
@@ -2666,30 +2632,10 @@ function renderMercari() {
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px;">そろそろ補充を検討してください</div>
           </div>
-          ${c.image_url?`<button onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
+          ${c.image_url?`<button onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
           <div style="background:#fef3c7;color:#d97706;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">残り${have}枚</div>
         </div>`;
       }).join('')}
-    </div>`;
-  }
-
-  // 在庫0
-  if (zeroStock.length > 0) {
-    html += `
-    <div style="background:var(--surface);border-radius:14px;overflow:hidden;border:1.5px solid var(--surface2);">
-      <div style="background:#374151;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;">
-        <div style="color:white;font-weight:900;font-size:14px;">⚫ 在庫0</div>
-        <div style="background:rgba(255,255,255,0.25);color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:700;">${zeroStock.length}種</div>
-      </div>
-      ${zeroStock.map((c,i)=>`
-        <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<zeroStock.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
-          <div style="flex:1;min-width:0;">
-            <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:2px;">在庫なし・次回補充してください</div>
-          </div>
-          ${c.image_url?`<button onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
-          <div style="background:var(--surface2);color:var(--text2);border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">0枚</div>
-        </div>`).join('')}
     </div>`;
   }
 
