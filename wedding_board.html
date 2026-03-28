@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>千葉大次郎 & 鈴木千笑 ご入籍おめでとう</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Noto+Serif+JP:wght@300;400&family=Lato:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent: #c8a880;
+    --accent-dark: #5a3e2b;
+    --bg: #faf7f2;
+    --surface: #fff;
+    --text: #3a3028;
+    --text-muted: #8a7060;
+    --border: #e8d8c0;
+    --dark-bg: #2a1f18;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Noto Serif JP', serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+  /* HERO */
+  .hero { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: linear-gradient(160deg, #fdf9f3 0%, #f5ede0 50%, #ede0d0 100%); overflow: hidden; }
+  .hero::before { content: ''; position: absolute; inset: 0; background-image: radial-gradient(ellipse 80% 60% at 20% 80%, rgba(210,170,130,0.15) 0%, transparent 60%), radial-gradient(ellipse 60% 80% at 80% 20%, rgba(220,190,160,0.12) 0%, transparent 60%); pointer-events: none; }
+  .petals-container { position: absolute; inset: 0; pointer-events: none; }
+  .petal { position: absolute; background: rgba(210,160,140,0.35); animation: fall linear infinite; }
+  @keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.5; } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
+
+  .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; animation: fadeUp 1.2s ease 0.4s both; }
+  .hero-label { font-family: 'Lato', sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.55em; color: #a08060; text-transform: uppercase; margin-bottom: 1.75rem; }
+  .hero-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(2.8rem, 10vw, 6rem); color: var(--accent-dark); line-height: 1.1; letter-spacing: 0.02em; }
+  .hero-names .amp { font-style: italic; color: var(--accent); display: block; font-size: 0.65em; margin: 0.2em 0; }
+  .hero-divider { display: flex; align-items: center; gap: 1rem; margin: 1.75rem auto; width: 200px; }
+  .hero-divider::before, .hero-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--accent); }
+  .hero-divider span { color: var(--accent); font-size: 12px; }
+  .hero-sub { font-family: 'Lato', sans-serif; font-weight: 300; font-size: 12px; letter-spacing: 0.3em; color: #9a7858; }
+  .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.35em; color: #a08060; text-transform: uppercase; animation: bounce 2.2s ease infinite; z-index: 1; }
+  @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(7px); } }
+  @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* SLIDESHOW - fullscreen */
+  .slideshow-section { position: relative; width: 100%; height: 100svh; overflow: hidden; background: #0e0a08; }
+  .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
+  .slide.active { opacity: 1; }
+  .slide img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.04); transition: transform 8s ease; }
+  .slide.active img { transform: scale(1); }
+
+  .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.0) 40%, rgba(0,0,0,0.5) 100%); pointer-events: none; }
+
+  .slide-caption { position: absolute; bottom: 3rem; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; }
+  .slide-caption-text { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-style: italic; font-size: clamp(1rem, 3vw, 1.4rem); color: rgba(255,245,230,0.8); letter-spacing: 0.1em; }
+
+  .slideshow-controls { position: absolute; bottom: 1.5rem; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 1rem; z-index: 3; }
+  .slide-btn { background: rgba(255,255,255,0.1); border: 0.5px solid rgba(200,168,128,0.4); color: var(--accent); width: 36px; height: 36px; border-radius: 50%; cursor: pointer; font-size: 14px; display: flex; align-items: center; justify-content: center; transition: all 0.2s; backdrop-filter: blur(4px); }
+  .slide-btn:hover { background: rgba(200,168,128,0.2); border-color: var(--accent); }
+  .slide-dots { display: flex; gap: 7px; }
+  .slide-dot { width: 5px; height: 5px; border-radius: 50%; background: rgba(200,168,128,0.35); cursor: pointer; transition: all 0.3s; }
+  .slide-dot.active { background: var(--accent); width: 20px; border-radius: 3px; }
+
+  .section-header { position: absolute; top: 2.5rem; left: 50%; transform: translateX(-50%); text-align: center; z-index: 2; white-space: nowrap; }
+  .section-eyebrow { font-family: 'Lato', sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.5em; text-transform: uppercase; color: rgba(200,168,128,0.6); margin-bottom: 0.4rem; }
+  .section-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: 0.06em; color: rgba(232,216,192,0.9); }
+  .slideshow-outer { display: contents; }
+
+  /* MESSAGES */
+  .messages-section { background: var(--bg); padding: 5rem 1.5rem 6rem; }
+  .refresh-bar { display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto 1.5rem; }
+  .msg-count { font-family: 'Lato', sans-serif; font-size: 12px; color: var(--text-muted); }
+  .msg-count span { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--accent); margin-right: 4px; }
+  .refresh-btn { display: flex; align-items: center; gap: 6px; background: none; border: 0.5px solid var(--border); border-radius: 100px; padding: 7px 16px; font-size: 12px; font-family: 'Lato', sans-serif; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+  .messages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; max-width: 900px; margin: 0 auto; }
+  .msg-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.75rem 1.5rem 1.5rem; position: relative; opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
+  .msg-card.visible { opacity: 1; transform: translateY(0); }
+  .msg-card::before { content: '\201C'; font-family: 'Cormorant Garamond', serif; font-size: 5rem; color: #eddec8; position: absolute; top: -0.6rem; left: 1.25rem; line-height: 1; pointer-events: none; }
+
+  .msg-dear { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: #b09070; margin-bottom: 0.3rem; }
+  .msg-to { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--accent-dark); margin-bottom: 1rem; }
+  .msg-body { font-size: 0.875rem; line-height: 1.95; color: #5a4838; padding-top: 0.25rem; white-space: pre-wrap; word-break: break-word; }
+  .msg-photo { margin-top: 1rem; border-radius: 8px; overflow: hidden; }
+  .msg-photo img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
+
+  .msg-from-line { display: flex; align-items: center; gap: 10px; margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid var(--border); }
+  .msg-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4b090, #c89870); display: flex; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 12px; color: white; flex-shrink: 0; }
+  .msg-from-label { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #b09070; display: block; }
+  .msg-from-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--accent-dark); }
+
+  .empty-state { grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 14px; }
+
+  /* FOOTER */
+  .footer { background: var(--dark-bg); text-align: center; padding: 3.5rem 1.5rem; }
+  .footer-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 2rem; color: #e8d8c0; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .footer-names .amp { font-style: italic; color: var(--accent); }
+  .footer-date { font-family: 'Lato', sans-serif; font-size: 11px; letter-spacing: 0.35em; color: #6a5848; text-transform: uppercase; }
+</style>
+</head>
+<body>
+
+<script>
+  const SUPABASE_URL = 'https://qrynpbgilwnfymuihsse.supabase.co';
+  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFyeW5wYmdpbHduZnltdWloc3NlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ2OTQxMjQsImV4cCI6MjA5MDI3MDEyNH0.KtYelj9iRmj3wVZtXAaRmNYRx87MDa8iaV-z5Wt2cNI';
+  const TABLE_NAME = 'wedding_messages';
+  const GROOM = '千葉大次郎';
+  const BRIDE = '鈴木千笑';
+
+  // 写真ファイルは同じフォルダに photo1.jpeg / photo2.jpeg / photo3.jpeg を置いてください
+  const SLIDE_PHOTOS = ['photo1.jpeg', 'photo2.jpeg', 'photo3.jpeg'];
+
+  // 30秒ごとに自動更新（0にすると無効）
+  const AUTO_RELOAD_INTERVAL = 30000;
+</script>
+
+<div class="petals-container" id="petals"></div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <p class="hero-label">Congratulations on your marriage</p>
+    <h1 class="hero-names">
+      千葉大次郎<span class="amp">&amp;</span>鈴木千笑
+    </h1>
+    <div class="hero-divider"><span>◇</span></div>
+    <p class="hero-sub">ご入籍おめでとうございます</p>
+  </div>
+  <div class="scroll-hint">↓ scroll</div>
+</section>
+
+<!-- SLIDESHOW -->
+<section class="slideshow-section">
+  <div class="section-header">
+    <p class="section-eyebrow">Our Memories</p>
+    <h2 class="section-title">二人の思い出</h2>
+  </div>
+  <div class="slideshow-outer">
+    <div id="slideshow"></div>
+    <div class="slide-overlay"></div>
+    <div class="slideshow-controls">
+      <button class="slide-btn" id="slide-prev">&#8592;</button>
+      <div class="slide-dots" id="slide-dots"></div>
+      <button class="slide-btn" id="slide-next">&#8594;</button>
+    </div>
+  </div>
+</section>
+
+<!-- MESSAGES -->
+<section class="messages-section">
+  <div class="section-header">
+    <p class="section-eyebrow">Messages</p>
+    <h2 class="section-title">みんなからのメッセージ</h2>
+  </div>
+  <div class="refresh-bar">
+    <p class="msg-count"><span id="msg-count-num">0</span>通のメッセージ</p>
+    <button class="refresh-btn" onclick="loadMessages()">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <polyline points="23 4 23 10 17 10"/>
+        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+      </svg>
+      更新
+    </button>
+  </div>
+  <div class="messages-grid" id="messages-grid">
+    <div class="empty-state">読み込み中...</div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <p class="footer-names">千葉大次郎 <span class="amp">&amp;</span> 鈴木千笑</p>
+  <p class="footer-date">Congratulations on your marriage</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ---- Petals ----
+  const petalsEl = document.getElementById('petals');
+  for (let i = 0; i < 20; i++) {
+    const p = document.createElement('div');
+    p.className = 'petal';
+    const size = 6 + Math.random() * 9;
+    p.style.cssText = [
+      `left:${Math.random()*100}%`,
+      `width:${size}px`,
+      `height:${size*1.4}px`,
+      `border-radius:${Math.random()>0.5?'50% 0 50% 0':'0 50% 0 50%'}`,
+      `animation-duration:${9+Math.random()*13}s`,
+      `animation-delay:${Math.random()*12}s`,
+      `opacity:${0.15+Math.random()*0.35}`
+    ].join(';');
+    petalsEl.appendChild(p);
+  }
+
+  // ---- Slideshow ----
+  const slideshowEl = document.getElementById('slideshow');
+  const dotsEl = document.getElementById('slide-dots');
+  let currentSlide = 0, slideTimer;
+
+  SLIDE_PHOTOS.forEach((src, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'slide' + (i===0?' active':'');
+    slide.innerHTML = `<img src="${src}" alt="Photo ${i+1}" loading="lazy">`;
+    slideshowEl.appendChild(slide);
+
+    const dot = document.createElement('div');
+    dot.className = 'slide-dot' + (i===0?' active':'');
+    dot.onclick = () => goToSlide(i);
+    dotsEl.appendChild(dot);
+  });
+
+  function goToSlide(n) {
+    const slides = slideshowEl.querySelectorAll('.slide');
+    const dots = dotsEl.querySelectorAll('.slide-dot');
+    slides[currentSlide].classList.remove('active');
+    dots[currentSlide].classList.remove('active');
+    currentSlide = (n + slides.length) % slides.length;
+    slides[currentSlide].classList.add('active');
+    dots[currentSlide].classList.add('active');
+    clearInterval(slideTimer);
+    slideTimer = setInterval(() => goToSlide(currentSlide+1), 4500);
+  }
+
+  document.getElementById('slide-prev').onclick = () => goToSlide(currentSlide-1);
+  document.getElementById('slide-next').onclick = () => goToSlide(currentSlide+1);
+  slideTimer = setInterval(() => goToSlide(currentSlide+1), 4500);
+
+  // ---- Messages ----
+  function getInitials(name) {
+    const p = name.trim().split(/[\s　]+/);
+    return p.length >= 2 ? p[0][0]+p[1][0] : name.slice(0,2);
+  }
+  function escHtml(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  async function loadMessages() {
+    const grid = document.getElementById('messages-grid');
+    const { data, error } = await supabase
+      .from(TABLE_NAME).select('*').order('created_at', { ascending: false });
+
+    if (error) { grid.innerHTML = '<div class="empty-state">読み込みに失敗しました</div>'; return; }
+
+    document.getElementById('msg-count-num').textContent = data.length;
+
+    if (data.length === 0) {
+      grid.innerHTML = '<div class="empty-state">まだメッセージが届いていません</div>';
+      return;
+    }
+
+    grid.innerHTML = data.map((m, i) => `
+      <div class="msg-card" style="transition-delay:${Math.min(i*0.07,0.5)}s">
+        <p class="msg-dear">Dear</p>
+        <p class="msg-to">${GROOM} &amp; ${BRIDE}</p>
+        <p class="msg-body">${escHtml(m.message)}</p>
+        ${m.photo_base64 ? `<div class="msg-photo"><img src="${m.photo_base64}" alt="" loading="lazy"></div>` : ''}
+        <div class="msg-from-line">
+          <div class="msg-avatar">${getInitials(m.name)}</div>
+          <div>
+            <span class="msg-from-label">From</span>
+            <span class="msg-from-name">${escHtml(m.name)}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+    }, { threshold: 0.1 });
+    grid.querySelectorAll('.msg-card').forEach(c => observer.observe(c));
+  }
+
+  loadMessages();
+  if (AUTO_RELOAD_INTERVAL > 0) setInterval(loadMessages, AUTO_RELOAD_INTERVAL);
+</script>
+</body>
+</html>
