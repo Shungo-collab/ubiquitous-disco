@@ -1007,17 +1007,25 @@ body {
           </button>
         </div>
 
-        <!-- カテゴリ ドロップダウン -->
-        <div style="margin-bottom:10px;">
+        <!-- カテゴリ・レアリティ ドロップダウン -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
           <select id="shopCatSelect" onchange="switchShopCat(this.value)"
-            style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 14px center;">
-            <option value="不足">⚠️ 不足中のカード</option>
+            style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 10px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+            <option value="不足">⚠️ 不足中</option>
             <option value="ポケモン">🐾 ポケモン</option>
             <option value="グッズ">🎒 グッズ</option>
-            <option value="ポケモンの道具">🔧 ポケモンの道具</option>
+            <option value="ポケモンの道具">🔧 道具</option>
             <option value="サポート">👤 サポート</option>
             <option value="スタジアム">🏟 スタジアム</option>
             <option value="エネルギー">⚡ エネルギー</option>
+          </select>
+          <select id="shopRaritySelect" onchange="switchShopRarity(this.value)"
+            style="width:100px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 10px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+            <option value="">すべて</option>
+            <option value="RR">RR</option>
+            <option value="R">R</option>
+            <option value="ACE">ACE</option>
+            <option value="-">ノーマル</option>
           </select>
         </div>
 
@@ -2157,6 +2165,7 @@ let currentShopCat = '不足';
 let shopSelectedCards = {};
 let currentStockLocation = 'home';
 let currentShopPage = 0;
+let currentShopRarity = '';
 const SHOP_PAGE_SIZE = 10;
 
 function selectShop(shopName) {
@@ -2174,6 +2183,7 @@ function selectStockLocation(loc) {
   currentStockLocation = loc;
   shopSelectedCards = {};
   currentShopCat = '不足';
+  currentShopRarity = '';
   document.getElementById('shopStep15').style.display = 'none';
   document.getElementById('shopStep2').style.display = 'block';
   renderShopCardList();
@@ -2203,6 +2213,8 @@ function renderShopCardList() {
   // ドロップダウン同期
   const sel = document.getElementById('shopCatSelect');
   if (sel) sel.value = currentShopCat;
+  const rsel = document.getElementById('shopRaritySelect');
+  if (rsel) rsel.value = currentShopRarity;
 
   // 表示カード絞り込み
   let filtered;
@@ -2213,6 +2225,13 @@ function renderShopCardList() {
     const shortage = inCat.filter(c => shortageIds.has(c.id));
     const others = inCat.filter(c => !shortageIds.has(c.id));
     filtered = [...shortage, ...others];
+  }
+
+  // レアリティフィルター
+  if (currentShopRarity === '-') {
+    filtered = filtered.filter(c => !c.rarity || c.rarity === '-');
+  } else if (currentShopRarity) {
+    filtered = filtered.filter(c => c.rarity === currentShopRarity);
   }
 
   updateShopSelectedDisplay();
@@ -2370,6 +2389,7 @@ function confirmEditShop() {
 }
 
 function switchShopCat(cat) { currentShopCat = cat; currentShopPage = 0; renderShopCardList(); }
+function switchShopRarity(val) { currentShopRarity = val; currentShopPage = 0; renderShopCardList(); }
 
 function addShopCard(cardId) {
   const priceEl = document.getElementById('sp-input-'+cardId);
