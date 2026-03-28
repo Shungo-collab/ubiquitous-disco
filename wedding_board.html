@@ -173,7 +173,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ---- Petals ----
   const petalsEl = document.getElementById('petals');
@@ -237,7 +237,7 @@
 
   async function loadMessages() {
     const grid = document.getElementById('messages-grid');
-    const { data, error } = await supabase
+    const { data, error } = await sbClient
       .from(TABLE_NAME).select('*').order('created_at', { ascending: false });
 
     if (error) { grid.innerHTML = '<div class="empty-state">読み込みに失敗しました</div>'; return; }

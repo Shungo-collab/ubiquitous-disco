@@ -145,7 +145,7 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
-  const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
   document.getElementById('header-names').innerHTML = GROOM + '<span class="amp">&amp;</span>' + BRIDE;
 
   let photoBase64 = null;
@@ -188,7 +188,7 @@
     const btn = document.getElementById('submit-btn');
     btn.disabled = true; btn.textContent = '送信中...';
 
-    const { error } = await supabase.from(TABLE_NAME).insert([{
+    const { error } = await sbClient.from(TABLE_NAME).insert([{
       name, message: msg, photo_base64: photoBase64 || null,
       created_at: new Date().toISOString()
     }]);
