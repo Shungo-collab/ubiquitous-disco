@@ -834,6 +834,17 @@ body {
   </div>
 
   <div class="filter-section">
+    <div class="filter-section-title">レアリティ</div>
+    <div class="filter-chips">
+      <button class="filter-chip-item active" data-rarity="" onclick="sheetSetRarity('',this)">すべて</button>
+      <button class="filter-chip-item" data-rarity="RR" onclick="sheetSetRarity('RR',this)">RR</button>
+      <button class="filter-chip-item" data-rarity="R" onclick="sheetSetRarity('R',this)">R</button>
+      <button class="filter-chip-item" data-rarity="ACE" onclick="sheetSetRarity('ACE',this)">ACE</button>
+      <button class="filter-chip-item" data-rarity="-" onclick="sheetSetRarity('-',this)">ノーマル</button>
+    </div>
+  </div>
+
+  <div class="filter-section">
     <div class="filter-section-title">在庫</div>
     <div class="filter-chips">
       <button class="filter-chip-item active" data-filter="all" onclick="sheetSetFilter('all',this)">すべて</button>
@@ -1201,7 +1212,7 @@ const H = {
 };
 
 let cards = [], decks = [], deckCards = [], shopPrices = [], sales = [];
-let isAdmin = false, currentFilter = 'all', currentSort = '', currentCat = '';
+let isAdmin = false, currentFilter = 'all', currentSort = '', currentCat = '', currentRarity = '';
 let pendingListDeckId = null, pendingCompleteId = null;
 let selectedDeckCardName = {};
 
@@ -1256,6 +1267,8 @@ function renderInventory() {
   let list = [...cards];
   if (q) list = list.filter(c => c.name.toLowerCase().includes(q));
   if (currentCat) list = list.filter(c => (c.category||'グッズ') === currentCat);
+  if (currentRarity === '-') list = list.filter(c => !c.rarity || c.rarity === '-');
+  else if (currentRarity) list = list.filter(c => c.rarity === currentRarity);
   if (currentFilter === 'rare') list = list.filter(c => c.rarity && c.rarity !== '-');
   if (currentFilter === 'stock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) > 0);
   if (currentFilter === 'nostock') list = list.filter(c => (c.stock_home||0)+(c.stock_parents||0) === 0);
@@ -2687,6 +2700,13 @@ function sheetSetCat(val, el) {
   updateFilterBtnState();
   renderInventory();
 }
+function sheetSetRarity(val, el) {
+  currentRarity = val;
+  document.querySelectorAll('[data-rarity]').forEach(e=>e.classList.remove('active'));
+  el.classList.add('active');
+  updateFilterBtnState();
+  renderInventory();
+}
 function sheetSetFilter(val, el) {
   currentFilter = val;
   document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
@@ -2702,9 +2722,11 @@ function sheetSetSort(val, el) {
   renderInventory();
 }
 function resetFilters() {
-  currentCat=''; currentFilter='all'; currentSort='';
+  currentCat=''; currentFilter='all'; currentSort=''; currentRarity='';
   document.querySelectorAll('[data-cat]').forEach(e=>e.classList.remove('active'));
   document.querySelector('[data-cat=""]')?.classList.add('active');
+  document.querySelectorAll('[data-rarity]').forEach(e=>e.classList.remove('active'));
+  document.querySelector('[data-rarity=""]')?.classList.add('active');
   document.querySelectorAll('[data-filter]').forEach(e=>e.classList.remove('active'));
   document.querySelector('[data-filter="all"]')?.classList.add('active');
   document.querySelectorAll('[data-sort]').forEach(e=>e.classList.remove('active','active-sort'));
@@ -2713,7 +2735,7 @@ function resetFilters() {
   renderInventory();
 }
 function updateFilterBtnState() {
-  const isActive = currentCat!=='' || currentFilter!=='all' || currentSort!=='';
+  const isActive = currentCat!=='' || currentFilter!=='all' || currentSort!=='' || currentRarity!=='';
   const btn = document.getElementById('filterBtn');
   if (btn) {
     btn.classList.toggle('active', isActive);
