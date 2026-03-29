@@ -19,6 +19,7 @@
   * { margin: 0; padding: 0; box-sizing: border-box; }
   html { scroll-behavior: smooth; }
   body { font-family: 'Noto Serif JP', serif; background: var(--bg); color: var(--text); overflow-x: hidden; }
+  body.scroll-locked { overflow: hidden; }
 
   /* HERO */
   .hero { min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; background: linear-gradient(160deg, #fdf9f3 0%, #f5ede0 50%, #ede0d0 100%); overflow: hidden; }
@@ -49,7 +50,7 @@
   .hero-congrats {
     font-family: 'Dancing Script', cursive;
     font-weight: 700;
-    font-size: clamp(2.8rem, 9vw, 7rem);
+    font-size: clamp(3.5rem, 11vw, 7rem);
     line-height: 1.1;
     display: block;
     color: transparent;
@@ -469,17 +470,21 @@
   // ---- Hero sequence ----
   const seq = (id, cls, delay) => setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add(cls); }, delay);
 
-  // フェーズ1: Congratulations 全画面で書かれる
+  // フェーズ1中はスクロールロック
+  document.body.classList.add('scroll-locked');
+
   seq('w-congrats', 'stroke', 300);
   seq('w-congrats', 'fill',   2500);
   seq('w-on',       'stroke', 2600);
   seq('w-on',       'fill',   4200);
 
-  // フェーズ1フェードアウト → フェーズ2登場
+  // フェーズ1フェードアウト → スクロール解除 → フェーズ2
   setTimeout(() => document.getElementById('phase1').classList.add('hide'), 5200);
-  setTimeout(() => document.getElementById('phase2').classList.add('show'), 5600);
+  setTimeout(() => {
+    document.body.classList.remove('scroll-locked');
+    document.getElementById('phase2').classList.add('show');
+  }, 5600);
 
-  // 名前を輪郭→塗り
   setTimeout(() => document.getElementById('w-groom').classList.add('fill'), 6200);
   setTimeout(() => document.getElementById('w-bride').classList.add('fill'), 6600);
 
