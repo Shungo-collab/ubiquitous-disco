@@ -342,6 +342,26 @@
 
   .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 14px; width: 100%; }
 
+  /* 音楽ボタン */
+  .music-btn {
+    position: fixed;
+    bottom: 1.5rem;
+    right: 1.5rem;
+    z-index: 999;
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: rgba(90,62,43,0.85);
+    color: #faf0e0;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(6px);
+    transition: all 0.2s;
+    box-shadow: 0 2px 12px rgba(90,62,43,0.3);
+  }
+  .music-btn:hover { background: rgba(90,62,43,1); transform: scale(1.05); }
+
   /* Progress bar */
   .slide-progress { position: absolute; top: 0; left: 0; width: 100%; height: 3px; z-index: 4; display: flex; gap: 3px; padding: 0 1.5rem; box-sizing: border-box; }
   .slide-progress-item { flex: 1; height: 100%; background: rgba(200,168,128,0.25); border-radius: 2px; overflow: hidden; }
@@ -377,6 +397,8 @@
 <audio id="sfx-write" preload="auto">
   <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
 </audio>
+
+<button class="music-btn" id="music-btn" onclick="toggleMusic()" title="音楽をオン">♩</button>
 
 <div class="petals-container" id="petals"></div>
 
@@ -476,27 +498,38 @@
 
   // ---- Audio ----
   const bgm = document.getElementById('bgm');
-  bgm.volume = 0;
+  bgm.volume = 0.45;
+  let bgmPlaying = false;
 
-  // 最初のタップ/クリックでBGM開始（ブラウザ制限対応）
-  let audioStarted = false;
-  function startAudio() {
-    if (audioStarted) return;
-    audioStarted = true;
+  function tryPlayBgm() {
+    if (bgmPlaying) return;
     bgm.play().then(() => {
-      // フェードイン
-      let vol = 0;
-      const fadeIn = setInterval(() => {
-        vol = Math.min(vol + 0.03, 0.5);
-        bgm.volume = vol;
-        if (vol >= 0.5) clearInterval(fadeIn);
-      }, 100);
+      bgmPlaying = true;
+      updateMusicBtn();
     }).catch(() => {});
   }
-  document.addEventListener('touchstart', startAudio, { once: true });
-  document.addEventListener('click', startAudio, { once: true });
-  // 自動再生も試みる
-  setTimeout(() => startAudio(), 500);
+
+  function updateMusicBtn() {
+    const btn = document.getElementById('music-btn');
+    if (!btn) return;
+    btn.textContent = bgmPlaying ? '♪' : '♩';
+    btn.title = bgmPlaying ? '音楽をオフ' : '音楽をオン';
+  }
+
+  function toggleMusic() {
+    if (bgmPlaying) {
+      bgm.pause();
+      bgmPlaying = false;
+    } else {
+      bgm.play().then(() => { bgmPlaying = true; }).catch(() => {});
+    }
+    updateMusicBtn();
+  }
+
+  // タップ/クリックで再生（ブラウザ制限対応）
+  document.addEventListener('touchstart', tryPlayBgm, { once: true });
+  document.addEventListener('click', tryPlayBgm, { once: true });
+  setTimeout(tryPlayBgm, 800);
 
   // ---- Hero sequence ----
   const seq = (id, cls, delay) => setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add(cls); }, delay);
