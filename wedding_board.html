@@ -27,10 +27,10 @@
   .petal { position: absolute; background: rgba(210,160,140,0.35); animation: fall linear infinite; }
   @keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.5; } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
 
-  .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; width: 100%; }
+  .hero-content { position: relative; z-index: 1; text-align: center; width: 100%; min-height: 100svh; display: flex; align-items: center; justify-content: center; }
   .hero-label { display: none; }
 
-  /* === Congratulations 全画面フェーズ === */
+  /* フェーズ1：Congratulations が全画面を完全に覆う */
   .hero-phase1 {
     position: absolute;
     inset: 0;
@@ -38,60 +38,64 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    padding: 2rem;
+    background: linear-gradient(160deg, #fdf9f3 0%, #f5ede0 50%, #ede0d0 100%);
+    z-index: 10;
     opacity: 1;
-    transition: opacity 0.8s ease;
+    transition: opacity 1.2s ease;
   }
   .hero-phase1.hide { opacity: 0; pointer-events: none; }
 
   .hero-congrats {
     font-family: 'Dancing Script', cursive;
     font-weight: 700;
-    font-size: clamp(3rem, 10vw, 7rem);
+    font-size: clamp(4.5rem, 14vw, 10rem);
+    line-height: 1.1;
+    display: block;
     color: transparent;
-    -webkit-text-stroke: 1.5px var(--accent-dark);
+    -webkit-text-stroke: 2px var(--accent-dark);
     background: linear-gradient(to right, var(--accent-dark) 50%, transparent 50%);
     background-size: 200% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    display: block;
-    line-height: 1.2;
   }
-  .hero-congrats.stroke { animation: strokeDraw 2s ease forwards; }
-  .hero-congrats.fill   { animation: fillIn 0.8s ease forwards; }
+  .hero-congrats.stroke { animation: strokeDraw 2.2s ease forwards; }
+  .hero-congrats.fill   { animation: fillIn 1s ease forwards; }
 
   .hero-on {
     font-family: 'Dancing Script', cursive;
     font-weight: 400;
-    font-size: clamp(1.8rem, 5vw, 3.5rem);
+    font-size: clamp(2.2rem, 7vw, 5rem);
+    display: block;
+    margin-top: 0.2em;
     color: transparent;
-    -webkit-text-stroke: 1px #9a7858;
+    -webkit-text-stroke: 1.5px #9a7858;
     background: linear-gradient(to right, #9a7858 50%, transparent 50%);
     background-size: 200% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    display: block;
-    margin-top: 0.3rem;
   }
-  .hero-on.stroke { animation: strokeDrawMuted 1.4s ease forwards; }
-  .hero-on.fill   { animation: fillInMuted 0.8s ease forwards; }
+  .hero-on.stroke { animation: strokeDrawMuted 1.6s ease forwards; }
+  .hero-on.fill   { animation: fillInMuted 1s ease forwards; }
 
   @keyframes strokeDraw      { from { background-position: 100% 0; } to { background-position: 0% 0; } }
-  @keyframes fillIn          { from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); } to { color: var(--accent-dark); -webkit-text-stroke: 1.5px transparent; } }
+  @keyframes fillIn          { from { color: transparent; -webkit-text-stroke: 2px var(--accent-dark); } to { color: var(--accent-dark); -webkit-text-stroke: 2px transparent; } }
   @keyframes strokeDrawMuted { from { background-position: 100% 0; } to { background-position: 0% 0; } }
-  @keyframes fillInMuted     { from { color: transparent; -webkit-text-stroke: 1px #9a7858; } to { color: #9a7858; -webkit-text-stroke: 1px transparent; } }
+  @keyframes fillInMuted     { from { color: transparent; -webkit-text-stroke: 1.5px #9a7858; } to { color: #9a7858; -webkit-text-stroke: 1.5px transparent; } }
 
-  /* === 名前フェーズ === */
+  /* フェーズ2：名前（最初は完全に invisible） */
   .hero-phase2 {
     opacity: 0;
     transform: translateY(16px);
     transition: opacity 0.9s ease, transform 0.9s ease;
     pointer-events: none;
+    padding: 2rem 1.5rem;
   }
   .hero-phase2.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
 
-  .hero-names { line-height: 1.05; margin-bottom: 0.5rem; }
+  .hero-names { line-height: 1.05; margin-bottom: 0.3rem; }
   .hero-name-item {
     font-family: 'Noto Serif JP', serif;
     font-weight: 300;
@@ -99,7 +103,7 @@
     color: transparent;
     -webkit-text-stroke: 1px var(--accent-dark);
     display: block;
-    transition: color 0.8s ease, -webkit-text-stroke 0.8s ease;
+    transition: color 0.9s ease, -webkit-text-stroke 0.9s ease;
   }
   .hero-name-item.fill { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; }
 
