@@ -30,44 +30,48 @@
   .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; }
   .hero-label { display: none; }
 
-  /* 筆書きテキスト共通 */
+  /* 筆書き2段階：①アウトラインが書かれる → ②塗りがふわっと入る */
   .write-text {
     font-family: 'Dancing Script', cursive;
+    display: block;
     color: transparent;
     -webkit-text-stroke: 1.5px var(--accent-dark);
-    text-stroke: 1.5px var(--accent-dark);
     background: linear-gradient(to right, var(--accent-dark) 50%, transparent 50%);
     background-size: 200% 100%;
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    display: block;
   }
-  .write-text.writing {
-    animation: writeIn 1.8s ease forwards;
+  /* ステージ1：アウトラインが左→右に描かれる */
+  .write-text.stage1 {
+    animation: strokeDraw 1.8s ease forwards;
   }
-  .write-text.writing-fast {
-    animation: writeIn 1.2s ease forwards;
+  @keyframes strokeDraw {
+    from { background-position: 100% 0; }
+    to   { background-position: 0% 0; }
   }
-  @keyframes writeIn {
-    from { background-position: 100% 0; -webkit-text-stroke-color: var(--accent-dark); }
-    to   { background-position: 0% 0; -webkit-text-stroke-color: transparent; color: var(--accent-dark); }
+  /* ステージ2：塗りがふわっと入りstrokeが消える */
+  .write-text.stage2 {
+    animation: fillFade 0.8s ease forwards;
+    -webkit-text-stroke: 1.5px var(--accent-dark);
+  }
+  @keyframes fillFade {
+    from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); }
+    to   { color: var(--accent-dark); -webkit-text-stroke: 1.5px transparent; }
   }
 
-  /* congratulations行 */
   .hero-congrats {
-    font-size: clamp(1.6rem, 5vw, 3rem);
+    font-size: clamp(1.8rem, 5.5vw, 3.2rem);
     font-weight: 700;
-    letter-spacing: 0.02em;
-    margin-bottom: 0.5rem;
+    letter-spacing: 0.01em;
     line-height: 1.2;
+    margin-bottom: 0.3rem;
+    min-height: 1.3em;
   }
-
-  /* on your marriage行 */
   .hero-on {
+    font-family: 'Dancing Script', cursive;
     font-size: clamp(1.2rem, 3.5vw, 2rem);
     font-weight: 400;
-    letter-spacing: 0.04em;
     color: transparent;
     -webkit-text-stroke: 1px #9a7858;
     background: linear-gradient(to right, #9a7858 50%, transparent 50%);
@@ -75,54 +79,58 @@
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-    margin-bottom: 2rem;
+    display: block;
+    margin-bottom: 1.8rem;
+    min-height: 1.3em;
   }
-  .hero-on.writing-fast {
-    animation: writeInMuted 1.2s ease forwards;
-  }
-  @keyframes writeInMuted {
+  .hero-on.stage1 { animation: strokeDrawMuted 1.2s ease forwards; }
+  .hero-on.stage2 { animation: fillFadeMuted 0.8s ease forwards; -webkit-text-stroke: 1px #9a7858; }
+  @keyframes strokeDrawMuted {
     from { background-position: 100% 0; }
-    to   { background-position: 0% 0; -webkit-text-stroke-color: transparent; color: #9a7858; }
+    to   { background-position: 0% 0; }
+  }
+  @keyframes fillFadeMuted {
+    from { color: transparent; -webkit-text-stroke: 1px #9a7858; }
+    to   { color: #9a7858; -webkit-text-stroke: 1px transparent; }
   }
 
-  /* 名前 */
-  .hero-names {
-    line-height: 1.15;
-    letter-spacing: 0.02em;
-    margin-bottom: 0.2rem;
-  }
+  /* 漢字名前：Dancing Scriptでは出ないので、Cormorant+アニメで対応 */
+  .hero-names { line-height: 1.1; }
   .hero-name-item {
-    font-family: 'Dancing Script', cursive;
+    font-family: 'Noto Serif JP', serif;
+    font-weight: 300;
     font-size: clamp(3rem, 11vw, 6.5rem);
-    font-weight: 700;
-    color: transparent;
-    -webkit-text-stroke: 2px var(--accent-dark);
-    background: linear-gradient(to right, var(--accent-dark) 50%, transparent 50%);
-    background-size: 200% 100%;
-    background-position: 100% 0;
-    -webkit-background-clip: text;
-    background-clip: text;
     display: block;
+    color: transparent;
+    -webkit-text-stroke: 1px var(--accent-dark);
+    transition: color 0.8s ease, -webkit-text-stroke 0.8s ease;
   }
-  .hero-name-item.writing {
-    animation: writeInName 2s ease forwards;
+  .hero-name-item.stage1 {
+    animation: nameStroke 0.6s ease forwards;
   }
-  @keyframes writeInName {
-    from { background-position: 100% 0; }
-    to   { background-position: 0% 0; -webkit-text-stroke-color: transparent; color: var(--accent-dark); }
+  @keyframes nameStroke {
+    from { opacity: 0; -webkit-text-stroke: 1px var(--accent-dark); }
+    to   { opacity: 1; -webkit-text-stroke: 1.5px var(--accent-dark); }
   }
+  .hero-name-item.stage2 {
+    animation: nameFill 0.8s ease forwards;
+  }
+  @keyframes nameFill {
+    from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); }
+    to   { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; }
+  }
+
   .hero-amp-line {
     font-family: 'Dancing Script', cursive;
     font-size: clamp(1.8rem, 5vw, 3rem);
     color: var(--accent);
     display: block;
-    margin: 0.1em 0;
+    margin: 0.05em 0;
     opacity: 0;
     transition: opacity 0.6s ease;
   }
   .hero-amp-line.show { opacity: 1; }
 
-  /* シーケンス共通 */
   .hero-seq { opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .hero-seq.show { opacity: 1; transform: translateY(0); }
 
@@ -346,16 +354,16 @@
   <div class="hero-content">
 
     <span class="write-text hero-congrats" id="w-congrats">Congratulations</span>
-    <span class="write-text hero-on" id="w-on">on your marriage</span>
+    <span class="hero-on" id="w-on">on your marriage</span>
 
     <div class="hero-names">
-      <span class="hero-name-item" id="w-groom">Daijiro Chiba</span>
+      <span class="hero-name-item" id="w-groom">千葉大次郎</span>
       <span class="hero-amp-line" id="w-amp">&amp;</span>
-      <span class="hero-name-item" id="w-bride">Chiemi Suzuki</span>
+      <span class="hero-name-item" id="w-bride">鈴木千笑</span>
     </div>
 
     <div class="hero-divider hero-seq" id="seq-divider"><span>◇</span></div>
-    <p class="hero-sub hero-seq" id="seq-sub">千葉大次郎 &amp; 鈴木千笑</p>
+    <p class="hero-sub hero-seq" id="seq-sub">Chiba Daijiro &amp; Suzuki Chiemi</p>
 
   </div>
   <div class="scroll-hint" id="scroll-hint">↓ scroll</div>
@@ -431,22 +439,27 @@
   const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ---- Hero sequence ----
-  // 0.3s: Congratulations書き始め(1.8s)
-  // 2.1s: on your marriage(1.2s)
-  // 3.3s: 新郎名前(2s)
-  // 4.0s: & 出現
-  // 5.3s: 新婦名前(2s)
-  // 7.3s: divider
-  // 7.8s: sub
-  // 8.3s: scroll
-  setTimeout(() => document.getElementById('w-congrats').classList.add('writing'), 300);
-  setTimeout(() => document.getElementById('w-on').classList.add('writing-fast'), 2100);
-  setTimeout(() => document.getElementById('w-groom').classList.add('writing'), 3300);
-  setTimeout(() => document.getElementById('w-amp').classList.add('show'), 4000);
-  setTimeout(() => document.getElementById('w-bride').classList.add('writing'), 5300);
-  setTimeout(() => document.getElementById('seq-divider').classList.add('show'), 7300);
-  setTimeout(() => document.getElementById('seq-sub').classList.add('show'), 7800);
-  setTimeout(() => document.getElementById('scroll-hint').classList.add('show'), 8300);
+  // Congratulations: stroke(1.8s) → fill(0.8s)
+  // on your marriage: stroke(1.2s) → fill(0.8s)
+  // 千葉大次郎: stroke出現(0.6s) → fill(0.8s)
+  // & → 鈴木千笑: stroke → fill
+  const seq = (id, cls, delay) => setTimeout(() => {
+    const el = document.getElementById(id);
+    if (el) el.classList.add(cls);
+  }, delay);
+
+  seq('w-congrats', 'stage1', 300);
+  seq('w-congrats', 'stage2', 2300);
+  seq('w-on',       'stage1', 2400);
+  seq('w-on',       'stage2', 3800);
+  seq('w-groom',    'stage1', 4000);
+  seq('w-groom',    'stage2', 4800);
+  seq('w-amp',      'show',   5000);
+  seq('w-bride',    'stage1', 5300);
+  seq('w-bride',    'stage2', 6100);
+  seq('seq-divider','show',   6500);
+  seq('seq-sub',    'show',   7000);
+  seq('scroll-hint','show',   7500);
 
   // ---- Petals ----
   const petalsEl = document.getElementById('petals');
