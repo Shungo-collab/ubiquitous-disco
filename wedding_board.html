@@ -767,7 +767,6 @@
 
     if (error) { grid.innerHTML = '<div class="empty-state">読み込みに失敗しました</div>'; return; }
 
-    document.getElementById('msg-count-num').textContent = data.length;
     messagesData = data;
 
     if (data.length === 0) {
