@@ -371,6 +371,13 @@
   const AUTO_RELOAD_INTERVAL = 30000;
 </script>
 
+<audio id="bgm" loop preload="auto">
+  <source src="bgm.mp3" type="audio/mpeg">
+</audio>
+<audio id="sfx-write" preload="auto">
+  <source src="data:audio/wav;base64,UklGRiQAAABXQVZFZm10IBAAAAABAAEARKwAAIhYAQACABAAZGF0YQAAAAA=" type="audio/wav">
+</audio>
+
 <div class="petals-container" id="petals"></div>
 
 <!-- HERO -->
@@ -466,6 +473,30 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
   const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // ---- Audio ----
+  const bgm = document.getElementById('bgm');
+  bgm.volume = 0;
+
+  // 最初のタップ/クリックでBGM開始（ブラウザ制限対応）
+  let audioStarted = false;
+  function startAudio() {
+    if (audioStarted) return;
+    audioStarted = true;
+    bgm.play().then(() => {
+      // フェードイン
+      let vol = 0;
+      const fadeIn = setInterval(() => {
+        vol = Math.min(vol + 0.03, 0.5);
+        bgm.volume = vol;
+        if (vol >= 0.5) clearInterval(fadeIn);
+      }, 100);
+    }).catch(() => {});
+  }
+  document.addEventListener('touchstart', startAudio, { once: true });
+  document.addEventListener('click', startAudio, { once: true });
+  // 自動再生も試みる
+  setTimeout(() => startAudio(), 500);
 
   // ---- Hero sequence ----
   const seq = (id, cls, delay) => setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add(cls); }, delay);
@@ -628,6 +659,20 @@
   }
 
   function openEnvelope(i) {
+    // 封筒開封音（Web Audio APIで生成）
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)();
+      const buf = ctx.createBuffer(1, ctx.sampleRate * 0.15, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let j = 0; j < data.length; j++) {
+        data[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / data.length, 2) * 0.3;
+      }
+      const src = ctx.createBufferSource();
+      src.buffer = buf;
+      src.connect(ctx.destination);
+      src.start();
+    } catch(e) {}
+
     const env = document.getElementById('env-' + i);
     env.classList.add('open');
     setTimeout(() => openModal(i), 350);
