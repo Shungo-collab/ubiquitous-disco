@@ -139,7 +139,8 @@
   @keyframes fadeUp { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
 
   /* SLIDESHOW - fullscreen */
-  .slideshow-section { position: relative; width: 100%; height: 100svh; overflow: hidden; background: #0e0a08; }
+  .slideshow-section { position: relative; width: 100%; height: 100svh; overflow: hidden; background: #0e0a08; opacity: 0; transform: translateY(30px); transition: opacity 0.9s ease, transform 0.9s ease; }
+  .slideshow-section.revealed { opacity: 1; transform: translateY(0); }
   .slide { position: absolute; inset: 0; opacity: 0; transition: opacity 1.4s ease; }
   .slide.active { opacity: 1; }
   .slide img { width: 100%; height: 100%; object-fit: cover; display: block; transform: scale(1.04); transition: transform 8s ease; }
@@ -663,9 +664,21 @@
 
   // ---- Scroll reveal ----
   const revealObserver = new IntersectionObserver(entries => {
-    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObserver.unobserve(e.target); } });
-  }, { threshold: 0.12 });
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('revealed');
+        // スライドショーが表示されたらタイマー開始
+        if (e.target.classList.contains('slideshow-section')) {
+          startProgress();
+          slideTimer = setInterval(() => goToSlide(currentSlide + 1), SLIDE_DURATION);
+        }
+        revealObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.15 });
+
   document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
+  revealObserver.observe(document.querySelector('.slideshow-section'));
 
   // ---- Slideshow ----
   const slideshowEl = document.getElementById('slideshow');
@@ -720,8 +733,7 @@
 
   document.getElementById('slide-prev').onclick = () => goToSlide(currentSlide-1);
   document.getElementById('slide-next').onclick = () => goToSlide(currentSlide+1);
-  startProgress();
-  slideTimer = setInterval(() => goToSlide(currentSlide+1), SLIDE_DURATION);
+  // タイマーはスクロールで表示されたときに開始（scroll reveal側で制御）
 
   // ---- Messages ----
   function getInitials(name) {
