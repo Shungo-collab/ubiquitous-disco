@@ -29,8 +29,8 @@
 
   .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; animation: fadeUp 1.2s ease 0.4s both; }
   .hero-label { font-family: 'Lato', sans-serif; font-weight: 300; font-size: 10px; letter-spacing: 0.55em; color: #a08060; text-transform: uppercase; margin-bottom: 1.75rem; }
-  .hero-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(2.8rem, 10vw, 6rem); color: var(--accent-dark); line-height: 1.1; letter-spacing: 0.02em; }
-  .hero-names .amp { font-style: italic; color: var(--accent); display: block; font-size: 0.65em; margin: 0.2em 0; }
+  .hero-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(3.5rem, 13vw, 8rem); color: var(--accent-dark); line-height: 1.1; letter-spacing: 0.02em; }
+  .hero-names .amp { font-style: italic; color: var(--accent); display: block; font-size: 0.55em; margin: 0.15em 0; }
   .hero-divider { display: flex; align-items: center; gap: 1rem; margin: 1.75rem auto; width: 200px; }
   .hero-divider::before, .hero-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--accent); }
   .hero-divider span { color: var(--accent); font-size: 12px; }
@@ -89,9 +89,15 @@
 
   .empty-state { grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 14px; }
 
+  /* Progress bar */
+  .slide-progress { position: absolute; top: 0; left: 0; width: 100%; height: 3px; z-index: 4; display: flex; gap: 3px; padding: 0 1.5rem; box-sizing: border-box; }
+  .slide-progress-item { flex: 1; height: 100%; background: rgba(200,168,128,0.25); border-radius: 2px; overflow: hidden; }
+  .slide-progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.1s linear; }
+  .slide-progress-fill.complete { width: 100%; transition: none; }
+
   /* FOOTER */
   .footer { background: var(--dark-bg); text-align: center; padding: 3.5rem 1.5rem; }
-  .footer-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: 2rem; color: #e8d8c0; letter-spacing: 0.08em; margin-bottom: 0.5rem; }
+  .footer-names { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(1.4rem, 5vw, 2rem); color: #e8d8c0; letter-spacing: 0.08em; margin-bottom: 0.5rem; white-space: nowrap; }
   .footer-names .amp { font-style: italic; color: var(--accent); }
   .footer-date { font-family: 'Lato', sans-serif; font-size: 11px; letter-spacing: 0.35em; color: #6a5848; text-transform: uppercase; }
 </style>
@@ -129,6 +135,7 @@
 
 <!-- SLIDESHOW -->
 <section class="slideshow-section">
+  <div class="slide-progress" id="slide-progress"></div>
   <div class="section-header">
     <p class="section-eyebrow">Our Memories</p>
     <h2 class="section-title">二人の思い出</h2>
@@ -196,7 +203,9 @@
   // ---- Slideshow ----
   const slideshowEl = document.getElementById('slideshow');
   const dotsEl = document.getElementById('slide-dots');
-  let currentSlide = 0, slideTimer;
+  const progressEl = document.getElementById('slide-progress');
+  let currentSlide = 0, slideTimer, progressTimer, progressStart;
+  const SLIDE_DURATION = 4500;
 
   SLIDE_PHOTOS.forEach((src, i) => {
     const slide = document.createElement('div');
@@ -208,7 +217,26 @@
     dot.className = 'slide-dot' + (i===0?' active':'');
     dot.onclick = () => goToSlide(i);
     dotsEl.appendChild(dot);
+
+    const item = document.createElement('div');
+    item.className = 'slide-progress-item';
+    const fill = document.createElement('div');
+    fill.className = 'slide-progress-fill' + (i===0?'':' complete');
+    item.appendChild(fill);
+    progressEl.appendChild(item);
   });
+
+  function startProgress() {
+    const fills = progressEl.querySelectorAll('.slide-progress-fill');
+    fills.forEach((f, i) => {
+      f.style.transition = 'none';
+      f.style.width = i < currentSlide ? '100%' : i === currentSlide ? '0%' : '0%';
+    });
+    requestAnimationFrame(() => {
+      fills[currentSlide].style.transition = `width ${SLIDE_DURATION}ms linear`;
+      fills[currentSlide].style.width = '100%';
+    });
+  }
 
   function goToSlide(n) {
     const slides = slideshowEl.querySelectorAll('.slide');
@@ -219,12 +247,14 @@
     slides[currentSlide].classList.add('active');
     dots[currentSlide].classList.add('active');
     clearInterval(slideTimer);
-    slideTimer = setInterval(() => goToSlide(currentSlide+1), 4500);
+    startProgress();
+    slideTimer = setInterval(() => goToSlide(currentSlide+1), SLIDE_DURATION);
   }
 
   document.getElementById('slide-prev').onclick = () => goToSlide(currentSlide-1);
   document.getElementById('slide-next').onclick = () => goToSlide(currentSlide+1);
-  slideTimer = setInterval(() => goToSlide(currentSlide+1), 4500);
+  startProgress();
+  slideTimer = setInterval(() => goToSlide(currentSlide+1), SLIDE_DURATION);
 
   // ---- Messages ----
   function getInitials(name) {
