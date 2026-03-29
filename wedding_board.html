@@ -63,31 +63,156 @@
   .section-title { font-family: 'Cormorant Garamond', serif; font-weight: 300; font-size: clamp(1.4rem, 4vw, 2rem); letter-spacing: 0.06em; color: rgba(232,216,192,0.9); }
   .slideshow-outer { display: contents; }
 
-  /* MESSAGES */
+  /* MESSAGES - envelope UI */
   .messages-section { background: var(--bg); padding: 5rem 1.5rem 6rem; }
-  .refresh-bar { display: flex; align-items: center; justify-content: space-between; max-width: 900px; margin: 0 auto 1.5rem; }
+
+  /* 封筒グリッド */
+  .envelopes-area { max-width: 900px; margin: 0 auto; }
+  .refresh-bar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 2rem; }
   .msg-count { font-family: 'Lato', sans-serif; font-size: 12px; color: var(--text-muted); }
   .msg-count span { font-family: 'Cormorant Garamond', serif; font-size: 1.4rem; color: var(--accent); margin-right: 4px; }
   .refresh-btn { display: flex; align-items: center; gap: 6px; background: none; border: 0.5px solid var(--border); border-radius: 100px; padding: 7px 16px; font-size: 12px; font-family: 'Lato', sans-serif; color: var(--text-muted); cursor: pointer; transition: all 0.2s; }
   .refresh-btn:hover { border-color: var(--accent); color: var(--accent-dark); }
 
-  .messages-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.25rem; max-width: 900px; margin: 0 auto; }
-  .msg-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1.75rem 1.5rem 1.5rem; position: relative; opacity: 0; transform: translateY(18px); transition: opacity 0.55s ease, transform 0.55s ease; }
-  .msg-card.visible { opacity: 1; transform: translateY(0); }
-  .msg-card::before { content: '\201C'; font-family: 'Cormorant Garamond', serif; font-size: 5rem; color: #eddec8; position: absolute; top: -0.6rem; left: 1.25rem; line-height: 1; pointer-events: none; }
+  .envelopes-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
+
+  /* 封筒カード */
+  .envelope-wrap { position: relative; }
+  .envelope {
+    width: 100px; height: 72px;
+    background: #fff8f0;
+    border: 0.5px solid var(--border);
+    border-radius: 4px;
+    cursor: pointer;
+    position: relative;
+    overflow: visible;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+  .envelope:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(90,62,43,0.12); }
+
+  /* 封筒フラップ（上三角） */
+  .envelope-flap {
+    position: absolute;
+    top: 0; left: 0;
+    width: 0; height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-top: 36px solid #eddcc8;
+    z-index: 2;
+    transform-origin: top center;
+    transition: transform 0.4s ease;
+  }
+  .envelope.open .envelope-flap { transform: rotateX(180deg); }
+
+  /* 封筒底面の三角 */
+  .envelope::before {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0;
+    width: 0; height: 0;
+    border-left: 50px solid transparent;
+    border-right: 50px solid transparent;
+    border-bottom: 36px solid #e8d0b8;
+    z-index: 1;
+  }
+  /* 封筒左右の三角 */
+  .envelope::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background:
+      linear-gradient(135deg, #eddcc8 50%, transparent 50%),
+      linear-gradient(225deg, #eddcc8 50%, transparent 50%);
+    background-size: 50% 100%, 50% 100%;
+    background-position: left, right;
+    background-repeat: no-repeat;
+    z-index: 0;
+  }
+
+  /* 封筒の差出人名 */
+  .envelope-name {
+    position: absolute;
+    bottom: -1.4rem;
+    left: 50%;
+    transform: translateX(-50%);
+    font-family: 'Lato', sans-serif;
+    font-size: 10px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    letter-spacing: 0.03em;
+  }
+
+  /* ♥ シール */
+  .envelope-seal {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 3;
+    color: var(--accent);
+    font-size: 14px;
+    transition: opacity 0.3s;
+  }
+  .envelope.open .envelope-seal { opacity: 0; }
+
+  /* モーダルオーバーレイ */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(40,25,15,0.55);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+  }
+  .modal-overlay.show { display: flex; }
+
+  /* モーダルカード */
+  .modal-card {
+    background: var(--surface);
+    border-radius: 16px;
+    padding: 2rem 1.75rem 1.75rem;
+    max-width: 480px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+    position: relative;
+    animation: cardOpen 0.35s ease both;
+  }
+  @keyframes cardOpen {
+    from { opacity: 0; transform: translateY(20px) scale(0.96); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  .modal-close {
+    position: absolute;
+    top: 1rem; right: 1rem;
+    background: var(--bg);
+    border: 0.5px solid var(--border);
+    border-radius: 50%;
+    width: 30px; height: 30px;
+    cursor: pointer;
+    font-size: 16px;
+    color: var(--text-muted);
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+  .modal-close:hover { border-color: var(--accent); color: var(--accent-dark); }
+
+  .modal-card::before { content: '\201C'; font-family: 'Cormorant Garamond', serif; font-size: 5rem; color: #eddec8; position: absolute; top: -0.6rem; left: 1.25rem; line-height: 1; pointer-events: none; }
 
   .msg-dear { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.4em; text-transform: uppercase; color: #b09070; margin-bottom: 0.3rem; }
   .msg-to { font-family: 'Cormorant Garamond', serif; font-size: 1.15rem; color: var(--accent-dark); margin-bottom: 1rem; }
   .msg-body { font-size: 0.875rem; line-height: 1.95; color: #5a4838; padding-top: 0.25rem; white-space: pre-wrap; word-break: break-word; }
   .msg-photo { margin-top: 1rem; border-radius: 8px; overflow: hidden; }
-  .msg-photo img { width: 100%; max-height: 200px; object-fit: cover; display: block; }
-
+  .msg-photo img { width: 100%; max-height: 240px; object-fit: cover; display: block; }
   .msg-from-line { display: flex; align-items: center; gap: 10px; margin-top: 1.25rem; padding-top: 1rem; border-top: 0.5px solid var(--border); }
   .msg-avatar { width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #d4b090, #c89870); display: flex; align-items: center; justify-content: center; font-family: 'Lato', sans-serif; font-size: 12px; color: white; flex-shrink: 0; }
   .msg-from-label { font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.3em; text-transform: uppercase; color: #b09070; display: block; }
   .msg-from-name { font-family: 'Cormorant Garamond', serif; font-size: 1rem; color: var(--accent-dark); }
 
-  .empty-state { grid-column: 1 / -1; text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 14px; }
+  .empty-state { text-align: center; padding: 4rem 1rem; color: var(--text-muted); font-size: 14px; width: 100%; }
 
   /* Progress bar */
   .slide-progress { position: absolute; top: 0; left: 0; width: 100%; height: 3px; z-index: 4; display: flex; gap: 3px; padding: 0 1.5rem; box-sizing: border-box; }
@@ -157,20 +282,40 @@
     <p class="section-eyebrow">Messages</p>
     <h2 class="section-title">みんなからのメッセージ</h2>
   </div>
-  <div class="refresh-bar">
-    <p class="msg-count"><span id="msg-count-num">0</span>通のメッセージ</p>
-    <button class="refresh-btn" onclick="loadMessages()">
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <polyline points="23 4 23 10 17 10"/>
-        <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
-      </svg>
-      更新
-    </button>
-  </div>
-  <div class="messages-grid" id="messages-grid">
-    <div class="empty-state">読み込み中...</div>
+  <div class="envelopes-area">
+    <div class="refresh-bar">
+      <p class="msg-count"><span id="msg-count-num">0</span>通のメッセージ</p>
+      <button class="refresh-btn" onclick="loadMessages()">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <polyline points="23 4 23 10 17 10"/>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/>
+        </svg>
+        更新
+      </button>
+    </div>
+    <div class="envelopes-grid" id="envelopes-grid">
+      <div class="empty-state">読み込み中...</div>
+    </div>
   </div>
 </section>
+
+<!-- モーダル -->
+<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal-card" id="modal-card">
+    <button class="modal-close" onclick="closeModalBtn()">×</button>
+    <p class="msg-dear">Dear</p>
+    <p class="msg-to" id="modal-to"></p>
+    <p class="msg-body" id="modal-body"></p>
+    <div class="msg-photo" id="modal-photo" style="display:none"><img id="modal-img" src="" alt=""></div>
+    <div class="msg-from-line">
+      <div class="msg-avatar" id="modal-avatar"></div>
+      <div>
+        <span class="msg-from-label">From</span>
+        <span class="msg-from-name" id="modal-name"></span>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- FOOTER -->
 <footer class="footer">
@@ -265,14 +410,41 @@
     return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
+  let messagesData = [];
+
+  function openModal(i) {
+    const m = messagesData[i];
+    document.getElementById('modal-to').textContent = GROOM + ' & ' + BRIDE;
+    document.getElementById('modal-body').innerHTML = escHtml(m.message);
+    document.getElementById('modal-avatar').textContent = getInitials(m.name);
+    document.getElementById('modal-name').textContent = m.name;
+    if (m.photo_base64) {
+      document.getElementById('modal-img').src = m.photo_base64;
+      document.getElementById('modal-photo').style.display = 'block';
+    } else {
+      document.getElementById('modal-photo').style.display = 'none';
+    }
+    document.getElementById('modal-overlay').classList.add('show');
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modal-overlay')) {
+      document.getElementById('modal-overlay').classList.remove('show');
+    }
+  }
+  function closeModalBtn() {
+    document.getElementById('modal-overlay').classList.remove('show');
+  }
+
   async function loadMessages() {
-    const grid = document.getElementById('messages-grid');
+    const grid = document.getElementById('envelopes-grid');
     const { data, error } = await sbClient
       .from(TABLE_NAME).select('*').order('created_at', { ascending: false });
 
     if (error) { grid.innerHTML = '<div class="empty-state">読み込みに失敗しました</div>'; return; }
 
     document.getElementById('msg-count-num').textContent = data.length;
+    messagesData = data;
 
     if (data.length === 0) {
       grid.innerHTML = '<div class="empty-state">まだメッセージが届いていません</div>';
@@ -280,25 +452,20 @@
     }
 
     grid.innerHTML = data.map((m, i) => `
-      <div class="msg-card" style="transition-delay:${Math.min(i*0.07,0.5)}s">
-        <p class="msg-dear">Dear</p>
-        <p class="msg-to">${GROOM} &amp; ${BRIDE}</p>
-        <p class="msg-body">${escHtml(m.message)}</p>
-        ${m.photo_base64 ? `<div class="msg-photo"><img src="${m.photo_base64}" alt="" loading="lazy"></div>` : ''}
-        <div class="msg-from-line">
-          <div class="msg-avatar">${getInitials(m.name)}</div>
-          <div>
-            <span class="msg-from-label">From</span>
-            <span class="msg-from-name">${escHtml(m.name)}</span>
-          </div>
+      <div class="envelope-wrap">
+        <div class="envelope" id="env-${i}" onclick="openEnvelope(${i})">
+          <div class="envelope-flap"></div>
+          <div class="envelope-seal">&#9825;</div>
         </div>
+        <div class="envelope-name">${escHtml(m.name)}</div>
       </div>
     `).join('');
+  }
 
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-    }, { threshold: 0.1 });
-    grid.querySelectorAll('.msg-card').forEach(c => observer.observe(c));
+  function openEnvelope(i) {
+    const env = document.getElementById('env-' + i);
+    env.classList.add('open');
+    setTimeout(() => openModal(i), 350);
   }
 
   loadMessages();
