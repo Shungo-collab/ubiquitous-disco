@@ -106,7 +106,16 @@
     display: block;
     transition: color 0.9s ease, -webkit-text-stroke 0.9s ease;
   }
-  .hero-name-item.fill { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; }
+  .hero-name-item.fill {
+    color: var(--accent-dark);
+    -webkit-text-stroke: 1px transparent;
+    animation: nameGlow 1.2s ease forwards;
+  }
+  @keyframes nameGlow {
+    0%   { text-shadow: 0 0 0px rgba(200,168,128,0); }
+    40%  { text-shadow: 0 0 30px rgba(200,168,128,0.7), 0 0 60px rgba(200,168,128,0.4); }
+    100% { text-shadow: 0 0 0px rgba(200,168,128,0); }
+  }
 
   .hero-amp-line {
     font-family: 'Dancing Script', cursive;
@@ -204,8 +213,14 @@
 
   .envelopes-grid { display: flex; flex-wrap: wrap; gap: 1rem; justify-content: center; }
 
-  /* 封筒カード */
-  .envelope-wrap { position: relative; }
+  .envelope-wrap { position: relative; animation: floatEnv 3s ease-in-out infinite; }
+  .envelope-wrap:nth-child(2n)   { animation-delay: 0.4s; }
+  .envelope-wrap:nth-child(3n)   { animation-delay: 0.8s; }
+  .envelope-wrap:nth-child(4n)   { animation-delay: 1.2s; }
+  @keyframes floatEnv {
+    0%, 100% { transform: translateY(0); }
+    50%       { transform: translateY(-6px); }
+  }
   .envelope {
     width: 100px; height: 72px;
     background: #fff8f0;
@@ -217,6 +232,10 @@
     transition: transform 0.2s, box-shadow 0.2s;
   }
   .envelope:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(90,62,43,0.12); }
+
+  /* スクロール時のフェードイン */
+  .scroll-reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.7s ease, transform 0.7s ease; }
+  .scroll-reveal.revealed { opacity: 1; transform: translateY(0); }
 
   /* 封筒フラップ（上三角） */
   .envelope-flap {
@@ -447,7 +466,7 @@
 
 <!-- MESSAGES -->
 <section class="messages-section">
-  <div class="messages-heading">
+  <div class="messages-heading scroll-reveal">
     <p class="messages-eyebrow">Messages</p>
     <h2 class="messages-heading-inner">みんなからのメッセージ</h2>
   </div>
@@ -531,48 +550,122 @@
   document.addEventListener('click', tryPlayBgm, { once: true });
   setTimeout(tryPlayBgm, 800);
 
+  // ---- Web Audio helpers ----
+  function makeCtx() {
+    return new (window.AudioContext || window.webkitAudioContext)();
+  }
+
+  // チャイム音（ページ開いたとき）
+  function playChime() {
+    try {
+      const ctx = makeCtx();
+      [523, 659, 784, 1047].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        const t = ctx.currentTime + i * 0.18;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.18, t + 0.05);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 1.2);
+        osc.start(t); osc.stop(t + 1.2);
+      });
+    } catch(e) {}
+  }
+
+  // 筆で書く音（ホワイトノイズ）
+  function playWriting(duration = 2.2) {
+    try {
+      const ctx = makeCtx();
+      const bufSize = ctx.sampleRate * duration;
+      const buf = ctx.createBuffer(1, bufSize, ctx.sampleRate);
+      const data = buf.getChannelData(0);
+      for (let i = 0; i < bufSize; i++) {
+        const env = Math.sin(Math.PI * i / bufSize);
+        data[i] = (Math.random() * 2 - 1) * env * 0.06;
+      }
+      const src = ctx.createBufferSource();
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'bandpass';
+      filter.frequency.value = 3000;
+      filter.Q.value = 0.5;
+      src.buffer = buf;
+      src.connect(filter); filter.connect(ctx.destination);
+      src.start();
+    } catch(e) {}
+  }
+
+  // キラキラ音（名前登場）
+  function playSparkle() {
+    try {
+      const ctx = makeCtx();
+      [1200, 1500, 1800, 2200].forEach((freq, i) => {
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.frequency.value = freq;
+        osc.type = 'sine';
+        const t = ctx.currentTime + i * 0.07;
+        gain.gain.setValueAtTime(0, t);
+        gain.gain.linearRampToValueAtTime(0.1, t + 0.03);
+        gain.gain.exponentialRampToValueAtTime(0.001, t + 0.5);
+        osc.start(t); osc.stop(t + 0.5);
+      });
+    } catch(e) {}
+  }
+
   // ---- Hero sequence ----
   const seq = (id, cls, delay) => setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add(cls); }, delay);
 
-  // フェーズ1中はスクロールロック
   document.body.classList.add('scroll-locked');
 
-  seq('w-congrats', 'stroke', 300);
-  seq('w-congrats', 'fill',   2500);
-  seq('w-on',       'stroke', 2600);
-  seq('w-on',       'fill',   4200);
+  // チャイム → 筆音 → Congratulations描画
+  setTimeout(() => { playChime(); tryPlayBgm(); }, 400);
+  setTimeout(() => playWriting(2.2), 700);
+  seq('w-congrats', 'stroke', 700);
+  seq('w-congrats', 'fill',   3100);
+  setTimeout(() => playWriting(1.6), 3300);
+  seq('w-on',       'stroke', 3300);
+  seq('w-on',       'fill',   5100);
 
-  // フェーズ1フェードアウト → スクロール解除 → フェーズ2
-  setTimeout(() => document.getElementById('phase1').classList.add('hide'), 5200);
+  setTimeout(() => document.getElementById('phase1').classList.add('hide'), 6000);
   setTimeout(() => {
     document.body.classList.remove('scroll-locked');
     document.getElementById('phase2').classList.add('show');
-  }, 5600);
+  }, 6400);
 
-  setTimeout(() => document.getElementById('w-groom').classList.add('fill'), 6200);
-  setTimeout(() => document.getElementById('w-bride').classList.add('fill'), 6600);
+  // 名前登場＋キラキラ音
+  setTimeout(() => { document.getElementById('w-groom').classList.add('fill'); playSparkle(); }, 7000);
+  setTimeout(() => { document.getElementById('w-bride').classList.add('fill'); playSparkle(); }, 7500);
 
-  seq('seq-divider', 'show', 7000);
-  seq('seq-sub',     'show', 7400);
-  seq('scroll-hint', 'show', 7900);
+  seq('seq-divider', 'show', 8000);
+  seq('seq-sub',     'show', 8400);
+  seq('scroll-hint', 'show', 8900);
 
-  // ---- Petals ----
+  // ---- Petals（派手に増量）----
   const petalsEl = document.getElementById('petals');
-  for (let i = 0; i < 20; i++) {
+  for (let i = 0; i < 45; i++) {
     const p = document.createElement('div');
     p.className = 'petal';
-    const size = 6 + Math.random() * 9;
+    const size = 5 + Math.random() * 14;
     p.style.cssText = [
-      `left:${Math.random()*100}%`,
+      `left:${Math.random()*110 - 5}%`,
       `width:${size}px`,
-      `height:${size*1.4}px`,
+      `height:${size * (1.2 + Math.random() * 0.6)}px`,
       `border-radius:${Math.random()>0.5?'50% 0 50% 0':'0 50% 0 50%'}`,
-      `animation-duration:${9+Math.random()*13}s`,
-      `animation-delay:${Math.random()*12}s`,
-      `opacity:${0.15+Math.random()*0.35}`
+      `animation-duration:${7+Math.random()*14}s`,
+      `animation-delay:${Math.random()*15}s`,
+      `opacity:${0.2+Math.random()*0.5}`
     ].join(';');
     petalsEl.appendChild(p);
   }
+
+  // ---- Scroll reveal ----
+  const revealObserver = new IntersectionObserver(entries => {
+    entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('revealed'); revealObserver.unobserve(e.target); } });
+  }, { threshold: 0.12 });
+  document.querySelectorAll('.scroll-reveal').forEach(el => revealObserver.observe(el));
 
   // ---- Slideshow ----
   const slideshowEl = document.getElementById('slideshow');
