@@ -54,7 +54,7 @@
     line-height: 1.1;
     display: block;
     color: transparent;
-    -webkit-text-stroke: 2px var(--accent-dark);
+    -webkit-text-stroke: 1px var(--accent-dark);
     background: linear-gradient(to right, var(--accent-dark) 50%, transparent 50%);
     background-size: 200% 100%;
     background-position: 100% 0;
@@ -67,11 +67,11 @@
   .hero-on {
     font-family: 'Dancing Script', cursive;
     font-weight: 400;
-    font-size: clamp(1.5rem, 5vw, 3.5rem);
+    font-size: clamp(1.9rem, 6.5vw, 3.5rem);
     display: block;
     margin-top: 0.2em;
     color: transparent;
-    -webkit-text-stroke: 1.5px #9a7858;
+    -webkit-text-stroke: 1px #9a7858;
     background: linear-gradient(to right, #9a7858 50%, transparent 50%);
     background-size: 200% 100%;
     background-position: 100% 0;
@@ -82,7 +82,7 @@
   .hero-on.fill   { animation: fillInMuted 1s ease forwards; }
 
   @keyframes strokeDraw      { from { background-position: 100% 0; } to { background-position: 0% 0; } }
-  @keyframes fillIn          { from { color: transparent; -webkit-text-stroke: 2px var(--accent-dark); } to { color: var(--accent-dark); -webkit-text-stroke: 2px transparent; } }
+  @keyframes fillIn          { from { color: transparent; -webkit-text-stroke: 1px var(--accent-dark); } to { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; } }
   @keyframes strokeDrawMuted { from { background-position: 100% 0; } to { background-position: 0% 0; } }
   @keyframes fillInMuted     { from { color: transparent; -webkit-text-stroke: 1.5px #9a7858; } to { color: #9a7858; -webkit-text-stroke: 1.5px transparent; } }
 
