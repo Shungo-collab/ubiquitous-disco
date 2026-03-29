@@ -27,13 +27,26 @@
   .petal { position: absolute; background: rgba(210,160,140,0.35); animation: fall linear infinite; }
   @keyframes fall { 0% { transform: translateY(-20px) rotate(0deg); opacity: 0; } 10% { opacity: 1; } 90% { opacity: 0.5; } 100% { transform: translateY(105vh) rotate(720deg); opacity: 0; } }
 
-  .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; }
+  .hero-content { position: relative; z-index: 1; text-align: center; padding: 2rem 1.5rem; width: 100%; }
   .hero-label { display: none; }
 
-  /* 筆書き2段階：①アウトラインが書かれる → ②塗りがふわっと入る */
-  .write-text {
+  /* === Congratulations 全画面フェーズ === */
+  .hero-phase1 {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 1;
+    transition: opacity 0.8s ease;
+  }
+  .hero-phase1.hide { opacity: 0; pointer-events: none; }
+
+  .hero-congrats {
     font-family: 'Dancing Script', cursive;
-    display: block;
+    font-weight: 700;
+    font-size: clamp(3rem, 10vw, 7rem);
     color: transparent;
     -webkit-text-stroke: 1.5px var(--accent-dark);
     background: linear-gradient(to right, var(--accent-dark) 50%, transparent 50%);
@@ -41,37 +54,16 @@
     background-position: 100% 0;
     -webkit-background-clip: text;
     background-clip: text;
-  }
-  /* ステージ1：アウトラインが左→右に描かれる */
-  .write-text.stage1 {
-    animation: strokeDraw 1.8s ease forwards;
-  }
-  @keyframes strokeDraw {
-    from { background-position: 100% 0; }
-    to   { background-position: 0% 0; }
-  }
-  /* ステージ2：塗りがふわっと入りstrokeが消える */
-  .write-text.stage2 {
-    animation: fillFade 0.8s ease forwards;
-    -webkit-text-stroke: 1.5px var(--accent-dark);
-  }
-  @keyframes fillFade {
-    from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); }
-    to   { color: var(--accent-dark); -webkit-text-stroke: 1.5px transparent; }
-  }
-
-  .hero-congrats {
-    font-size: clamp(1.8rem, 5.5vw, 3.2rem);
-    font-weight: 700;
-    letter-spacing: 0.01em;
+    display: block;
     line-height: 1.2;
-    margin-bottom: 0.3rem;
-    min-height: 1.3em;
   }
+  .hero-congrats.stroke { animation: strokeDraw 2s ease forwards; }
+  .hero-congrats.fill   { animation: fillIn 0.8s ease forwards; }
+
   .hero-on {
     font-family: 'Dancing Script', cursive;
-    font-size: clamp(1.2rem, 3.5vw, 2rem);
     font-weight: 400;
+    font-size: clamp(1.8rem, 5vw, 3.5rem);
     color: transparent;
     -webkit-text-stroke: 1px #9a7858;
     background: linear-gradient(to right, #9a7858 50%, transparent 50%);
@@ -80,64 +72,53 @@
     -webkit-background-clip: text;
     background-clip: text;
     display: block;
-    margin-bottom: 1.8rem;
-    min-height: 1.3em;
+    margin-top: 0.3rem;
   }
-  .hero-on.stage1 { animation: strokeDrawMuted 1.2s ease forwards; }
-  .hero-on.stage2 { animation: fillFadeMuted 0.8s ease forwards; -webkit-text-stroke: 1px #9a7858; }
-  @keyframes strokeDrawMuted {
-    from { background-position: 100% 0; }
-    to   { background-position: 0% 0; }
-  }
-  @keyframes fillFadeMuted {
-    from { color: transparent; -webkit-text-stroke: 1px #9a7858; }
-    to   { color: #9a7858; -webkit-text-stroke: 1px transparent; }
-  }
+  .hero-on.stroke { animation: strokeDrawMuted 1.4s ease forwards; }
+  .hero-on.fill   { animation: fillInMuted 0.8s ease forwards; }
 
-  /* 漢字名前：Dancing Scriptでは出ないので、Cormorant+アニメで対応 */
-  .hero-names { line-height: 1.1; }
+  @keyframes strokeDraw      { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+  @keyframes fillIn          { from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); } to { color: var(--accent-dark); -webkit-text-stroke: 1.5px transparent; } }
+  @keyframes strokeDrawMuted { from { background-position: 100% 0; } to { background-position: 0% 0; } }
+  @keyframes fillInMuted     { from { color: transparent; -webkit-text-stroke: 1px #9a7858; } to { color: #9a7858; -webkit-text-stroke: 1px transparent; } }
+
+  /* === 名前フェーズ === */
+  .hero-phase2 {
+    opacity: 0;
+    transform: translateY(16px);
+    transition: opacity 0.9s ease, transform 0.9s ease;
+    pointer-events: none;
+  }
+  .hero-phase2.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+
+  .hero-names { line-height: 1.05; margin-bottom: 0.5rem; }
   .hero-name-item {
     font-family: 'Noto Serif JP', serif;
     font-weight: 300;
-    font-size: clamp(3rem, 11vw, 6.5rem);
-    display: block;
+    font-size: clamp(3.2rem, 12vw, 7rem);
     color: transparent;
     -webkit-text-stroke: 1px var(--accent-dark);
+    display: block;
     transition: color 0.8s ease, -webkit-text-stroke 0.8s ease;
   }
-  .hero-name-item.stage1 {
-    animation: nameStroke 0.6s ease forwards;
-  }
-  @keyframes nameStroke {
-    from { opacity: 0; -webkit-text-stroke: 1px var(--accent-dark); }
-    to   { opacity: 1; -webkit-text-stroke: 1.5px var(--accent-dark); }
-  }
-  .hero-name-item.stage2 {
-    animation: nameFill 0.8s ease forwards;
-  }
-  @keyframes nameFill {
-    from { color: transparent; -webkit-text-stroke: 1.5px var(--accent-dark); }
-    to   { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; }
-  }
+  .hero-name-item.fill { color: var(--accent-dark); -webkit-text-stroke: 1px transparent; }
 
   .hero-amp-line {
     font-family: 'Dancing Script', cursive;
-    font-size: clamp(1.8rem, 5vw, 3rem);
+    font-size: clamp(2rem, 5vw, 3.2rem);
     color: var(--accent);
     display: block;
     margin: 0.05em 0;
-    opacity: 0;
-    transition: opacity 0.6s ease;
   }
-  .hero-amp-line.show { opacity: 1; }
 
-  .hero-seq { opacity: 0; transform: translateY(10px); transition: opacity 0.6s ease, transform 0.6s ease; }
+  .hero-seq { opacity: 0; transform: translateY(8px); transition: opacity 0.6s ease, transform 0.6s ease; }
   .hero-seq.show { opacity: 1; transform: translateY(0); }
 
-  .hero-divider { display: flex; align-items: center; gap: 1rem; margin: 1.5rem auto; width: 180px; }
+  .hero-divider { display: flex; align-items: center; gap: 1rem; margin: 1.2rem auto; width: 160px; }
   .hero-divider::before, .hero-divider::after { content: ''; flex: 1; height: 0.5px; background: var(--accent); }
   .hero-divider span { color: var(--accent); font-size: 11px; }
   .hero-sub { font-family: 'Lato', sans-serif; font-weight: 300; font-size: 11px; letter-spacing: 0.35em; color: #9a7858; text-transform: uppercase; }
+
   .scroll-hint { position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%); font-family: 'Lato', sans-serif; font-size: 10px; letter-spacing: 0.35em; color: #a08060; text-transform: uppercase; z-index: 1; opacity: 0; transition: opacity 0.8s ease; }
   .scroll-hint.show { opacity: 1; animation: bounce 2.2s ease infinite; }
   @keyframes bounce { 0%, 100% { transform: translateX(-50%) translateY(0); } 50% { transform: translateX(-50%) translateY(7px); } }
@@ -353,17 +334,22 @@
 <section class="hero">
   <div class="hero-content">
 
-    <span class="write-text hero-congrats" id="w-congrats">Congratulations</span>
-    <span class="hero-on" id="w-on">on your marriage</span>
-
-    <div class="hero-names">
-      <span class="hero-name-item" id="w-groom">千葉大次郎</span>
-      <span class="hero-amp-line" id="w-amp">&amp;</span>
-      <span class="hero-name-item" id="w-bride">鈴木千笑</span>
+    <!-- フェーズ1：Congratulations 全画面 -->
+    <div class="hero-phase1" id="phase1">
+      <span class="hero-congrats" id="w-congrats">Congratulations</span>
+      <span class="hero-on" id="w-on">on your marriage</span>
     </div>
 
-    <div class="hero-divider hero-seq" id="seq-divider"><span>◇</span></div>
-    <p class="hero-sub hero-seq" id="seq-sub">Chiba Daijiro &amp; Suzuki Chiemi</p>
+    <!-- フェーズ2：名前 -->
+    <div class="hero-phase2" id="phase2">
+      <div class="hero-names">
+        <span class="hero-name-item" id="w-groom">千葉大次郎</span>
+        <span class="hero-amp-line">&amp;</span>
+        <span class="hero-name-item" id="w-bride">鈴木千笑</span>
+      </div>
+      <div class="hero-divider hero-seq" id="seq-divider"><span>◇</span></div>
+      <p class="hero-sub hero-seq" id="seq-sub">ご入籍おめでとうございます</p>
+    </div>
 
   </div>
   <div class="scroll-hint" id="scroll-hint">↓ scroll</div>
@@ -439,27 +425,25 @@
   const sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   // ---- Hero sequence ----
-  // Congratulations: stroke(1.8s) → fill(0.8s)
-  // on your marriage: stroke(1.2s) → fill(0.8s)
-  // 千葉大次郎: stroke出現(0.6s) → fill(0.8s)
-  // & → 鈴木千笑: stroke → fill
-  const seq = (id, cls, delay) => setTimeout(() => {
-    const el = document.getElementById(id);
-    if (el) el.classList.add(cls);
-  }, delay);
+  const seq = (id, cls, delay) => setTimeout(() => { const el = document.getElementById(id); if(el) el.classList.add(cls); }, delay);
 
-  seq('w-congrats', 'stage1', 300);
-  seq('w-congrats', 'stage2', 2300);
-  seq('w-on',       'stage1', 2400);
-  seq('w-on',       'stage2', 3800);
-  seq('w-groom',    'stage1', 4000);
-  seq('w-groom',    'stage2', 4800);
-  seq('w-amp',      'show',   5000);
-  seq('w-bride',    'stage1', 5300);
-  seq('w-bride',    'stage2', 6100);
-  seq('seq-divider','show',   6500);
-  seq('seq-sub',    'show',   7000);
-  seq('scroll-hint','show',   7500);
+  // フェーズ1: Congratulations 全画面で書かれる
+  seq('w-congrats', 'stroke', 300);
+  seq('w-congrats', 'fill',   2500);
+  seq('w-on',       'stroke', 2600);
+  seq('w-on',       'fill',   4200);
+
+  // フェーズ1フェードアウト → フェーズ2登場
+  setTimeout(() => document.getElementById('phase1').classList.add('hide'), 5200);
+  setTimeout(() => document.getElementById('phase2').classList.add('show'), 5600);
+
+  // 名前を輪郭→塗り
+  setTimeout(() => document.getElementById('w-groom').classList.add('fill'), 6200);
+  setTimeout(() => document.getElementById('w-bride').classList.add('fill'), 6600);
+
+  seq('seq-divider', 'show', 7000);
+  seq('seq-sub',     'show', 7400);
+  seq('scroll-hint', 'show', 7900);
 
   // ---- Petals ----
   const petalsEl = document.getElementById('petals');
