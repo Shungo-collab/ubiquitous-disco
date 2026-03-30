@@ -1248,16 +1248,10 @@ body {
 
     <!-- 投稿フォーム -->
     <div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border);">
-      <div style="font-size:14px;font-weight:900;margin-bottom:12px;">📢 投稿する</div>
+      <div style="font-size:14px;font-weight:900;margin-bottom:12px;">投稿する</div>
 
       <!-- 投稿者選択 -->
-      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
-        ${['駿吾','菜摘','優真','お母さん'].map(n=>`
-          <button onclick="selectBoardAuthor('${n}',this)" data-author="${n}"
-            style="border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--surface2);color:var(--text2);">
-            ${n}
-          </button>`).join('')}
-      </div>
+      <div id="boardAuthorBtns" style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;"></div>
 
       <!-- テキスト入力 -->
       <textarea id="boardContent" placeholder="今日のポケカ情報を共有しよう！" rows="3"
@@ -1275,9 +1269,7 @@ body {
         <img id="boardPreviewImg" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;">
       </div>
 
-      <button onclick="submitPost()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;">
-        📢 投稿する
-      </button>
+      <button onclick="submitPost()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;">投稿する</button>
     </div>
 
     <!-- 投稿一覧 -->
@@ -2960,6 +2952,19 @@ async function deletePost(id) {
 }
 
 function renderBoard() {
+  // 投稿者ボタンを動的生成
+  const btnContainer = document.getElementById('boardAuthorBtns');
+  if (btnContainer && !btnContainer.children.length) {
+    ['駿吾','菜摘','優真','お母さん'].forEach(name => {
+      const btn = document.createElement('button');
+      btn.textContent = name;
+      btn.dataset.author = name;
+      btn.style.cssText = 'border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--surface2);color:var(--text2);';
+      btn.onclick = () => selectBoardAuthor(name, btn);
+      btnContainer.appendChild(btn);
+    });
+  }
+
   const el = document.getElementById('boardPosts');
   if (!el) return;
   if (!posts.length) {
