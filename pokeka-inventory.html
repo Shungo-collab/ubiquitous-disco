@@ -1126,6 +1126,28 @@ body {
 
       <!-- カード別ビュー -->
       <div id="shopListViewCard" style="display:none;">
+        <!-- 絞り込みドロップダウン -->
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <select id="cardViewCatSelect" onchange="updateCardPriceSelect()"
+            style="flex:1;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 10px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+            <option value="">すべてのカテゴリ</option>
+            <option value="ポケモン">🐾 ポケモン</option>
+            <option value="グッズ">🎒 グッズ</option>
+            <option value="ポケモンの道具">🔧 道具</option>
+            <option value="サポート">👤 サポート</option>
+            <option value="スタジアム">🏟 スタジアム</option>
+            <option value="エネルギー">⚡ エネルギー</option>
+          </select>
+          <select id="cardViewRaritySelect" onchange="updateCardPriceSelect()"
+            style="width:100px;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:10px 10px;font-size:13px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 10px center;">
+            <option value="">すべて</option>
+            <option value="RR">RR</option>
+            <option value="R">R</option>
+            <option value="ACE">ACE</option>
+            <option value="-">ノーマル</option>
+          </select>
+        </div>
+        <!-- カード選択 -->
         <select id="shopCardPriceSelect" onchange="renderShopByCard(this.value)"
           style="width:100%;background:var(--surface);border:1.5px solid var(--border);border-radius:12px;padding:11px 14px;font-size:14px;font-weight:700;font-family:inherit;color:var(--text);cursor:pointer;appearance:none;background-image:url('data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%2212%22 height=%228%22 viewBox=%220 0 12 8%22><path d=%22M1 1l5 5 5-5%22 stroke=%22%23999%22 stroke-width=%221.5%22 fill=%22none%22/></svg>');background-repeat:no-repeat;background-position:right 14px center;margin-bottom:12px;">
           <option value="">カードを選択してください</option>
@@ -2193,13 +2215,28 @@ function switchShopListView(view) {
   if (isShop) {
     renderShop();
   } else {
-    // カード選択プルダウンを生成
-    const cardNames = [...new Set(shopPrices.map(s=>s.card_name))].sort((a,b)=>a.localeCompare(b,'ja'));
-    const sel = document.getElementById('shopCardPriceSelect');
-    sel.innerHTML = '<option value="">カードを選択してください</option>' +
-      cardNames.map(n=>`<option value="${n}">${n}</option>`).join('');
-    document.getElementById('shopByCardResult').innerHTML = '';
+    updateCardPriceSelect();
   }
+}
+
+function updateCardPriceSelect() {
+  const cat = document.getElementById('cardViewCatSelect')?.value || '';
+  const rarity = document.getElementById('cardViewRaritySelect')?.value || '';
+
+  // 価格記録があるカード名を取得
+  const recordedNames = new Set(shopPrices.map(s=>s.card_name));
+
+  // cardsから絞り込み
+  let filtered = cards.filter(c => recordedNames.has(c.name));
+  if (cat) filtered = filtered.filter(c => (c.category||'グッズ') === cat);
+  if (rarity === '-') filtered = filtered.filter(c => !c.rarity || c.rarity === '-');
+  else if (rarity) filtered = filtered.filter(c => c.rarity === rarity);
+  filtered.sort((a,b) => a.name.localeCompare(b.name,'ja'));
+
+  const sel = document.getElementById('shopCardPriceSelect');
+  sel.innerHTML = `<option value="">カードを選択 (${filtered.length}件)</option>` +
+    filtered.map(c=>`<option value="${c.name}">${c.name}${c.rarity&&c.rarity!=='-'?' ['+c.rarity+']':''}</option>`).join('');
+  document.getElementById('shopByCardResult').innerHTML = '';
 }
 
 function renderShopByCard(cardName) {
