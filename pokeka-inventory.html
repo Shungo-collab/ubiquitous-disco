@@ -1242,6 +1242,52 @@ body {
 
 <div class="toast" id="toast"></div>
 
+<!-- 掲示板ページ -->
+<div class="page" id="page-board">
+  <div style="padding:12px;display:flex;flex-direction:column;gap:12px;">
+
+    <!-- 投稿フォーム -->
+    <div style="background:var(--surface);border-radius:16px;padding:16px;border:1px solid var(--border);">
+      <div style="font-size:14px;font-weight:900;margin-bottom:12px;">📢 投稿する</div>
+
+      <!-- 投稿者選択 -->
+      <div style="display:flex;gap:8px;margin-bottom:10px;flex-wrap:wrap;">
+        ${['駿吾','菜摘','優真','お母さん'].map(n=>`
+          <button onclick="selectBoardAuthor('${n}',this)" data-author="${n}"
+            style="border:1.5px solid var(--border);border-radius:20px;padding:6px 14px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;background:var(--surface2);color:var(--text2);">
+            ${n}
+          </button>`).join('')}
+      </div>
+
+      <!-- テキスト入力 -->
+      <textarea id="boardContent" placeholder="今日のポケカ情報を共有しよう！" rows="3"
+        style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:14px;font-family:inherit;color:var(--text);resize:none;outline:none;box-sizing:border-box;margin-bottom:8px;"></textarea>
+
+      <!-- 画像添付 -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+        <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;">
+          📷 写真を添付
+          <input type="file" accept="image/*" id="boardImageInput" style="display:none;" onchange="previewBoardImage(this)">
+        </label>
+        <span id="boardImageName" style="font-size:12px;color:var(--text2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;"></span>
+      </div>
+      <div id="boardImagePreview" style="display:none;margin-bottom:12px;">
+        <img id="boardPreviewImg" style="width:100%;max-height:200px;object-fit:cover;border-radius:10px;">
+      </div>
+
+      <button onclick="submitPost()" style="width:100%;background:var(--accent);color:white;border:none;border-radius:12px;padding:13px;font-size:14px;font-weight:900;font-family:inherit;cursor:pointer;">
+        📢 投稿する
+      </button>
+    </div>
+
+    <!-- 投稿一覧 -->
+    <div id="boardPosts">
+      <div class="loading">読み込み中<span class="dot">.</span><span class="dot">.</span><span class="dot">.</span></div>
+    </div>
+
+  </div>
+</div>
+
 <div class="bottom-nav">
   <button class="nav-btn active" id="nav-inventory" onclick="switchPage('inventory',this)">
     <span class="nav-icon">📦</span>在庫
@@ -1254,6 +1300,9 @@ body {
   </button>
   <button class="nav-btn" id="nav-shop" onclick="switchPage('shop',this)">
     <span class="nav-icon">🏪</span>カドショ
+  </button>
+  <button class="nav-btn" id="nav-board" onclick="switchPage('board',this)">
+    <span class="nav-icon">📢</span>掲示板
   </button>
 </div>
 
@@ -1302,12 +1351,14 @@ async function init() {
       sbFetch('sales', '?order=created_at.desc').catch(() => [])
     ]);
     shopPrices = await sbFetch('shop_prices', '?order=created_at.desc').catch(() => []);
+    posts = await sbFetch('posts', '?order=created_at.desc').catch(() => []);
     renderInventory();
     renderSummary();
     renderDecks();
     renderMercari();
     renderShop();
     renderHistory();
+    renderBoard();
     startNotifPolling();
   } catch(e) {
     document.getElementById('cardList').innerHTML = `<div class="empty"><div class="e-icon">⚠️</div><p>読み込みエラー<br>${e.message}</p></div>`;
@@ -2833,6 +2884,109 @@ function renderMercari() {
 
   html += `</div>`;
   document.getElementById('mercariPage').innerHTML = html;
+}
+
+// ===== 掲示板 =====
+let posts = [];
+let selectedBoardAuthor = '';
+let boardImageBase64 = null;
+
+function selectBoardAuthor(name, el) {
+  selectedBoardAuthor = name;
+  document.querySelectorAll('[data-author]').forEach(b => {
+    b.style.background = 'var(--surface2)';
+    b.style.color = 'var(--text2)';
+    b.style.borderColor = 'var(--border)';
+  });
+  el.style.background = 'var(--accent)';
+  el.style.color = 'white';
+  el.style.borderColor = 'var(--accent)';
+}
+
+function previewBoardImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  document.getElementById('boardImageName').textContent = file.name;
+  const reader = new FileReader();
+  reader.onload = e => {
+    boardImageBase64 = e.target.result;
+    document.getElementById('boardPreviewImg').src = boardImageBase64;
+    document.getElementById('boardImagePreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+async function submitPost() {
+  if (!selectedBoardAuthor) { showToast('投稿者を選んでください'); return; }
+  const content = document.getElementById('boardContent').value.trim();
+  if (!content) { showToast('内容を入力してください'); return; }
+
+  let imageUrl = null;
+  if (boardImageBase64) {
+    try {
+      const blob = await (await fetch(boardImageBase64)).blob();
+      const ext = blob.type.split('/')[1] || 'jpg';
+      const path = `posts/${Date.now()}.${ext}`;
+      const res = await fetch(`${SB_URL}/storage/v1/object/card-images/${path}`, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': blob.type },
+        body: blob
+      });
+      if (res.ok) imageUrl = `${SB_URL}/storage/v1/object/public/card-images/${path}`;
+    } catch(e) {}
+  }
+
+  try {
+    const result = await sbPost('posts', { author: selectedBoardAuthor, content, image_url: imageUrl });
+    if (result && result[0]) posts.unshift(result[0]);
+    document.getElementById('boardContent').value = '';
+    document.getElementById('boardImageName').textContent = '';
+    document.getElementById('boardImagePreview').style.display = 'none';
+    document.getElementById('boardImageInput').value = '';
+    boardImageBase64 = null;
+    showToast('📢 投稿しました！');
+    renderBoard();
+  } catch(e) { showToast('⚠️ 投稿失敗'); }
+}
+
+async function deletePost(id) {
+  if (!confirm('この投稿を削除しますか？')) return;
+  try {
+    await sbDelete('posts', id);
+    posts = posts.filter(p=>p.id!==id);
+    renderBoard();
+    showToast('削除しました');
+  } catch(e) { showToast('⚠️ 削除失敗'); }
+}
+
+function renderBoard() {
+  const el = document.getElementById('boardPosts');
+  if (!el) return;
+  if (!posts.length) {
+    el.innerHTML = `<div style="text-align:center;padding:30px;color:var(--text2);">
+      <div style="font-size:40px;margin-bottom:8px;">📢</div>
+      <div style="font-size:14px;font-weight:700;">まだ投稿がありません</div>
+      <div style="font-size:12px;margin-top:4px;">最初の投稿をしてみよう！</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML = posts.map(p => {
+    const date = new Date(p.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
+    const authorColors = { '駿吾':'#2563eb', '菜摘':'#db2777', '優真':'#16a34a', 'お母さん':'#d97706' };
+    const color = authorColors[p.author] || 'var(--accent)';
+    return `
+    <div style="background:var(--surface);border-radius:16px;padding:14px;border:1px solid var(--border);">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="background:${color};color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:900;">${p.author}</div>
+          <div style="font-size:11px;color:var(--text2);">${date}</div>
+        </div>
+        ${isAdmin?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">🗑</button>`:''}
+      </div>
+      <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-all;">${p.content}</div>
+      ${p.image_url?`<img src="${p.image_url}" style="width:100%;border-radius:10px;margin-top:10px;object-fit:cover;max-height:250px;" onclick="openImageModal('${p.image_url}','')">`:'' }
+    </div>`;
+  }).join('');
 }
 
 // ===== 取引履歴 =====
