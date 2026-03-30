@@ -2261,7 +2261,7 @@ function renderShopByCard(cardName) {
       ${sorted.map((s,i)=>`
         <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<sorted.length-1?'1px solid var(--surface2)':'none'};gap:8px;">
           <div style="flex:1;min-width:0;">
-            <div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.shop_name}</div>
+            <div style="font-size:13px;font-weight:700;word-break:break-all;">${s.shop_name}</div>
             <div style="font-size:11px;color:var(--text2);margin-top:2px;">${s.recorded_date}</div>
           </div>
           <div style="display:flex;align-items:center;gap:6px;flex-shrink:0;">
