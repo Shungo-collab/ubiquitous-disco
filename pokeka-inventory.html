@@ -1749,6 +1749,7 @@ function renderDecks() {
           <span class="deck-count">${totalQty}/60枚</span>
           ${isAdmin ? `
           <button class="dc-btn" style="background:var(--accent-light);color:var(--accent);font-size:11px;width:auto;padding:0 8px;border-radius:8px;height:26px;" onclick="renameDeck('${d.id}','${d.name.replace(/'/g,"\\'")}')">✏️</button>
+          <button class="dc-btn" style="background:#f0fdf4;color:#16a34a;font-size:11px;width:auto;padding:0 8px;border-radius:8px;height:26px;" onclick="copyDeck('${d.id}','${d.name.replace(/'/g,"\\'")}')">📋 コピー</button>
           <button class="dc-btn trash" style="width:auto;padding:0 8px;border-radius:8px;height:26px;font-size:11px;" onclick="deleteDeck('${d.id}','${d.name.replace(/'/g,"\\'")}')">🗑 削除</button>
           ` : ''}
         </div>
@@ -1914,6 +1915,32 @@ async function addCardToDeck(deckId) {
     showToast(`${sel.name} を追加しました`);
     renderDecks();
   } catch(e) { showToast('⚠️ 追加失敗'); }
+}
+
+async function copyDeck(deckId, deckName) {
+  const newName = prompt('コピー後のデッキ名', `${deckName} (コピー)`);
+  if (!newName) return;
+  try {
+    // 新しいデッキを作成
+    const res = await sbPost('decks', { name: newName });
+    if (!res || !res[0]) throw new Error('デッキ作成失敗');
+    const newDeck = res[0];
+    decks.push(newDeck);
+
+    // 元デッキのカードをコピー
+    const srcCards = deckCards.filter(r => r.deck_id === deckId);
+    for (const r of srcCards) {
+      const newCard = await sbPost('deck_cards', {
+        deck_id: newDeck.id,
+        card_id: r.card_id,
+        card_name: r.card_name,
+        quantity: r.quantity || 1
+      });
+      if (newCard && newCard[0]) deckCards.push(newCard[0]);
+    }
+    showToast(`📋 「${newName}」を作成しました！`);
+    renderDecks();
+  } catch(e) { showToast('⚠️ コピー失敗'); }
 }
 
 async function renameDeck(deckId, currentName) {
