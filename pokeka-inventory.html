@@ -1755,79 +1755,96 @@ function renderDecks() {
         </div>
       </div>
 
-      <div class="shortage-tabs">
-        <button class="shortage-tab active" onclick="switchShortageTab('${d.id}','all',this)">🏠＋🏡合計</button>
-        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','home',this)">🏠うちのみ</button>
-        <button class="shortage-tab" onclick="switchShortageTab('${d.id}','parents',this)">🏡実家のみ</button>
-      </div>
+      <details id="deck-detail-${d.id}" class="deck-detail-toggle">
+        <summary style="list-style:none;cursor:pointer;padding:8px 0;font-size:12px;font-weight:700;color:var(--text2);display:flex;align-items:center;gap:6px;">
+          <span id="deck-summary-${d.id}">
+            ${(() => {
+              const ngCount = dc.filter(r => {
+                const card = cards.find(c=>c.id===r.card_id);
+                if (!card) return false;
+                return (card.stock_home||0)+(card.stock_parents||0) < (r.quantity||1);
+              }).length;
+              return ngCount > 0
+                ? `<span style="color:var(--red);">⚠️ 不足${ngCount}種 · </span>`
+                : `<span style="color:var(--green);">✓ 充足 · </span>`;
+            })()}
+          </span>
+          <span>カードを見る ▾</span>
+        </summary>
 
-      <div class="deck-rows" id="deckrows-${d.id}">
-        ${(() => {
-          const rows = dc.map(r => {
-            const card = cards.find(c=>c.id===r.card_id);
-            const cname = card ? card.name : (r.card_name||'不明');
-            const needed = r.quantity||1;
-            const home = card?(card.stock_home||0):0;
-            const parents = card?(card.stock_parents||0):0;
-            const total = home+parents;
-            const diff = total - needed;
-            return { r, card, cname, needed, home, parents, total, diff };
-          });
-          const ngRows = rows.filter(x=>x.diff<0);
-          const okRows = rows.filter(x=>x.diff>=0);
-
-          const rowHTML = (x) => `
-            <div class="deck-row" data-home="${x.home}" data-parents="${x.parents}" data-needed="${x.needed}" data-name="${x.cname}">
-              <span class="deck-row-name">${x.cname}</span>
-              <div class="deck-row-right">
-                ${isAdmin ? `
-                <button class="dc-btn minus" onclick="updateDeckQty('${x.r.id}','${d.id}',-1)">−</button>
-                <span class="deck-qty-badge" id="dqb-${x.r.id}">${x.needed}枚</span>
-                <button class="dc-btn plus" onclick="updateDeckQty('${x.r.id}','${d.id}',1)">＋</button>
-                <button class="dc-btn trash" onclick="removeDeckCard('${x.r.id}','${d.id}')">🗑</button>
-                ` : `<span class="deck-qty-badge">${x.needed}枚</span>`}
-                <span class="shortage-badge ${x.diff>=0?'ok':x.diff===-1?'warn':'ng'}">${x.diff>=0?`✓ ${x.total}枚`:`不足 ${Math.abs(x.diff)}枚`}</span>
-              </div>
-            </div>`;
-
-          if (!rows.length) return '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>';
-
-          let html = '';
-          if (ngRows.length > 0) {
-            html += `<div style="background:var(--red-light);border-radius:8px;padding:4px 8px;margin-bottom:4px;font-size:10px;font-weight:700;color:var(--red);">⚠️ 不足 ${ngRows.length}種</div>`;
-            html += ngRows.map(rowHTML).join('');
-          }
-          if (okRows.length > 0) {
-            html += ngRows.length > 0 ? `
-              <details style="margin-top:4px;">
-                <summary style="font-size:11px;color:var(--text2);cursor:pointer;padding:4px 0;font-weight:700;list-style:none;">▸ 充足カード ${okRows.length}種</summary>
-                ${okRows.map(rowHTML).join('')}
-              </details>` : okRows.map(rowHTML).join('');
-          }
-          return html;
-        })()}
-      </div>
-
-      ${isAdmin ? `
-      <div class="deck-add-card">
-        <h4>＋ カードを追加</h4>
-        <div class="deck-search-wrap">
-          <input class="deck-search-input" type="text" placeholder="カード名で検索..."
-            oninput="searchDeckCard('${d.id}',this.value)"
-            onfocus="document.getElementById('dsr-${d.id}').classList.add('open')"
-            id="dsi-${d.id}">
-          <div class="deck-search-results" id="dsr-${d.id}"></div>
+        <div class="shortage-tabs">
+          <button class="shortage-tab active" onclick="switchShortageTab('${d.id}','all',this)">🏠＋🏡合計</button>
+          <button class="shortage-tab" onclick="switchShortageTab('${d.id}','home',this)">🏠うちのみ</button>
+          <button class="shortage-tab" onclick="switchShortageTab('${d.id}','parents',this)">🏡実家のみ</button>
         </div>
-        <div id="dsc-${d.id}"></div>
-        <div class="deck-add-row">
-          <input class="deck-qty-input" type="number" id="dqty-${d.id}" value="1" min="1" max="4">
-          <button class="deck-add-btn" onclick="addCardToDeck('${d.id}')">デッキに追加</button>
+
+        <div class="deck-rows" id="deckrows-${d.id}">
+          ${(() => {
+            const rows = dc.map(r => {
+              const card = cards.find(c=>c.id===r.card_id);
+              const cname = card ? card.name : (r.card_name||'不明');
+              const needed = r.quantity||1;
+              const home = card?(card.stock_home||0):0;
+              const parents = card?(card.stock_parents||0):0;
+              const total = home+parents;
+              const diff = total - needed;
+              return { r, card, cname, needed, home, parents, total, diff };
+            });
+            const ngRows = rows.filter(x=>x.diff<0);
+            const okRows = rows.filter(x=>x.diff>=0);
+
+            const rowHTML = (x) => `
+              <div class="deck-row" data-home="${x.home}" data-parents="${x.parents}" data-needed="${x.needed}" data-name="${x.cname}">
+                <span class="deck-row-name">${x.cname}</span>
+                <div class="deck-row-right">
+                  ${isAdmin ? `
+                  <button class="dc-btn minus" onclick="updateDeckQty('${x.r.id}','${d.id}',-1)">−</button>
+                  <span class="deck-qty-badge" id="dqb-${x.r.id}">${x.needed}枚</span>
+                  <button class="dc-btn plus" onclick="updateDeckQty('${x.r.id}','${d.id}',1)">＋</button>
+                  <button class="dc-btn trash" onclick="removeDeckCard('${x.r.id}','${d.id}')">🗑</button>
+                  ` : `<span class="deck-qty-badge">${x.needed}枚</span>`}
+                  <span class="shortage-badge ${x.diff>=0?'ok':x.diff===-1?'warn':'ng'}">${x.diff>=0?`✓ ${x.total}枚`:`不足 ${Math.abs(x.diff)}枚`}</span>
+                </div>
+              </div>`;
+
+            if (!rows.length) return '<div style="font-size:12px;color:var(--text2);padding:8px 0;">カード未登録</div>';
+
+            let html = '';
+            if (ngRows.length > 0) {
+              html += `<div style="background:var(--red-light);border-radius:8px;padding:4px 8px;margin-bottom:4px;font-size:10px;font-weight:700;color:var(--red);">⚠️ 不足 ${ngRows.length}種</div>`;
+              html += ngRows.map(rowHTML).join('');
+            }
+            if (okRows.length > 0) {
+              html += ngRows.length > 0 ? `
+                <details style="margin-top:4px;">
+                  <summary style="font-size:11px;color:var(--text2);cursor:pointer;padding:4px 0;font-weight:700;list-style:none;">▸ 充足カード ${okRows.length}種</summary>
+                  ${okRows.map(rowHTML).join('')}
+                </details>` : okRows.map(rowHTML).join('');
+            }
+            return html;
+          })()}
         </div>
-      </div>
+
+        ${isAdmin ? `
+        <div class="deck-add-card">
+          <h4>＋ カードを追加</h4>
+          <div class="deck-search-wrap">
+            <input class="deck-search-input" type="text" placeholder="カード名で検索..."
+              oninput="searchDeckCard('${d.id}',this.value)"
+              onfocus="document.getElementById('dsr-${d.id}').classList.add('open')"
+              id="dsi-${d.id}">
+            <div class="deck-search-results" id="dsr-${d.id}"></div>
+          </div>
+          <div id="dsc-${d.id}"></div>
+          <div class="deck-add-row">
+            <input class="deck-qty-input" type="number" id="dqty-${d.id}" value="1" min="1" max="4">
+            <button class="deck-add-btn" onclick="addCardToDeck('${d.id}')">デッキに追加</button>
+          </div>
+        </div>
+        ` : ''}
+      </details>
+
       <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🎉 売れた！</button>
-      ` : `
-      <button class="list-btn" onclick="openListModal('${d.id}','${d.name}')">🎉 売れた！</button>
-      `}
     </div>`;
   });
 
