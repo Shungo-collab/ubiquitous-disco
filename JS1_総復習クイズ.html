@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS1 総復習クイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --text: #f0f0f0;
+    --sub: #888;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 32px; padding: 0 8px; }
+  .breakdown { margin-bottom: 28px; text-align: left; }
+  .breakdown-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--sub); margin-bottom: 16px; text-align: center; }
+  .chapter-item { margin-bottom: 12px; }
+  .chapter-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .chapter-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .chapter-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">JS1 · FINAL QUIZ</div>
+    <div class="title">総復習クイズ</div>
+    <div class="subtitle">今日学んだことを確認しよう！全5問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 5</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 5問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+      <div id="chapters"></div>
+    </div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+const allQuestions = [
+  {
+    chapter: 'HTML・CSS・JS',
+    q: "HTML・CSS・JavaScriptの役割で正しい組み合わせはどれですか？",
+    opts: [
+      "HTML＝見た目、CSS＝骨格、JS＝動き",
+      "HTML＝動き、CSS＝骨格、JS＝見た目",
+      "HTML＝骨格、CSS＝見た目、JS＝動き",
+      "全部同じ役割"
+    ],
+    ans: 2,
+    exp: "HTMLは「骨格」、CSSは「見た目」、JavaScriptは「動き」を担当しています！スライドショーが自動で動く・ハンバーガーメニューを押したら開く・フォームのエラーチェック、こういった動きを全部JavaScriptが作っています。"
+  },
+  {
+    chapter: 'コンソール',
+    q: "console.log(\"こんにちは\") を実行すると何が起きますか？",
+    opts: [
+      "コンソールに「こんにちは」と表示される",
+      "Webページに大きく「こんにちは」と表示される",
+      "「こんにちは」というファイルが作られる",
+      "隣の人に「こんにちは」と声がかかる"
+    ],
+    ans: 0,
+    exp: "コンソールに「こんにちは」と表示されます！console.log()は「コンソールに〇〇を表示しろ」という命令です。Webページには表示されず、開発者だけが確認できる場所に出力されます。プロのエンジニアも毎日使っているツールです。"
+  },
+  {
+    chapter: '変数',
+    q: "変数とは何ですか？",
+    opts: [
+      "コンソールを開くための命令",
+      "HTMLのタグのひとつ",
+      "CSSの書き方のひとつ",
+      "データに名前をつけて保存しておく入れ物"
+    ],
+    ans: 3,
+    exp: "変数は「データに名前をつけて保存しておく入れ物」です！例えば const name = \"田中\" と書くと、\"田中\"というデータに name という名前がつきます。以降は name と書くだけで \"田中\" が取り出せます。同じデータを何度も使い回せるのが変数の便利なところです。"
+  },
+  {
+    chapter: '関数',
+    q: "「関数」を一言で言うと何ですか？",
+    opts: [
+      "処理に名前をつけて、何度でも呼び出せるもの",
+      "データに名前をつけた入れ物",
+      "コンソールを開くための呪文",
+      "ラーメンのレシピ"
+    ],
+    ans: 0,
+    exp: "関数は「処理に名前をつけて、何度でも呼び出せるもの」です！変数が「データ」に名前をつけるのに対して、関数は「処理」に名前をつけます。同じ処理を何度も書かなくて済むので、現場では大活躍します。今日の演習で実際に自分で書いて動かしましたね！"
+  },
+  {
+    chapter: 'テンプレートリテラル',
+    q: "テンプレートリテラルとは何ですか？",
+    opts: [
+      "HTMLを書くための特別な記法",
+      "関数を短く書くための記法",
+      "バッククォートと${}を使った、便利な文字列の書き方",
+      "CSSのアニメーション設定"
+    ],
+    ans: 2,
+    exp: "テンプレートリテラルは「バッククォート（`）と${}を使った便利な文字列の書き方」です！例えば const name = \"田中\" のとき、`${name}さん、こんにちは！` と書くだけで「田中さん、こんにちは！」と表示できます。+でつなぐ書き方より断然すっきりして読みやすくなります！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+const chapterResults = {};
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION 0${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${o}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  if (!chapterResults[q.chapter]) chapterResults[q.chapter] = { correct: 0, total: 0 };
+  chapterResults[q.chapter].total++;
+  if (isCorrect) chapterResults[q.chapter].correct++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('result-score').textContent = `${score} / ${questions.length}`;
+
+  const msgs = [
+    "0問正解！実はこれがいちばんラッキーかもしれない。人間の脳は「間違えた瞬間」に強い感情が動き、その体験が記憶として深く刻まれます（エラー駆動学習）。今日の間違いは、次回の確実な正解になる。今日ここに来て手を動かしてくれただけで、もう十分すごい！",
+    "1問正解！JavaScriptって何？というところから始まって、コンソールも関数も全部初めてで、それでも最後まで一緒に進んでくれた。それだけで本当にえらい！1問取れたってことは、確実に理解が始まってる。頑張っててとってもえらいです！",
+    "2問正解！コンソール・変数・関数・テンプレートリテラル、どれも初めての内容だったのにしっかり聞けてた証拠。今日ここに来て手を動かしてくれたこと、それだけでもう十分すごい！頑張っててとってもえらいです！",
+    "3問正解！しっかり聞けてた！今日の内容、自分のものになってきてる。頑張っててとってもえらいです！今日ここに来て、真剣に取り組んでくれたこと、それが一番大事！この調子で次回も来てね！",
+    "4問正解！ほぼ完璧！今日の内容しっかり自分のものになってる。コンソール・変数・関数・テンプレートリテラル、全部理解できてる。頑張っててとってもえらいです！最高です！",
+    "満点！完璧！！今日学んだこと全部バッチリ理解できてる！コンソール・変数・関数・テンプレートリテラル、どれもちゃんと頭に入ってる。今日ここに来て、手を動かして、最後まで頑張ってくれた。それがもう最高にえらい！！自信を持って次も来てね！！"
+  ];
+  const retryMsg = "もう一度向き合ってくれた、その気持ちが本当に大事です。エビングハウスの忘却曲線って知っていますか？人間は学んだことを1日後には約70%忘れると言われています。でも忘れたことに気づいて、もう一度触れることで記憶は一気に定着します。今まさにそれをやってる。今日ここに来て、最後まで諦めなかった。それがもう最高にえらい！！";
+  document.getElementById('result-msg').textContent = isRetryMode ? retryMsg : msgs[score];
+
+  if (!isRetryMode) {
+    const ch = document.getElementById('chapters');
+    ch.innerHTML = '';
+    Object.entries(chapterResults).forEach(([name, res]) => {
+      const pct = Math.round((res.correct / res.total) * 100);
+      ch.innerHTML += `<div class="chapter-item"><div class="chapter-label"><span>${name}</span><span>${res.correct}/${res.total}</span></div><div class="chapter-bar"><div class="chapter-fill" style="width:${pct}%"></div></div></div>`;
+    });
+  }
+
+  const wrongBtn = document.getElementById('retry-wrong-btn');
+  if (wrongIndices.length > 0 && !isRetryMode) wrongBtn.classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; isRetryMode = false;
+  Object.keys(chapterResults).forEach(k => delete chapterResults[k]);
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
