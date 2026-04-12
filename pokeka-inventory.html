@@ -1202,6 +1202,32 @@ body {
   </div>
 </div>
 
+<!-- 投稿編集モーダル -->
+<div class="modal-overlay" id="editPostModal">
+  <div class="modal">
+    <h3>✏️ 投稿を編集</h3>
+    <textarea id="editPostContent" rows="4"
+      style="width:100%;background:var(--surface2);border:1.5px solid var(--border);border-radius:12px;padding:12px;font-size:14px;font-family:inherit;color:var(--text);resize:none;outline:none;box-sizing:border-box;margin-bottom:10px;"></textarea>
+    <!-- 現在の画像 -->
+    <div id="editPostCurrentImg" style="display:none;margin-bottom:10px;">
+      <div style="font-size:11px;color:var(--text2);margin-bottom:4px;">現在の画像</div>
+      <div style="position:relative;display:inline-block;width:100%;">
+        <img id="editPostPreviewImg" style="width:100%;max-height:160px;object-fit:cover;border-radius:10px;">
+        <button onclick="removeEditPostImg()" style="position:absolute;top:6px;right:6px;background:rgba(0,0,0,0.6);color:white;border:none;border-radius:50%;width:28px;height:28px;font-size:14px;cursor:pointer;">✕</button>
+      </div>
+    </div>
+    <!-- 新しい画像添付 -->
+    <label style="display:flex;align-items:center;gap:6px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:14px;">
+      📷 写真を変更
+      <input type="file" accept="image/*" id="editPostImageInput" style="display:none;" onchange="previewEditPostImage(this)">
+    </label>
+    <div class="modal-btns">
+      <button class="modal-btn confirm" onclick="saveEditPostModal()">💾 保存する</button>
+      <button class="modal-btn cancel" onclick="closeModal('editPostModal')">キャンセル</button>
+    </div>
+  </div>
+</div>
+
 <!-- 価格編集モーダル -->
 <div class="modal-overlay" id="editPriceModal">
   <div class="modal">
@@ -3090,20 +3116,86 @@ function showEditPicker(postId, author) {
   document.body.appendChild(picker);
 }
 
+let editingPostId = null;
+let editPostNewImageBase64 = null;
+let editPostRemoveImage = false;
+
 function openEditPost(postId) {
   const post = posts.find(p=>p.id===postId);
   if (!post) return;
-  const newContent = prompt('投稿を編集', post.content);
-  if (newContent === null || newContent === post.content) return;
-  if (!newContent.trim()) { showToast('内容を入力してください'); return; }
-  editPost(postId, newContent.trim());
+  editingPostId = postId;
+  editPostNewImageBase64 = null;
+  editPostRemoveImage = false;
+
+  document.getElementById('editPostContent').value = post.content;
+  document.getElementById('editPostImageInput').value = '';
+
+  // 現在の画像
+  const currentImgDiv = document.getElementById('editPostCurrentImg');
+  const previewImg = document.getElementById('editPostPreviewImg');
+  if (post.image_url) {
+    previewImg.src = post.image_url;
+    currentImgDiv.style.display = 'block';
+  } else {
+    currentImgDiv.style.display = 'none';
+  }
+
+  document.getElementById('editPostModal').classList.add('open');
 }
 
-async function editPost(postId, newContent) {
+function previewEditPostImage(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    editPostNewImageBase64 = e.target.result;
+    editPostRemoveImage = false;
+    const previewImg = document.getElementById('editPostPreviewImg');
+    previewImg.src = editPostNewImageBase64;
+    document.getElementById('editPostCurrentImg').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
+
+function removeEditPostImg() {
+  editPostRemoveImage = true;
+  editPostNewImageBase64 = null;
+  document.getElementById('editPostCurrentImg').style.display = 'none';
+  document.getElementById('editPostImageInput').value = '';
+}
+
+async function saveEditPostModal() {
+  const newContent = document.getElementById('editPostContent').value.trim();
+  if (!newContent) { showToast('内容を入力してください'); return; }
+
+  let imageUrl = undefined;
+
+  if (editPostRemoveImage) {
+    imageUrl = null;
+  } else if (editPostNewImageBase64) {
+    try {
+      const blob = await (await fetch(editPostNewImageBase64)).blob();
+      const ext = blob.type.split('/')[1] || 'jpg';
+      const path = `posts/${Date.now()}.${ext}`;
+      const res = await fetch(`${SB_URL}/storage/v1/object/card-images/${path}`, {
+        method: 'POST',
+        headers: { 'apikey': SB_KEY, 'Authorization': `Bearer ${SB_KEY}`, 'Content-Type': blob.type },
+        body: blob
+      });
+      if (res.ok) imageUrl = `${SB_URL}/storage/v1/object/public/card-images/${path}`;
+    } catch(e) {}
+  }
+
   try {
-    await sbPatch('posts', postId, { content: newContent });
-    const post = posts.find(p=>p.id===postId);
-    if (post) post.content = newContent;
+    const updateData = { content: newContent };
+    if (imageUrl !== undefined) updateData.image_url = imageUrl;
+    await sbPatch('posts', editingPostId, updateData);
+    const post = posts.find(p=>p.id===editingPostId);
+    if (post) {
+      post.content = newContent;
+      if (imageUrl !== undefined) post.image_url = imageUrl;
+    }
+    closeModal('editPostModal');
     showToast('✅ 編集しました');
     renderBoard();
   } catch(e) { showToast('⚠️ 編集失敗'); }
