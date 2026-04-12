@@ -2995,7 +2995,7 @@ function renderBoard() {
           <div style="font-size:11px;color:var(--text2);">${date}</div>
         </div>
         <div style="display:flex;align-items:center;gap:6px;">
-          ${isMyPost?`<button onclick="openEditPost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">✏️</button>`:''}
+          ${isMyPost?`<button onclick="openEditPost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">✏️</button>`:`<button onclick="showEditPicker('${p.id}','${p.author}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">✏️</button>`}
           ${isAdmin?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">🗑</button>`:''}
         </div>
       </div>
@@ -3013,18 +3013,81 @@ function renderBoard() {
 }
 
 async function toggleLike(postId) {
-  if (!selectedBoardAuthor) { showToast('先に投稿者を選んでください'); return; }
   const post = posts.find(p=>p.id===postId);
   if (!post) return;
   const likes = Array.isArray(post.likes) ? [...post.likes] : [];
-  const idx = likes.indexOf(selectedBoardAuthor);
+
+  // 既にいいねしてる人がいればその人の取り消し、いなければ誰としていいねするか選ぶ
+  // ミニポップアップを表示
+  showLikePicker(postId, likes);
+}
+
+function showLikePicker(postId, currentLikes) {
+  // 既存のピッカーを削除
+  const existing = document.getElementById('likePicker');
+  if (existing) existing.remove();
+
+  const picker = document.createElement('div');
+  picker.id = 'likePicker';
+  picker.style.cssText = 'position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);';
+  picker.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px;padding:20px;margin:20px;width:100%;max-width:320px;box-shadow:0 8px 30px rgba(0,0,0,0.2);">
+      <div style="font-size:15px;font-weight:900;margin-bottom:16px;text-align:center;">誰としていいね？</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-bottom:16px;">
+        ${['駿吾','菜摘','優真','お母さん'].map(name => {
+          const alreadyLiked = currentLikes.includes(name);
+          return `<button onclick="doLike('${postId}','${name}')"
+            style="border:1.5px solid ${alreadyLiked?'#fca5a5':'var(--border)'};border-radius:20px;padding:8px 16px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;background:${alreadyLiked?'#fef2f2':'var(--surface2)'};color:${alreadyLiked?'#dc2626':'var(--text)'};">
+            ${alreadyLiked?'❤️':'🤍'} ${name}
+          </button>`;
+        }).join('')}
+      </div>
+      <button onclick="document.getElementById('likePicker').remove()"
+        style="width:100%;background:var(--surface2);border:none;border-radius:12px;padding:10px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:var(--text2);">
+        キャンセル
+      </button>
+    </div>`;
+  picker.onclick = e => { if (e.target === picker) picker.remove(); };
+  document.body.appendChild(picker);
+}
+
+async function doLike(postId, name) {
+  const post = posts.find(p=>p.id===postId);
+  if (!post) return;
+  const likes = Array.isArray(post.likes) ? [...post.likes] : [];
+  const idx = likes.indexOf(name);
   if (idx >= 0) likes.splice(idx, 1);
-  else likes.push(selectedBoardAuthor);
+  else likes.push(name);
   try {
     await sbPatch('posts', postId, { likes });
     post.likes = likes;
+    document.getElementById('likePicker')?.remove();
     renderBoard();
   } catch(e) { showToast('⚠️ 更新失敗'); }
+}
+
+function showEditPicker(postId, author) {
+  // 投稿者本人かどうか確認するピッカー
+  const picker = document.createElement('div');
+  picker.id = 'editPicker';
+  picker.style.cssText = 'position:fixed;inset:0;z-index:300;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.4);';
+  picker.innerHTML = `
+    <div style="background:var(--surface);border-radius:20px;padding:20px;margin:20px;width:100%;max-width:320px;">
+      <div style="font-size:15px;font-weight:900;margin-bottom:6px;text-align:center;">✏️ 投稿を編集</div>
+      <div style="font-size:13px;color:var(--text2);text-align:center;margin-bottom:16px;">${author} さんの投稿ですか？</div>
+      <div style="display:flex;gap:8px;">
+        <button onclick="document.getElementById('editPicker').remove();openEditPost('${postId}')"
+          style="flex:1;background:var(--accent);color:white;border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">
+          はい、編集する
+        </button>
+        <button onclick="document.getElementById('editPicker').remove()"
+          style="flex:1;background:var(--surface2);border:none;border-radius:12px;padding:12px;font-size:14px;font-weight:700;font-family:inherit;cursor:pointer;">
+          キャンセル
+        </button>
+      </div>
+    </div>`;
+  picker.onclick = e => { if (e.target === picker) picker.remove(); };
+  document.body.appendChild(picker);
 }
 
 function openEditPost(postId) {
