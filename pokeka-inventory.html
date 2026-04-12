@@ -2870,7 +2870,7 @@ function renderMercari() {
         <div style="display:flex;align-items:center;padding:12px 14px;border-bottom:${i<lowStock.length-1?'1px solid var(--surface2)':'none'};gap:10px;">
           <div style="flex:1;min-width:0;">
             <div style="font-size:14px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${c.name}</div>
-            <div style="font-size:11px;color:var(--text2);margin-top:2px;">🏠菜摘家 残り${have}枚 · そろそろ補充を</div>
+            <div style="font-size:11px;color:var(--text2);margin-top:2px;">🏠菜摘家 ${have}枚${(c.stock_parents||0)>0?` · 🏡実家${c.stock_parents}枚`:''}</div>
           </div>
           ${c.image_url?`<button onclick="openImageModal('${c.image_url}','${c.name.replace(/'/g,"\'").replace(/"/g,"&quot;")}')" style="background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:6px 10px;font-size:16px;cursor:pointer;flex-shrink:0;">🃏</button>`:''}
           <div style="background:#fef3c7;color:#d97706;border-radius:10px;padding:6px 12px;font-size:13px;font-weight:900;font-family:'DM Mono',monospace;white-space:nowrap;flex-shrink:0;">残り${have}枚</div>
