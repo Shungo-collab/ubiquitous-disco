@@ -2984,6 +2984,9 @@ function renderBoard() {
     const date = new Date(p.created_at).toLocaleDateString('ja-JP',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'});
     const authorColors = { '駿吾':'#2563eb', '菜摘':'#db2777', '優真':'#16a34a', 'お母さん':'#d97706' };
     const color = authorColors[p.author] || 'var(--accent)';
+    const likes = Array.isArray(p.likes) ? p.likes : [];
+    const likedByMe = selectedBoardAuthor && likes.includes(selectedBoardAuthor);
+    const isMyPost = selectedBoardAuthor && p.author === selectedBoardAuthor;
     return `
     <div style="background:var(--surface);border-radius:16px;padding:14px;border:1px solid var(--border);">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
@@ -2991,12 +2994,56 @@ function renderBoard() {
           <div style="background:${color};color:white;border-radius:20px;padding:3px 10px;font-size:12px;font-weight:900;">${p.author}</div>
           <div style="font-size:11px;color:var(--text2);">${date}</div>
         </div>
-        ${isAdmin?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">🗑</button>`:''}
+        <div style="display:flex;align-items:center;gap:6px;">
+          ${isMyPost?`<button onclick="openEditPost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">✏️</button>`:''}
+          ${isAdmin?`<button onclick="deletePost('${p.id}')" style="background:none;border:none;font-size:14px;cursor:pointer;color:var(--text2);">🗑</button>`:''}
+        </div>
       </div>
       <div style="font-size:14px;line-height:1.6;white-space:pre-wrap;word-break:break-all;">${p.content}</div>
       ${p.image_url?`<img src="${p.image_url}" style="width:100%;border-radius:10px;margin-top:10px;object-fit:cover;max-height:250px;" onclick="openImageModal('${p.image_url}','')">`:'' }
+      <div style="display:flex;align-items:center;gap:8px;margin-top:10px;padding-top:10px;border-top:1px solid var(--surface2);">
+        <button onclick="toggleLike('${p.id}')"
+          style="display:flex;align-items:center;gap:5px;background:${likedByMe?'#fef2f2':'var(--surface2)'};border:1.5px solid ${likedByMe?'#fca5a5':'var(--border)'};border-radius:20px;padding:5px 12px;font-size:13px;font-weight:700;font-family:inherit;cursor:pointer;color:${likedByMe?'#dc2626':'var(--text2)'};">
+          ${likedByMe?'❤️':'🤍'} ${likes.length > 0 ? likes.length : ''}
+        </button>
+        ${likes.length > 0 ? `<span style="font-size:11px;color:var(--text2);">${likes.join('・')}</span>` : ''}
+      </div>
     </div>`;
   }).join('');
+}
+
+async function toggleLike(postId) {
+  if (!selectedBoardAuthor) { showToast('先に投稿者を選んでください'); return; }
+  const post = posts.find(p=>p.id===postId);
+  if (!post) return;
+  const likes = Array.isArray(post.likes) ? [...post.likes] : [];
+  const idx = likes.indexOf(selectedBoardAuthor);
+  if (idx >= 0) likes.splice(idx, 1);
+  else likes.push(selectedBoardAuthor);
+  try {
+    await sbPatch('posts', postId, { likes });
+    post.likes = likes;
+    renderBoard();
+  } catch(e) { showToast('⚠️ 更新失敗'); }
+}
+
+function openEditPost(postId) {
+  const post = posts.find(p=>p.id===postId);
+  if (!post) return;
+  const newContent = prompt('投稿を編集', post.content);
+  if (newContent === null || newContent === post.content) return;
+  if (!newContent.trim()) { showToast('内容を入力してください'); return; }
+  editPost(postId, newContent.trim());
+}
+
+async function editPost(postId, newContent) {
+  try {
+    await sbPatch('posts', postId, { content: newContent });
+    const post = posts.find(p=>p.id===postId);
+    if (post) post.content = newContent;
+    showToast('✅ 編集しました');
+    renderBoard();
+  } catch(e) { showToast('⚠️ 編集失敗'); }
 }
 
 // ===== 取引履歴 =====
