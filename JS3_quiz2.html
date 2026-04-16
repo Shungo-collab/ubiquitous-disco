@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS3 総復習クイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --text: #f0f0f0;
+    --sub: #888;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .code-block { background: #0a0a10; border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 24px; font-family: 'Space Mono', monospace; font-size: 13px; line-height: 1.8; color: #c8d3f5; white-space: pre; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 32px; padding: 0 8px; }
+  .breakdown { margin-bottom: 28px; text-align: left; }
+  .breakdown-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--sub); margin-bottom: 16px; text-align: center; }
+  .chapter-item { margin-bottom: 12px; }
+  .chapter-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .chapter-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .chapter-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">JS3 · FINAL QUIZ</div>
+    <div class="title">総復習クイズ</div>
+    <div class="subtitle">今日学んだことを確認しよう！全5問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 5</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div id="code-area"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 5問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+      <div id="chapters"></div>
+    </div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+const allQuestions = [
+  {
+    chapter: 'if文',
+    q: "if文はどんなときに使う？",
+    opts: [
+      "ページに画像を並べたいとき",
+      "フォントを変えたいとき",
+      "条件によって表示する内容を変えたいとき",
+      "CSSを読み込みたいとき"
+    ],
+    ans: 2,
+    exp: "if文は「条件によって処理を切り替える」仕組みです！「血液型がAならAの結果を表示する」「入力欄が空なら警告を出す」など、判断が必要なところで使います。今日の演習まさにそれでしたね！"
+  },
+  {
+    chapter: '正規表現',
+    q: "正規表現は何のために使う？",
+    opts: [
+      "文字の色を変えるため",
+      "文字列が特定のパターンになっているか確認するため",
+      "画像を表示するため",
+      "ボタンを動かすため"
+    ],
+    ans: 1,
+    exp: "正規表現は「文字列が特定のパターンになっているか確認する」ためのものです！たとえばメールアドレスに＠が入っているか、電話番号が数字だけかなどのチェックに使います。フォームのバリデーションで大活躍します！"
+  },
+  {
+    chapter: 'if文',
+    q: "条件が「合っている」とき、プログラムはどうなる？",
+    opts: [
+      "エラーが出る",
+      "ページがリロードされる",
+      "{ }の中の処理が実行される",
+      "何も起きない"
+    ],
+    ans: 2,
+    exp: "条件が合っているとき（true）、{ }の中に書いた処理が実行されます！if (条件) { ここが動く } という形ですね。今日の血液型アプリでも「A型を選んだとき」の{ }の中に結果を書いて動かしました！"
+  },
+  {
+    chapter: '作品制作',
+    q: "お問い合わせフォームで、入力欄が空のまま送信されたとき『入力してください』と表示させたい。今日学んだ何を使えば実装できる？",
+    opts: [
+      "CSS",
+      "if文",
+      "フォームをPhotoshopで消す",
+      "HTMLのborder属性"
+    ],
+    ans: 1,
+    exp: "if文を使います！「もし入力欄が空なら→『入力してください』と表示する」という条件分岐を書けば実装できます。これが今日学んだif文の作品制作での使いどころです！自分のお問い合わせフォームにそのまま使えますよ！"
+  },
+  {
+    chapter: '文字数チェック',
+    q: "このコードは何を実現している？",
+    code: "if (text.length < 10) {\n    document.write('文字数が足りません');\n} else {\n    document.write('OK');\n}",
+    opts: [
+      "文字数が少ないとき警告を出している",
+      "文字を自動で入力している",
+      "ボタンを押したらページが開く",
+      "文字の色を変えている"
+    ],
+    ans: 0,
+    exp: "text.lengthで文字数を取得して、10文字未満のとき『文字数が足りません』と表示しています！lengthとif文を組み合わせるだけで文字数チェックができます。お問い合わせフォームの本文欄などにそのまま使えます！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+const chapterResults = {};
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION 0${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+
+  const codeArea = document.getElementById('code-area');
+  if (q.code) {
+    codeArea.innerHTML = `<div class="code-block">${q.code}</div>`;
+  } else {
+    codeArea.innerHTML = '';
+  }
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${o}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  if (!chapterResults[q.chapter]) chapterResults[q.chapter] = { correct: 0, total: 0 };
+  chapterResults[q.chapter].total++;
+  if (isCorrect) chapterResults[q.chapter].correct++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('result-score').textContent = `${score} / ${questions.length}`;
+
+  const msgs = [
+    "0問正解！実はこれがいちばんラッキーかもしれない。間違えた瞬間の記憶は深く残ります。今日ここに来て手を動かしてくれただけで、もう十分すごい！",
+    "1問正解！今日初めてif文と正規表現に触れて、最後まで一緒に進んでくれた。それだけで本当にえらい！頑張っててとってもえらいです！",
+    "2問正解！半分取れた！if文・正規表現、どちらも難しい内容なのにしっかり聞けてた証拠。頑張っててとってもえらいです！",
+    "3問正解！しっかり今日の内容が身についてきてる！if文の判断の仕組み、ちゃんと理解できてる。頑張っててとってもえらいです！",
+    "4問正解！ほぼ完璧！今日の内容しっかり自分のものになってる。if文も正規表現も作品制作でそのまま使えます！",
+    "満点！完璧！！今日学んだこと全部バッチリ理解できてる！if文・正規表現・文字数チェック、全部できてる。最高にえらい！！"
+  ];
+  document.getElementById('result-msg').textContent = msgs[score];
+
+  if (!isRetryMode) {
+    const ch = document.getElementById('chapters');
+    ch.innerHTML = '';
+    Object.entries(chapterResults).forEach(([name, res]) => {
+      const pct = Math.round((res.correct / res.total) * 100);
+      ch.innerHTML += `<div class="chapter-item"><div class="chapter-label"><span>${name}</span><span>${res.correct}/${res.total}</span></div><div class="chapter-bar"><div class="chapter-fill" style="width:${pct}%"></div></div></div>`;
+    });
+  }
+
+  const wrongBtn = document.getElementById('retry-wrong-btn');
+  if (wrongIndices.length > 0 && !isRetryMode) wrongBtn.classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; isRetryMode = false;
+  Object.keys(chapterResults).forEach(k => delete chapterResults[k]);
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
