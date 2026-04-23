@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JS4 休憩クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d1117;
+    --bg2: #161b22;
+    --bg3: #21262d;
+    --green: #39d353;
+    --green2: #56e368;
+    --green-dim: rgba(57,211,83,0.15);
+    --cyan: #58a6ff;
+    --yellow: #e3b341;
+    --red: #f85149;
+    --white: #f0f6fc;
+    --sub: #8b949e;
+    --border: rgba(57,211,83,0.2);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--white);
+    font-family: 'Noto Sans JP', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    position: relative;
+    overflow-x: hidden;
+  }
+
+  /* スキャンライン */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* グロー */
+  body::after {
+    content: '';
+    position: fixed;
+    top: -20%;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(57,211,83,0.04) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 640px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ヘッダー */
+  .header {
+    margin-bottom: 28px;
+    animation: fadeIn 0.6s ease both;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .terminal-bar {
+    background: var(--bg3);
+    border: 1px solid var(--border);
+    border-bottom: none;
+    border-radius: 10px 10px 0 0;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot { width: 12px; height: 12px; border-radius: 50%; }
+  .dot.red   { background: #ff5f57; }
+  .dot.yellow{ background: #febc2e; }
+  .dot.green { background: #28c840; }
+
+  .terminal-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--sub);
+    margin-left: 8px;
+    letter-spacing: 1px;
+  }
+
+  .header-body {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-top: none;
+    border-radius: 0 0 10px 10px;
+    padding: 20px 24px;
+  }
+
+  .prompt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .prompt span { color: var(--sub); }
+
+  .title {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--white);
+    margin-bottom: 4px;
+  }
+
+  .subtitle {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--sub);
+  }
+
+  /* プログレス */
+  .progress-wrap {
+    margin-bottom: 20px;
+    animation: fadeIn 0.6s 0.1s ease both;
+  }
+
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--sub);
+    margin-bottom: 8px;
+  }
+
+  .progress-bar {
+    height: 3px;
+    background: var(--bg3);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--cyan));
+    border-radius: 3px;
+    transition: width 0.5s ease;
+    position: relative;
+  }
+
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    right: 0;
+    top: -2px;
+    width: 7px;
+    height: 7px;
+    background: var(--green2);
+    border-radius: 50%;
+    box-shadow: 0 0 6px var(--green);
+  }
+
+  /* カード */
+  .card {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+    animation: fadeIn 0.6s 0.15s ease both;
+  }
+
+  .card-header {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .q-number {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 2px;
+  }
+
+  .q-tag {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    color: var(--sub);
+    background: var(--bg);
+    padding: 2px 8px;
+    border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .card-body { padding: 24px; }
+
+  .q-text {
+    font-size: 17px;
+    font-weight: 700;
+    line-height: 1.6;
+    color: var(--white);
+    margin-bottom: 24px;
+  }
+
+  /* 選択肢 */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 13px 18px;
+    background: var(--bg);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    color: var(--white);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .opt::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: var(--green);
+    transform: scaleY(0);
+    transition: transform 0.2s ease;
+  }
+
+  .opt:hover:not(.disabled) {
+    border-color: rgba(57,211,83,0.3);
+    background: var(--green-dim);
+  }
+
+  .opt:hover:not(.disabled)::before {
+    transform: scaleY(1);
+  }
+
+  .opt-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    width: 20px;
+    flex-shrink: 0;
+  }
+
+  .opt.correct {
+    border-color: var(--green);
+    background: rgba(57,211,83,0.08);
+    animation: correctFlash 0.4s ease;
+  }
+
+  @keyframes correctFlash {
+    0%   { background: rgba(57,211,83,0.3); }
+    100% { background: rgba(57,211,83,0.08); }
+  }
+
+  .opt.correct .opt-label { color: var(--green2); }
+  .opt.correct::before { transform: scaleY(1); background: var(--green); }
+
+  .opt.wrong {
+    border-color: rgba(248,81,73,0.4);
+    background: rgba(248,81,73,0.06);
+    animation: shake 0.3s ease;
+  }
+
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25%     { transform: translateX(-5px); }
+    75%     { transform: translateX(5px); }
+  }
+
+  .opt.wrong .opt-label { color: var(--red); }
+  .opt.wrong::before { transform: scaleY(1); background: var(--red); }
+  .opt.disabled { cursor: default; }
+
+  /* 解説 */
+  .explanation {
+    margin-top: 20px;
+    padding: 14px 16px;
+    background: var(--bg);
+    border: 1px solid rgba(57,211,83,0.2);
+    border-left: 3px solid var(--green);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.9;
+    color: rgba(240,246,252,0.85);
+    display: none;
+    animation: fadeIn 0.3s ease both;
+  }
+
+  .explanation.show { display: block; }
+
+  .exp-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 1px;
+    margin-bottom: 8px;
+  }
+
+  /* 次へボタン */
+  .next-btn {
+    margin-top: 20px;
+    width: 100%;
+    padding: 13px;
+    background: transparent;
+    border: 1px solid var(--green);
+    border-radius: 8px;
+    color: var(--green);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    display: none;
+    transition: all 0.2s ease;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .next-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--green-dim);
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .next-btn:hover { box-shadow: 0 0 12px rgba(57,211,83,0.3); }
+  .next-btn:hover::before { opacity: 1; }
+  .next-btn.show { display: block; animation: fadeIn 0.3s ease both; }
+
+  /* 結果 */
+  .result { display: none; }
+  .result.show { display: block; animation: fadeIn 0.5s ease both; }
+
+  .result-terminal {
+    background: var(--bg2);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  .result-terminal-bar {
+    background: var(--bg3);
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex; align-items: center; gap: 8px;
+  }
+
+  .result-body { padding: 32px 28px; text-align: center; }
+
+  .result-prompt {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--green);
+    margin-bottom: 16px;
+    text-align: left;
+  }
+
+  .result-score {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 72px;
+    font-weight: 700;
+    color: var(--green);
+    line-height: 1;
+    margin-bottom: 4px;
+    text-shadow: 0 0 20px rgba(57,211,83,0.5);
+    animation: glow 2s ease infinite alternate;
+  }
+
+  @keyframes glow {
+    from { text-shadow: 0 0 10px rgba(57,211,83,0.3); }
+    to   { text-shadow: 0 0 25px rgba(57,211,83,0.7); }
+  }
+
+  .result-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--sub);
+    margin-bottom: 24px;
+    letter-spacing: 2px;
+  }
+
+  .result-msg {
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.8;
+    color: rgba(240,246,252,0.9);
+    margin-bottom: 28px;
+    padding: 16px 20px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    text-align: left;
+  }
+
+  .btn-group { display: flex; flex-direction: column; gap: 10px; }
+
+  .retry-btn {
+    padding: 13px;
+    background: var(--green);
+    border: none;
+    border-radius: 8px;
+    color: var(--bg);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .retry-btn:hover { box-shadow: 0 0 16px rgba(57,211,83,0.4); transform: translateY(-1px); }
+
+  .retry-wrong-btn {
+    padding: 13px;
+    background: transparent;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 8px;
+    color: var(--sub);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: none;
+  }
+
+  .retry-wrong-btn:hover { border-color: var(--green); color: var(--green); }
+  .retry-wrong-btn.show { display: block; }
+
+  /* タイピングカーソル */
+  .cursor {
+    display: inline-block;
+    width: 8px;
+    height: 14px;
+    background: var(--green);
+    margin-left: 2px;
+    vertical-align: middle;
+    animation: blink 1s step-end infinite;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="terminal-bar">
+      <div class="dot red"></div>
+      <div class="dot yellow"></div>
+      <div class="dot green"></div>
+      <span class="terminal-title">js4_quiz.js — Break Quiz</span>
+    </div>
+    <div class="header-body">
+      <div class="prompt">$ <span>node quiz --mode=break --lesson=JS4</span></div>
+      <div class="title">休憩クイズ<span class="cursor"></span></div>
+      <div class="subtitle">// 前半の内容を振り返ろう — 全3問</div>
+    </div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info">
+      <span id="prog-text">question 1 / 3</span>
+      <span id="prog-pct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="card-header">
+      <span class="q-number" id="q-num">Q.01</span>
+      <span class="q-tag" id="q-tag">JavaScript</span>
+    </div>
+    <div class="card-body">
+      <div class="q-text" id="q-text"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation">
+        <div class="exp-title">// 解説</div>
+        <div id="exp-text"></div>
+      </div>
+      <button class="next-btn" id="next-btn">次の問題へ →</button>
+    </div>
+  </div>
+  <div class="result" id="result">
+    <div class="result-terminal">
+      <div class="result-terminal-bar">
+        <div class="dot red"></div><div class="dot yellow"></div><div class="dot green"></div>
+        <span class="terminal-title">result.log</span>
+      </div>
+      <div class="result-body">
+        <div class="result-prompt">$ <span>console.log(result)</span></div>
+        <div class="result-score" id="result-score"></div>
+        <div class="result-label">// 正解数 / 3問</div>
+        <div class="result-msg" id="result-msg"></div>
+        <div class="btn-group">
+          <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+          <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function escHTML(s) {
+  return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+const allQuestions = [
+  {
+    tag: 'function',
+    q: "JSのコードでfunctionが書いてあるところには何がある？",
+    opts: ["デザインの設定", "処理のまとまり", "画像のリンク", "CSSのリセット"],
+    ans: 1,
+    exp: "正解！functionが書いてあるところに「そのときに何をするか」という処理がまとまっています。JSのコードを見たとき、まずfunctionを探すと何をしているかわかりやすくなります！"
+  },
+  {
+    tag: 'class',
+    q: "classとfunctionの違いは？",
+    opts: ["classはデータと処理を両方セットにした箱・functionは処理だけの箱", "違いはない", "classはCSSで使う", "functionはHTMLで使う"],
+    ans: 0,
+    exp: "正解！functionは処理だけをまとめる箱。classはデータ（名前・HPなど）と処理（攻撃するなど）を両方セットにした箱です。今日の演習のキャラクターがclassで作られていましたね！"
+  },
+  {
+    tag: 'DOMContentLoaded',
+    q: "HTMLの一番上にJSを書くとエラーになることがある。なぜ？",
+    opts: ["HTMLが長すぎるから", "まだ読み込まれていないタグを操作しようとするから", "JSはbodyの外に書けないから", "ブラウザが古いから"],
+    ans: 1,
+    exp: "正解！HTMLは上から順番に読まれます。一番上にJSが書いてあると、まだ読み込まれていないpタグなどを操作しようとして「そんなタグないよ？」とエラーになります。だからDOMContentLoadedで「全部読み終わってから動いてね」と指示します！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false, isRetryMode = false;
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  const wrap = document.getElementById('quiz-card');
+
+  document.getElementById('q-num').textContent = `Q.0${current + 1}`;
+  document.getElementById('q-tag').textContent = q.tag;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `question ${current + 1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  const labels = ['a.', 'b.', 'c.', 'd.'];
+  q.opts.forEach((o, i) => {
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${escHTML(o)}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  document.getElementById('result').classList.add('show');
+  document.getElementById('result-score').innerHTML = `${score} / ${questions.length}<span class="cursor"></span>`;
+
+  const msgs = [
+    "0問正解！大丈夫、間違えた瞬間が一番記憶に残ります。今日ここに来て手を動かしてくれただけで十分すごい！後半もそのまま一緒に進もう！",
+    "1問正解！ここに来て、聞いて、参加してくれた。それだけでもう十分えらいです！1問取れたということは確実に理解が始まってる証拠！後半も一緒にいこう！",
+    "2問正解！あと1問で満点！その悔しさが記憶に残る。頑張っててとってもえらいです！後半も全力でいこう！",
+    "満点！完璧！前半の内容バッチリ理解できてる。今日ここに来て真剣に取り組んでくれた、それがもう最高にえらい！後半もこの調子で絶対いける！！"
+  ];
+  document.getElementById('result-msg').textContent = msgs[score];
+  if (wrongIndices.length > 0 && !isRetryMode) document.getElementById('retry-wrong-btn').classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions]; wrongIndices = []; current = 0; score = 0; isRetryMode = false;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]); current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
