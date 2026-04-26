@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Figma復習クイズ｜ドリーム幼稚園制作</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --text: #f0f0f0;
+    --sub: #888;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 32px; padding: 0 8px; }
+  .breakdown { margin-bottom: 28px; text-align: left; }
+  .breakdown-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--sub); margin-bottom: 16px; text-align: center; }
+  .chapter-item { margin-bottom: 12px; }
+  .chapter-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .chapter-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .chapter-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">FIGMA · QUIZ</div>
+    <div class="title">Figma復習クイズ</div>
+    <div class="subtitle">今日やったことを確認しよう！全5問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 5</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 5問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+      <div id="chapters"></div>
+    </div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+const allQuestions = [
+  {
+    chapter: 'レイヤー',
+    q: "Figmaの「レイヤー」とは何ですか？",
+    opts: [
+      "画像を明るくする機能",
+      "画面左側にある、パーツの重なり順や名前を管理する一覧",
+      "テキストの色を変える場所",
+      "ファイルを保存する機能"
+    ],
+    ans: 1,
+    exp: "レイヤーは画面左側にある一覧で、フレームの中にあるパーツ（テキスト・図形・画像など）の重なり順や名前を管理しています。レイヤーの上にあるものほど画面の手前に表示されます。今日は「年長クラス」の文字が図形の後ろに隠れてしまったとき、レイヤーで文字を上に持ってきて解決しましたね！"
+  },
+  {
+    chapter: 'オートレイアウト',
+    q: "今日の授業で「オートレイアウト」を使いました。オートレイアウトを使うと何がうれしいですか？",
+    opts: [
+      "画像が自動でダウンロードされる",
+      "テキストや図形をまとめて、自動でレイアウトを整えてくれる",
+      "フォントが自動で大きくなる",
+      "レイヤーの名前が自動でつく"
+    ],
+    ans: 1,
+    exp: "オートレイアウトは、テキストや図形をまとめて「フレーム」にして、自動でレイアウトを整えてくれる機能です！今日はクラス紹介のボタン（箱＋テキスト）を選択して右クリック→オートレイアウトを追加しましたね。デザインカンプ作りには欠かせない機能なので覚えておきましょう！"
+  },
+  {
+    chapter: 'タイポグラフィ',
+    q: "Figmaでテキストのサイズを変えるとき、右側のどのパネルを使いますか？",
+    opts: [
+      "プロトタイプ",
+      "デザイン",
+      "タイポグラフィ",
+      "エクスポート"
+    ],
+    ans: 2,
+    exp: "テキストのフォントサイズ・太さ・行間などは、右側の「タイポグラフィ」パネルで変更します！今日はクラス紹介の見出しを32px、説明テキストを17pxに設定しましたね。見出しは全セクションで同じサイズに揃えることで、ユーザーに統一感を感じてもらえます。"
+  },
+  {
+    chapter: '画像の入れ方',
+    q: "Figmaで図形の中に画像を入れるとき、正しい手順はどれですか？",
+    opts: [
+      "図形をダブルクリックして画像をドラッグ＆ドロップする",
+      "図形を選択→右側の「塗り」のカラーピッカーを押す→「画像」を選ぶ→コンピューターからアップロード",
+      "メニューの「ファイル」→「画像を挿入」を選ぶ",
+      "図形の上に画像ファイルをそのまま置く"
+    ],
+    ans: 1,
+    exp: "図形に画像を入れるには、①図形を選択→②右側の「塗り」のカラーピッカー（色のところ）を押す→③「画像」ボタンを選ぶ→④「コンピューターからアップロード」でダウンロードした画像を選ぶ、という手順です！今日は幼稚園の写真をこの手順でクラス紹介の箱に入れましたね。デザインカンプ作りの基本操作なので必ず覚えておきましょう！"
+  },
+  {
+    chapter: 'ナビゲーション設計',
+    q: "ドリーム幼稚園のナビゲーション（ヘッダー）に入れる要素として、今日決めた正しい組み合わせはどれですか？",
+    opts: [
+      "ロゴ・クラス紹介・園内解決・電話番号・アクセス・採用情報・資料請求",
+      "ロゴ（左）・クラス紹介・園内解決（中央）・資料請求ボタン（右上）",
+      "資料請求ボタンだけ",
+      "ロゴとアクセスマップだけ"
+    ],
+    ans: 1,
+    exp: "今日決めたナビゲーションは「ロゴ（左）・クラス紹介と園内解決（中央）・資料請求ボタン（右上）」の3要素です！人の視線はZ型（左上→右上→左下→右下）に動くので、左上にロゴ、右上に一番やってほしいアクション（資料請求）を置く設計が効果的です。情報を詰め込みすぎず、シンプルに絞ることが大切ですね！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+const chapterResults = {};
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION 0${current+1}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${o}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  if (!chapterResults[q.chapter]) chapterResults[q.chapter] = { correct: 0, total: 0 };
+  chapterResults[q.chapter].total++;
+  if (isCorrect) chapterResults[q.chapter].correct++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  const total = questions.length;
+  document.getElementById('result-score').textContent = `${score}/${total}`;
+  const msgs = [
+    `0点でも全然OK！今日来てくれたこと、手を動かしたこと、それだけで100点です。Figmaは触った回数が全部力になります。一緒に進めていきましょう！`,
+    `手を動かしながら覚えていくのがFigmaの一番の近道。今日の経験は絶対に残ります。次回またどんどん進めましょう！`,
+    `2問正解！レイヤーや画像の入れ方、少しずつ手が覚えてきましたね。復習しながらドリーム幼稚園を完成させましょう！`,
+    `3問正解！今日の内容をちゃんと理解できています。あとは繰り返し手を動かせば完璧です！`,
+    `4問正解！すごいです。今日の授業の内容をほぼ把握できています。このまま自信を持って進めてください！`,
+    `全問正解！完璧です！今日学んだオートレイアウト・レイヤー・画像入れ方、全部使いこなせる証拠です。ドリーム幼稚園の完成まで一緒に頑張りましょう！`
+  ];
+  document.getElementById('result-msg').textContent = msgs[score];
+  const chapDiv = document.getElementById('chapters');
+  chapDiv.innerHTML = '';
+  Object.entries(chapterResults).forEach(([ch, val]) => {
+    const pct = Math.round((val.correct / val.total) * 100);
+    chapDiv.innerHTML += `
+      <div class="chapter-item">
+        <div class="chapter-label"><span>${ch}</span><span>${val.correct}/${val.total}</span></div>
+        <div class="chapter-bar"><div class="chapter-fill" style="width:${pct}%"></div></div>
+      </div>`;
+  });
+  if (wrongIndices.length > 0) {
+    document.getElementById('retry-wrong-btn').classList.add('show');
+  }
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; answered = false;
+  isRetryMode = false;
+  Object.keys(chapterResults).forEach(k => delete chapterResults[k]);
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  wrongIndices = [];
+  current = 0; score = 0; answered = false;
+  isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
