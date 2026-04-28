@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSE7 Quiz &amp; Practice</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&family=Noto+Sans+JP:wght@400;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{--yellow:#FFE566;--pink:#FF6B9D;--blue:#4ECDC4;--purple:#A78BFA;--dark:#1a1a2e;--card:#ffffff;--sub:#6b7280;--correct:#10b981;--wrong:#ef4444;--shadow:4px 4px 0px #1a1a2e;}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;transition:background 0.5s ease;}
+body.mode-select,body.mode-quiz{background:var(--blue);background-image:radial-gradient(circle at 20% 20%,rgba(167,139,250,0.2) 0%,transparent 40%),radial-gradient(circle at 80% 80%,rgba(255,107,157,0.15) 0%,transparent 40%);}
+body.mode-practice{background:#0d1117;}
+.container{width:100%;max-width:600px;}
+@keyframes popIn{from{opacity:0;transform:scale(0.85) translateY(-12px);}to{opacity:1;transform:scale(1) translateY(0);}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px);}to{opacity:1;transform:translateY(0);}}
+
+/* 選択画面 */
+#screen-select{animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.select-header{text-align:center;margin-bottom:36px;}
+.select-badge{display:inline-block;background:var(--dark);color:var(--blue);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;padding:6px 16px;border-radius:20px;margin-bottom:14px;text-transform:uppercase;}
+.select-title{font-family:'Nunito',sans-serif;font-size:36px;font-weight:900;color:var(--dark);line-height:1.1;margin-bottom:8px;}
+.select-sub{font-size:14px;font-weight:700;color:var(--dark);opacity:0.6;}
+.select-cards{display:flex;flex-direction:column;gap:16px;}
+.select-card{background:var(--card);border:3px solid var(--dark);border-radius:20px;box-shadow:var(--shadow);padding:28px;cursor:pointer;transition:all 0.15s ease;display:flex;align-items:center;gap:20px;}
+.select-card:hover{transform:translate(-3px,-3px);box-shadow:7px 7px 0px var(--dark);}
+.select-icon{font-size:44px;flex-shrink:0;}
+.select-card-title{font-family:'Nunito',sans-serif;font-size:20px;font-weight:900;color:var(--dark);margin-bottom:4px;}
+.select-card-desc{font-size:13px;color:var(--sub);font-weight:700;line-height:1.6;}
+.quiz-card{border-color:var(--purple);box-shadow:4px 4px 0px var(--purple);}
+.quiz-card:hover{box-shadow:7px 7px 0px var(--purple);}
+.practice-card{border-color:#39d353;box-shadow:4px 4px 0px #39d353;}
+.practice-card:hover{box-shadow:7px 7px 0px #39d353;}
+
+/* クイズ画面 */
+#screen-quiz{display:none;}
+#screen-quiz.active{display:block;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1) both;}
+.quiz-header{text-align:center;margin-bottom:28px;}
+.quiz-badge{display:inline-block;background:var(--dark);color:var(--blue);font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;letter-spacing:3px;padding:6px 16px;border-radius:20px;margin-bottom:12px;text-transform:uppercase;}
+.quiz-title{font-family:'Nunito',sans-serif;font-size:36px;font-weight:900;color:var(--dark);margin-bottom:6px;}
+.quiz-subtitle{font-size:13px;font-weight:700;color:var(--dark);opacity:0.7;}
+.progress-wrap{margin-bottom:20px;}
+.progress-info{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--dark);margin-bottom:8px;}
+.progress-bar{height:10px;background:rgba(26,26,46,0.15);border-radius:10px;border:2px solid var(--dark);overflow:hidden;}
+.progress-fill{height:100%;background:var(--purple);border-radius:8px;transition:width 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+.q-card{background:var(--card);border:3px solid var(--dark);border-radius:20px;box-shadow:var(--shadow);padding:32px;}
+.q-number{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--purple);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px;}
+.q-text{font-size:18px;font-weight:700;line-height:1.6;color:var(--dark);margin-bottom:24px;}
+.options{display:flex;flex-direction:column;gap:10px;}
+.opt{display:flex;align-items:center;gap:14px;padding:14px 18px;background:#f9fafb;border:2.5px solid var(--dark);border-radius:12px;cursor:pointer;transition:all 0.15s ease;font-size:14px;font-weight:700;color:var(--dark);box-shadow:2px 2px 0px var(--dark);}
+.opt:hover:not(.disabled){transform:translate(-2px,-2px);box-shadow:4px 4px 0px var(--dark);background:#fff;}
+.opt-label{width:30px;height:30px;background:var(--blue);border:2px solid var(--dark);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:'Nunito',sans-serif;font-size:13px;font-weight:900;flex-shrink:0;}
+.opt.correct{background:#d1fae5;border-color:var(--correct);box-shadow:2px 2px 0px var(--correct);animation:correctBounce 0.4s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes correctBounce{0%{transform:scale(1);}50%{transform:scale(1.03);}100%{transform:scale(1);}}
+.opt.correct .opt-label{background:var(--correct);border-color:var(--correct);color:#fff;}
+.opt.wrong{background:#fee2e2;border-color:var(--wrong);box-shadow:2px 2px 0px var(--wrong);animation:wrongShake 0.4s ease;}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-6px);}75%{transform:translateX(6px);}}
+.opt.wrong .opt-label{background:var(--wrong);border-color:var(--wrong);color:#fff;}
+.opt.disabled{cursor:default;}
+.explanation{margin-top:20px;padding:16px 18px;background:#f5f3ff;border:2.5px solid var(--dark);border-radius:12px;font-size:13px;line-height:1.9;color:var(--dark);display:none;animation:fadeUp 0.4s ease both;}
+.explanation.show{display:block;}
+.exp-title{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--purple);letter-spacing:1px;text-transform:uppercase;margin-bottom:6px;}
+.next-btn{margin-top:20px;width:100%;padding:14px;background:var(--dark);border:2.5px solid var(--dark);border-radius:12px;color:var(--blue);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;letter-spacing:1px;cursor:pointer;display:none;transition:all 0.15s ease;box-shadow:3px 3px 0px rgba(0,0,0,0.3);}
+.next-btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0px rgba(0,0,0,0.3);}
+.next-btn.show{display:block;animation:fadeUp 0.4s ease both;}
+.result-card{background:var(--card);border:3px solid var(--dark);border-radius:20px;box-shadow:var(--shadow);padding:36px 32px;text-align:center;}
+.result-emoji{font-size:56px;margin-bottom:8px;display:block;}
+.result-score{font-family:'Nunito',sans-serif;font-size:80px;font-weight:900;color:var(--dark);line-height:1;margin-bottom:4px;}
+.result-label{font-size:13px;font-weight:700;color:var(--sub);margin-bottom:20px;letter-spacing:1px;}
+.result-msg{font-size:15px;font-weight:700;line-height:1.8;color:var(--dark);margin-bottom:24px;padding:16px 20px;background:#f9fafb;border:2.5px solid var(--dark);border-radius:12px;text-align:left;}
+.breakdown{margin-bottom:24px;text-align:left;}
+.breakdown-title{font-family:'Nunito',sans-serif;font-size:12px;font-weight:800;color:var(--sub);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px;text-align:center;}
+.chapter-item{margin-bottom:12px;}
+.chapter-label{display:flex;justify-content:space-between;font-size:12px;font-weight:700;color:var(--dark);margin-bottom:5px;}
+.chapter-bar{height:8px;background:#f3f4f6;border-radius:8px;border:1.5px solid var(--dark);overflow:hidden;}
+.chapter-fill{height:100%;background:var(--purple);border-radius:6px;transition:width 0.8s ease;}
+.btn-group{display:flex;flex-direction:column;gap:10px;}
+.retry-btn{padding:14px;background:var(--dark);border:2.5px solid var(--dark);border-radius:12px;color:var(--blue);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.15s ease;box-shadow:3px 3px 0px rgba(0,0,0,0.3);}
+.retry-btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0px rgba(0,0,0,0.3);}
+.retry-wrong-btn{padding:14px;background:transparent;border:2.5px solid var(--dark);border-radius:12px;color:var(--dark);font-family:'Nunito',sans-serif;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.15s ease;display:none;box-shadow:3px 3px 0px rgba(0,0,0,0.2);}
+.retry-wrong-btn:hover{transform:translate(-2px,-2px);}
+.retry-wrong-btn.show{display:block;}
+.back-btn{padding:14px;background:transparent;border:2.5px solid var(--dark);border-radius:12px;color:var(--dark);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all 0.15s ease;width:100%;}
+.back-btn:hover{background:#f9fafb;}
+
+/* コーディング練習画面 */
+#screen-practice{display:none;}
+#screen-practice.active{display:block;animation:fadeUp 0.5s ease both;}
+.editor-wrap{background:#0d1117;border-radius:16px;overflow:hidden;border:1px solid #30363d;}
+.editor-titlebar{background:#161b22;border-bottom:1px solid #30363d;padding:12px 20px;display:flex;align-items:center;gap:10px;}
+.editor-dot{width:12px;height:12px;border-radius:50%;}
+.editor-dot.r{background:#ff5f57;}.editor-dot.y{background:#febc2e;}.editor-dot.g{background:#28c840;}
+.editor-filename{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b949e;margin-left:8px;}
+.p-score{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:12px;color:#39d353;font-weight:700;}
+.practice-body{padding:28px;}
+.p-prog-info{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:11px;color:#8b949e;margin-bottom:8px;}
+.p-prog-bar{height:3px;background:#21262d;border-radius:3px;margin-bottom:24px;overflow:hidden;}
+.p-prog-fill{height:100%;background:#39d353;border-radius:3px;transition:width 0.4s ease;}
+.p-q-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:#39d353;letter-spacing:2px;margin-bottom:12px;}
+.p-question{font-size:16px;font-weight:700;color:#f0f6fc;line-height:1.7;margin-bottom:20px;}
+.code-block{background:#161b22;border:1px solid #30363d;border-radius:10px;padding:20px;margin-bottom:20px;font-family:'JetBrains Mono',monospace;font-size:14px;line-height:1.8;color:#e6edf3;}
+.code-line{display:flex;align-items:center;gap:8px;}
+.line-num{color:#484f58;font-size:12px;min-width:20px;text-align:right;user-select:none;}
+.code-punc{color:#e6edf3;}.code-blank{color:#ff7b72;}
+.input-area{display:flex;gap:10px;align-items:center;margin-bottom:14px;}
+.code-input{flex:1;background:#161b22;border:1px solid #30363d;border-radius:8px;padding:12px 16px;font-family:'JetBrains Mono',monospace;font-size:14px;color:#f0f6fc;outline:none;transition:border-color 0.2s ease;}
+.code-input:focus{border-color:#39d353;box-shadow:0 0 0 3px rgba(57,211,83,0.1);}
+.code-input.correct-i{border-color:#39d353;background:rgba(57,211,83,0.06);}
+.code-input.wrong-i{border-color:#f85149;background:rgba(248,81,73,0.06);animation:inputShake 0.4s ease;}
+@keyframes inputShake{0%,100%{transform:translateX(0);}25%{transform:translateX(-5px);}75%{transform:translateX(5px);}}
+.run-btn{padding:12px 20px;background:#39d353;border:none;border-radius:8px;color:#0d1117;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;transition:all 0.2s ease;white-space:nowrap;}
+.run-btn:hover{background:#56e368;transform:translateY(-1px);}
+.p-feedback{padding:14px 16px;border-radius:8px;font-size:13px;line-height:1.8;display:none;animation:fadeUp 0.3s ease both;}
+.p-feedback.ok{display:block;background:rgba(57,211,83,0.08);border:1px solid #39d353;color:#39d353;}
+.p-feedback.ng{display:block;background:rgba(248,81,73,0.08);border:1px solid #f85149;color:#f0f6fc;}
+.p-next-btn{margin-top:16px;width:100%;padding:13px;background:transparent;border:1px solid #39d353;border-radius:8px;color:#39d353;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;display:none;transition:all 0.2s ease;}
+.p-next-btn:hover{background:rgba(57,211,83,0.08);}
+.p-next-btn.show{display:block;animation:fadeUp 0.3s ease both;}
+.p-back-btn{margin-top:10px;width:100%;padding:10px;background:transparent;border:1px solid #30363d;border-radius:8px;color:#8b949e;font-family:'JetBrains Mono',monospace;font-size:12px;cursor:pointer;transition:all 0.2s ease;}
+.p-back-btn:hover{border-color:#8b949e;color:#f0f6fc;}
+.p-result{padding:36px 28px;text-align:center;}
+.p-result-score{font-family:'JetBrains Mono',monospace;font-size:72px;font-weight:700;color:#39d353;line-height:1;margin-bottom:4px;text-shadow:0 0 20px rgba(57,211,83,0.5);}
+.p-result-label{font-family:'JetBrains Mono',monospace;font-size:12px;color:#8b949e;letter-spacing:2px;margin-bottom:24px;}
+.p-result-msg{font-size:14px;font-weight:700;line-height:1.8;color:rgba(240,246,252,0.9);margin-bottom:24px;padding:16px 20px;background:#161b22;border:1px solid #30363d;border-radius:8px;text-align:left;}
+.p-retry-btn{padding:13px;background:#39d353;border:none;border-radius:8px;color:#0d1117;font-family:'JetBrains Mono',monospace;font-size:14px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px;}
+.p-retry-btn:hover{background:#56e368;}
+.p-to-select-btn{padding:13px;background:transparent;border:1px solid #30363d;border-radius:8px;color:#8b949e;font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700;cursor:pointer;width:100%;}
+.p-to-select-btn:hover{border-color:#8b949e;color:#f0f6fc;}
+</style>
+</head>
+<body class="mode-select">
+<div class="container">
+
+  <!-- 選択画面 -->
+  <div id="screen-select">
+    <div class="select-header">
+      <div class="select-badge">SSE7 · After Class</div>
+      <div class="select-title">今日の学習 🎯</div>
+      <div class="select-sub">どちらに挑戦しますか？</div>
+    </div>
+    <div class="select-cards">
+      <div class="select-card quiz-card" onclick="startQuiz()">
+        <div class="select-icon">🧠</div>
+        <div>
+          <div class="select-card-title">総復習クイズ</div>
+          <div class="select-card-desc">今日の授業の内容を確認しよう！<br>全5問・選択式</div>
+        </div>
+      </div>
+      <div class="select-card practice-card" onclick="startPractice(false)">
+        <div class="select-icon">⌨️</div>
+        <div>
+          <div class="select-card-title">HTML / CSS 練習</div>
+          <div class="select-card-desc">授業後にお願いします！<br>全10問・コード入力式</div>
+        </div>
+      </div>
+      <div class="select-card" id="resume-card" style="display:none;border-color:#58a6ff;box-shadow:4px 4px 0px #58a6ff;" onclick="startPractice(true)">
+        <div class="select-icon">▶️</div>
+        <div>
+          <div class="select-card-title" style="color:#1a1a2e;">前回の続きから</div>
+          <div class="select-card-desc" id="resume-desc">保存データを読み込み中...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- クイズ画面 -->
+  <div id="screen-quiz">
+    <div class="quiz-header">
+      <div class="quiz-badge">SSE7 · Final Quiz</div>
+      <div class="quiz-title">総復習クイズ ✨</div>
+      <div class="quiz-subtitle">今日学んだことを確認しよう — 全5問</div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-info"><span id="q-prog-text">Question 1 / 5</span><span id="q-prog-pct">0%</span></div>
+      <div class="progress-bar"><div class="progress-fill" id="q-prog-fill" style="width:0%"></div></div>
+    </div>
+    <div id="q-card-wrap">
+      <div class="q-card">
+        <div class="q-number" id="q-num">Question 01</div>
+        <div class="q-text" id="q-text"></div>
+        <div class="options" id="options"></div>
+        <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+        <button class="next-btn" id="next-btn">次の問題へ →</button>
+      </div>
+    </div>
+    <div id="q-result-wrap" style="display:none;">
+      <div class="result-card">
+        <span class="result-emoji" id="result-emoji">🎉</span>
+        <div class="result-score" id="result-score"></div>
+        <div class="result-label">正解数 / 5問</div>
+        <div class="result-msg" id="result-msg"></div>
+        <div class="breakdown"><div class="breakdown-title">Chapter Breakdown</div><div id="chapters"></div></div>
+        <div class="btn-group">
+          <button class="retry-btn" onclick="restartQuiz()">もう一度最初から</button>
+          <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+          <button class="back-btn" onclick="goSelect()">← 選択画面に戻る</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- コーディング練習画面 -->
+  <div id="screen-practice">
+    <div class="editor-wrap">
+      <div class="editor-titlebar">
+        <div class="editor-dot r"></div>
+        <div class="editor-dot y"></div>
+        <div class="editor-dot g"></div>
+        <span class="editor-filename">style.css — HTML/CSS Practice</span>
+        <div class="p-score" id="p-score-display">0 / 10</div>
+      </div>
+      <div class="practice-body" id="practice-body"></div>
+    </div>
+  </div>
+
+</div>
+<script>
+function escHTML(s){return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+
+function showScreen(name){
+  ['select','quiz','practice'].forEach(s=>{
+    const el=document.getElementById('screen-'+s);
+    el.classList.remove('active');
+    el.style.display='none';
+  });
+  const el=document.getElementById('screen-'+name);
+  el.style.display='block';
+  setTimeout(()=>el.classList.add('active'),10);
+}
+
+function goSelect(){document.body.className='mode-select';showScreen('select');checkResume();}
+function startQuiz(){document.body.className='mode-quiz';resetQuiz();showScreen('quiz');renderQuiz();}
+function startPractice(resume){
+  document.body.className='mode-practice';
+  if(resume){
+    const d=loadProgress();
+    if(d){pCur=d.cur;pSco=d.sco;pWrong=d.wrong||[];pAns=false;pIsRetry=false;}
+    else{resetPractice();}
+  }else{
+    resetPractice();clearProgress();
+  }
+  showScreen('practice');renderPractice();
+}
+
+/* クイズデータ */
+const quizData=[
+  {chapter:'CSSの基本',q:"CSSだけで要素の直前に装飾を追加できるのはどれ？",opts:["::before","background-color","text-align","フォントサイズ"],ans:0,exp:"正解！::before は「この要素の直前にCSSだけで装飾用の要素を追加する」機能です。今日の演習では section h2::before を使って見出しの上に赤いラインを追加しました。HTMLを変えずに見た目だけCSSで管理できます！"},
+  {chapter:'display',q:"CSSで要素を横並びにしたいとき、どのプロパティを使う？",opts:["display: flex","text-align: center","document.write","フレックスタイム制"],ans:0,exp:"正解！display: flex を親要素に書くだけで子要素が横並びになります。今日の演習では #menu .container に書いて4つの子要素を横並びにしました！floatという方法もありますが、現在の実務ではflexboxが主流です。"},
+  {chapter:'display',q:"spanタグにdisplay: blockを使うと何ができるようになる？",opts:["要素が消える","幅・高さが指定できるようになる","文字が大きくなる","色が変わる"],ans:1,exp:"正解！spanはデフォルトでインライン要素なので幅・高さが指定できません。display: block でブロック要素に変えることで幅・高さを自由に指定できるようになります。今日の演習では section h2 span に使って日本語を英語の下の行に表示させました！"},
+  {chapter:'セレクタ',q:"section h2 spanというセレクタは何を意味する？",opts:["sectionかh2かspanのどれか","h2の隣のspan","sectionの中のh2の中のspan","spanタグ全部"],ans:2,exp:"正解！CSSのセレクタはスペースで区切ると「その中にある要素」を意味します。section h2 span は「sectionの中のh2の中のspan」にだけCSSが適用されます。今日の演習でh2の中の日本語だけ小さくしたのは、このセレクタを使ったからです！"},
+  {chapter:'display',q:"display: noneにすると要素はどうなる？",opts:["透明になる","赤くなる","スペースごと消える","大きくなる"],ans:2,exp:"正解！display: none はスペースごと消えます。例えばPC版では表示してスマホ版では非表示にしたいとき、.sp { display: none; } とメディアクエリと組み合わせて使います。対して visibility: hidden はスペースを残したまま透明になります。"}
+];
+
+let qCur=0,qSco=0,qAns=false,qRetry=false,qWrong=[],qQuestions=[...quizData];
+const qChapRes={};
+const qEmoji={0:"😢",1:"🌱",2:"👏",3:"🌟",4:"🔥",5:"🎉"};
+
+function resetQuiz(){
+  qCur=0;qSco=0;qAns=false;qRetry=false;qWrong=[];qQuestions=[...quizData];
+  Object.keys(qChapRes).forEach(k=>delete qChapRes[k]);
+  document.getElementById('q-card-wrap').style.display='block';
+  document.getElementById('q-result-wrap').style.display='none';
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  document.getElementById('chapters').innerHTML='';
+}
+
+function renderQuiz(){
+  const q=qQuestions[qCur],total=qQuestions.length;
+  document.getElementById('q-num').textContent='Question 0'+(qCur+1);
+  document.getElementById('q-text').textContent=q.q;
+  document.getElementById('q-prog-text').textContent='Question '+(qCur+1)+' / '+total;
+  const pct=Math.round(qCur/total*100);
+  document.getElementById('q-prog-pct').textContent=pct+'%';
+  document.getElementById('q-prog-fill').style.width=pct+'%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  qAns=false;
+  const opts=document.getElementById('options');
+  opts.innerHTML='';
+  ['A','B','C','D'].forEach((lb,i)=>{
+    if(i>=q.opts.length)return;
+    const d=document.createElement('div');
+    d.className='opt';
+    d.innerHTML='<span class="opt-label">'+lb+'</span><span>'+escHTML(q.opts[i])+'</span>';
+    d.onclick=()=>selectQ(i);
+    opts.appendChild(d);
+  });
+}
+
+function selectQ(i){
+  if(qAns)return;
+  qAns=true;
+  const q=qQuestions[qCur];
+  const opts=document.querySelectorAll('.opt');
+  opts.forEach(o=>o.classList.add('disabled'));
+  const ok=i===q.ans;
+  opts[i].classList.add(ok?'correct':'wrong');
+  if(!ok){opts[q.ans].classList.add('correct');if(!qRetry)qWrong.push(quizData.indexOf(q));}
+  if(ok)qSco++;
+  if(!qChapRes[q.chapter])qChapRes[q.chapter]={correct:0,total:0};
+  qChapRes[q.chapter].total++;
+  if(ok)qChapRes[q.chapter].correct++;
+  document.getElementById('exp-text').textContent=q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn=document.getElementById('next-btn');
+  btn.textContent=qCur<qQuestions.length-1?'次の問題へ →':'結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick=()=>{
+  qCur++;
+  if(qCur<qQuestions.length)renderQuiz();
+  else showQResult();
+};
+
+function showQResult(){
+  document.getElementById('q-card-wrap').style.display='none';
+  document.getElementById('q-prog-fill').style.width='100%';
+  document.getElementById('q-prog-pct').textContent='100%';
+  document.getElementById('q-result-wrap').style.display='block';
+  document.getElementById('result-score').textContent=qSco+' / '+qQuestions.length;
+  document.getElementById('result-emoji').textContent=qEmoji[qSco]||'🎉';
+  const msgs=["0問正解！大丈夫、間違えた瞬間が一番記憶に残ります。今日ここに来て手を動かしてくれただけで十分すごい！","1問正解！今日学んだこと、確実に頭に入ってきてる証拠です。真剣に取り組んでくれた、それだけでもう十分えらいです！","2問正解！今日の内容、自分のものになってきてる。頑張っててとってもえらいです！","3問正解！しっかり聞けてた証拠。flexbox・::before・セレクタ、全部理解できてきてる！","4問正解！ほぼ完璧！今日の内容しっかり自分のものになってる。最高です！","満点！完璧！！::before・flexbox・display・セレクタ、全部頭に入ってる。今日ここに来て最後まで頑張ってくれた、それがもう最高にえらい！！"];
+  document.getElementById('result-msg').textContent=msgs[qSco];
+  if(!qRetry){
+    const ch=document.getElementById('chapters');ch.innerHTML='';
+    Object.entries(qChapRes).forEach(([n,r])=>{
+      const p=Math.round(r.correct/r.total*100);
+      ch.innerHTML+='<div class="chapter-item"><div class="chapter-label"><span>'+n+'</span><span>'+r.correct+'/'+r.total+'</span></div><div class="chapter-bar"><div class="chapter-fill" style="width:'+p+'%"></div></div></div>';
+    });
+  }
+  if(qWrong.length>0&&!qRetry)document.getElementById('retry-wrong-btn').classList.add('show');
+}
+
+function restartQuiz(){resetQuiz();renderQuiz();}
+function retryWrong(){
+  qQuestions=qWrong.map(i=>quizData[i]);qCur=0;qSco=0;qRetry=true;
+  document.getElementById('q-card-wrap').style.display='block';
+  document.getElementById('q-result-wrap').style.display='none';
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  renderQuiz();
+}
+
+/* コーディング練習データ */
+const practiceData=[
+  {q:"テキストを中央揃えにするプロパティと値は？",hint:"text-align: ____",answer:"center",lines:["p {","  text-align: ????;","}"],exp:"✅ text-align: center で文字を中央揃えにできます。left で左寄せ・right で右寄せです。"},
+  {q:"子要素を横並びにするdisplayの値は？",hint:"display: ____",answer:"flex",lines:[".container {","  display: ????;","}"],exp:"✅ display: flex で子要素が横並びになります。flexboxの基本中の基本です！"},
+  {q:"背景色を指定するプロパティは？（値はblueで）",hint:"____: blue",answer:"background-color",lines:["div {","  ????: blue;","}"],exp:"✅ background-color で背景色を指定できます。background と省略してもOKです。"},
+  {q:"要素を非表示にして「スペースごと消す」displayの値は？",hint:"display: ____",answer:"none",lines:[".hidden {","  display: ????;","}"],exp:"✅ display: none でスペースごと消えます。visibility: hidden はスペースを残したまま透明になります。"},
+  {q:"文字の大きさを指定するプロパティは？（値は16pxで）",hint:"____: 16px",answer:"font-size",lines:["p {","  ????: 16px;","}"],exp:"✅ font-size で文字の大きさを指定できます。px・em・remなどの単位が使えます。"},
+  {q:"要素の外側に余白をつけるプロパティは？（値は20pxで）",hint:"____: 20px",answer:"margin",lines:["section {","  ????: 20px;","}"],exp:"✅ margin で要素の外側に余白をつけられます。padding との違いは「外側か内側か」です。"},
+  {q:"要素の内側に余白をつけるプロパティは？（値は20pxで）",hint:"____: 20px",answer:"padding",lines:["div {","  ????: 20px;","}"],exp:"✅ padding で要素の内側に余白をつけられます。margin との違いは「内側か外側か」です。"},
+  {q:"::beforeを表示させるために必ず書くプロパティは？（値は\"\"で）",hint:'____: ""',answer:"content",lines:["h2::before {","  ????: \"\";","  display: block;","}"],exp:'✅ content を書かないと::beforeは表示されません。中身なしの場合は content: "" と空の文字列を書きます。'},
+  {q:"インライン要素をブロック要素に変えるdisplayの値は？",hint:"display: ____",answer:"block",lines:["span {","  display: ????;","}"],exp:"✅ display: block でインライン要素をブロック要素に変えられます。これで幅・高さが指定できるようになります。"},
+  {q:"文字の色を指定するプロパティは？（値はredで）",hint:"____: red",answer:"color",lines:["p {","  ????: red;","}"],exp:"✅ color で文字の色を指定できます。background-color との違いは「文字の色か背景の色か」です。"}
+];
+
+let pCur=0,pSco=0,pAns=false,pWrong=[],pIsRetry=false;
+
+const SAVE_KEY='sse7_practice_save';
+
+function saveProgress(){
+  try{
+    localStorage.setItem(SAVE_KEY,JSON.stringify({
+      cur:pCur,sco:pSco,wrong:pWrong,ts:Date.now()
+    }));
+  }catch(e){}
+}
+
+function loadProgress(){
+  try{
+    const d=localStorage.getItem(SAVE_KEY);
+    return d?JSON.parse(d):null;
+  }catch(e){return null;}
+}
+
+function clearProgress(){
+  try{localStorage.removeItem(SAVE_KEY);}catch(e){}
+}
+
+function checkResume(){
+  const d=loadProgress();
+  const card=document.getElementById('resume-card');
+  const desc=document.getElementById('resume-desc');
+  if(d&&d.cur>0&&d.cur<practiceData.length){
+    card.style.display='flex';
+    const date=new Date(d.ts);
+    const mm=date.getMonth()+1,dd=date.getDate(),hh=date.getHours(),mn=String(date.getMinutes()).padStart(2,'0');
+    desc.textContent=mm+'/'+dd+' '+hh+':'+mn+'に中断 — '+d.cur+'問目から再開（'+d.sco+'問正解済み）';
+  }else{
+    card.style.display='none';
+  }
+}
+
+function resetPractice(){pCur=0;pSco=0;pAns=false;pWrong=[];pIsRetry=false;}
+
+function renderPractice(){
+  if(pCur>=practiceData.length){showPResult();return;}
+  const q=practiceData[pCur];
+  const pct=Math.round(pCur/practiceData.length*100);
+  document.getElementById('p-score-display').textContent=pSco+' / '+practiceData.length;
+  pAns=false;
+  const linesHTML=q.lines.map((l,i)=>'<div class="code-line"><span class="line-num">'+(i+1)+'</span><span class="'+(l.includes('????')?'code-blank':'code-punc')+'">'+escHTML(l)+'</span></div>').join('');
+  document.getElementById('practice-body').innerHTML=
+    '<div class="p-prog-info"><span>Problem '+(pCur+1)+' / '+practiceData.length+'</span><span>'+pct+'%</span></div>'+
+    '<div class="p-prog-bar"><div class="p-prog-fill" style="width:'+pct+'%"></div></div>'+
+    '<div class="p-q-num">// PROBLEM '+String(pCur+1).padStart(2,'0')+'</div>'+
+    '<div class="p-question">'+escHTML(q.q)+'</div>'+
+    '<div class="code-block">'+linesHTML+'</div>'+
+    '<div class="input-area">'+
+    '<input class="code-input" id="code-input" type="text" placeholder="'+escHTML(q.hint)+'" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">'+
+    '<button class="run-btn" onclick="checkAnswer()">実行 ▶</button>'+
+    '</div>'+
+    '<div class="p-feedback" id="p-feedback"></div>'+
+    '<button class="p-next-btn" id="p-next-btn" onclick="nextPractice()">次の問題へ →</button>'+
+    '<button class="p-pause-btn" onclick="pausePractice()" style="margin-top:10px;width:100%;padding:10px;background:transparent;border:1px solid #febc2e;border-radius:8px;color:#febc2e;font-family:JetBrains Mono,monospace;font-size:12px;cursor:pointer;">⏸ 一時休止（進捗を保存して選択画面へ）</button>'+
+    '<button class="p-back-btn" onclick="goSelect()">← 保存せずに戻る</button>';
+  const inp=document.getElementById('code-input');
+  inp.focus();
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')checkAnswer();});
+}
+
+function checkAnswer(){
+  if(pAns)return;
+  const q=practiceData[pCur];
+  const inp=document.getElementById('code-input');
+  const val=inp.value.trim().replace(/;$/,'').trim();
+  const ok=val.toLowerCase()===q.answer.toLowerCase();
+  pAns=true;
+  inp.classList.add(ok?'correct-i':'wrong-i');
+  inp.disabled=true;
+  const fb=document.getElementById('p-feedback');
+  if(ok){pSco++;document.getElementById('p-score-display').textContent=pSco+' / '+practiceData.length;fb.className='p-feedback ok';fb.textContent=q.exp;}
+  else{
+    if(!pIsRetry)pWrong.push(pCur);
+    fb.className='p-feedback ng';fb.textContent='❌ 正解は「'+q.answer+'」です。\n'+q.exp;
+  }
+  document.getElementById('p-next-btn').classList.add('show');
+}
+
+function nextPractice(){pCur++;saveProgress();renderPractice();}
+
+function retryWrongPractice(){
+  const wrongQ=pWrong.slice();
+  const orig=[...practiceData];
+  pIsRetry=true;pCur=0;pSco=0;pAns=false;
+  // 間違えた問題だけのデータを一時的に差し替え
+  practiceData.length=0;
+  wrongQ.forEach(i=>practiceData.push(orig[i]));
+  document.getElementById('p-score-display').textContent='0 / '+practiceData.length;
+  renderPractice();
+  // 元データに戻すためのフラグ
+  practiceData._orig=orig;
+  practiceData._wrong=wrongQ;
+}
+
+function pausePractice(){
+  saveProgress();
+  goSelect();
+  setTimeout(checkResume,100);
+}
+
+function showPResult(){
+  const msgs=["0問正解！大丈夫。CSSのプロパティ名は使いながら自然に覚えていきます。今日ここで挑戦してくれただけで十分えらい！","1〜3問正解！少しずつ覚えてきてる！繰り返し書くうちに自然と身につきます。","4〜6問正解！半分以上正解！基本的なプロパティがしっかり身についてきてる。","7〜9問正解！ほぼ完璧！CSSの基本プロパティをしっかり使いこなせてる。","満点！！全部正解！CSSの基本プロパティを完全にマスターしてる。最高にえらい！！"];
+  const idx=pSco===10?4:pSco>=7?3:pSco>=4?2:pSco>=1?1:0;
+  document.getElementById('practice-body').innerHTML=
+    '<div class="p-result">'+
+    '<div class="p-result-score">'+pSco+' / '+practiceData.length+'</div>'+
+    '<div class="p-result-label">// 正解数 / 10問</div>'+
+    '<div class="p-result-msg">'+msgs[idx]+'</div>'+
+    '<button class="p-retry-btn" onclick="resetPractice();clearProgress();renderPractice();">もう一度最初から</button>'+
+    (pWrong.length>0&&!pIsRetry?'<button class="p-retry-btn" style="background:#febc2e;margin-top:8px;" onclick="retryWrongPractice()">間違えた'+pWrong.length+'問だけもう一度</button>':'')+
+    '<button class="p-to-select-btn" onclick="clearProgress();goSelect();setTimeout(checkResume,100);">← 選択画面に戻る</button>'+
+    '</div>';
+}
+
+showScreen('select');checkResume();
+</script>
+</body>
+</html>
