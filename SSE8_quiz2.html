@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SSE8 総復習クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Noto+Sans+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+:root{
+  --bg:#fafaf9;
+  --card:#ffffff;
+  --border:#e5e5e3;
+  --text:#1c1c1a;
+  --sub:#6b6b68;
+  --hint:#9b9b98;
+  --accent:#16a34a;
+  --accent-bg:#f0fdf4;
+  --wrong:#dc2626;
+  --wrong-bg:#fef2f2;
+  --progress:#1c1c1a;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:var(--bg);color:var(--text);font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:32px 20px;}
+.wrap{width:100%;max-width:560px;}
+.header{margin-bottom:40px;}
+.header-meta{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;}
+.label{font-size:11px;font-weight:500;letter-spacing:2px;color:var(--hint);text-transform:uppercase;}
+.q-counter{font-size:11px;font-weight:500;color:var(--hint);letter-spacing:1px;}
+.progress-track{height:2px;background:var(--border);border-radius:2px;overflow:hidden;}
+.progress-bar{height:100%;background:var(--progress);border-radius:2px;transition:width 0.6s cubic-bezier(0.4,0,0.2,1);}
+.scene{perspective:1200px;margin-bottom:28px;}
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:36px 32px;transform-style:preserve-3d;transition:transform 0.5s cubic-bezier(0.4,0,0.2,1);position:relative;min-height:140px;}
+.card.flip{transform:rotateY(90deg);}
+.card.flip-in{transform:rotateY(0deg);}
+.q-num{font-size:64px;font-weight:300;color:var(--border);line-height:1;margin-bottom:16px;font-family:'Inter',sans-serif;letter-spacing:-2px;}
+.q-text{font-size:17px;font-weight:500;line-height:1.7;color:var(--text);}
+.options{display:flex;flex-direction:column;gap:8px;margin-bottom:24px;}
+.opt{display:flex;align-items:center;gap:14px;padding:15px 18px;background:var(--card);border:1px solid var(--border);border-radius:12px;cursor:pointer;transition:all 0.2s ease;font-size:14px;font-weight:500;color:var(--text);position:relative;overflow:hidden;opacity:0;transform:translateY(8px);animation:slideIn 0.3s ease forwards;}
+.opt:nth-child(1){animation-delay:0.05s;}
+.opt:nth-child(2){animation-delay:0.1s;}
+.opt:nth-child(3){animation-delay:0.15s;}
+.opt:nth-child(4){animation-delay:0.2s;}
+@keyframes slideIn{to{opacity:1;transform:translateY(0);}}
+.opt::before{content:'';position:absolute;left:0;top:0;bottom:0;width:0;background:var(--accent-bg);transition:width 0.4s cubic-bezier(0.4,0,0.2,1);z-index:0;}
+.opt:hover:not(.disabled)::before{width:100%;}
+.opt:hover:not(.disabled){border-color:#d1d1ce;}
+.opt-label{width:28px;height:28px;border-radius:50%;border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:500;color:var(--sub);flex-shrink:0;position:relative;z-index:1;transition:all 0.2s ease;font-family:'Inter',sans-serif;}
+.opt-text{position:relative;z-index:1;}
+.opt.correct{border-color:var(--accent);background:var(--accent-bg);animation:correctSlide 0.5s ease forwards;}
+@keyframes correctSlide{0%{transform:translateX(0);}15%{transform:translateX(6px);}100%{transform:translateX(0);}}
+.opt.correct::before{width:100%;background:var(--accent-bg);}
+.opt.correct .opt-label{background:var(--accent);border-color:var(--accent);color:#fff;}
+.opt.wrong{border-color:var(--wrong);background:var(--wrong-bg);animation:wrongShake 0.4s ease;}
+@keyframes wrongShake{0%,100%{transform:translateX(0);}20%{transform:translateX(-5px);}60%{transform:translateX(5px);}}
+.opt.wrong::before{width:100%;background:var(--wrong-bg);}
+.opt.wrong .opt-label{background:var(--wrong);border-color:var(--wrong);color:#fff;}
+.opt.disabled{cursor:default;}
+.opt.disabled:hover::before{width:0;}
+.opt.disabled:hover{border-color:var(--border);}
+.opt.correct.disabled:hover{border-color:var(--accent);}
+.opt.wrong.disabled:hover{border-color:var(--wrong);}
+.exp{padding:16px 20px;background:#fafaf9;border-left:2px solid var(--accent);border-radius:0 10px 10px 0;font-size:13px;line-height:1.9;color:var(--sub);display:none;margin-bottom:16px;animation:fadeUp 0.3s ease both;}
+.exp.show{display:block;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.next-btn{width:100%;padding:14px;background:var(--text);color:#fff;border:none;border-radius:12px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:500;cursor:pointer;display:none;transition:all 0.2s ease;letter-spacing:0.5px;}
+.next-btn:hover{background:#333;}
+.next-btn.show{display:block;animation:fadeUp 0.3s ease both;}
+.result{display:none;}
+.result.show{display:block;animation:fadeUp 0.5s ease both;}
+.result-inner{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:44px 32px;}
+.result-top{display:flex;align-items:baseline;gap:12px;margin-bottom:28px;}
+.result-big{font-size:96px;font-weight:300;font-family:'Inter',sans-serif;color:var(--text);line-height:1;letter-spacing:-4px;}
+.result-denom{font-size:14px;color:var(--hint);}
+
+/* チャプター別 */
+.chapters{margin-bottom:28px;}
+.chapter-title{font-size:11px;font-weight:500;letter-spacing:2px;color:var(--hint);text-transform:uppercase;margin-bottom:16px;}
+.chapter-item{margin-bottom:14px;}
+.chapter-name{font-size:13px;color:var(--sub);margin-bottom:6px;display:flex;justify-content:space-between;}
+.chapter-track{height:4px;background:var(--border);border-radius:4px;overflow:hidden;}
+.chapter-fill{height:100%;background:var(--accent);border-radius:4px;width:0;transition:width 0.8s cubic-bezier(0.4,0,0.2,1);}
+
+.result-msg{font-size:14px;line-height:1.9;color:var(--sub);margin-bottom:28px;padding:20px;background:var(--bg);border-radius:12px;}
+.btn-group{display:flex;flex-direction:column;gap:8px;}
+.r-btn{padding:13px;border-radius:12px;font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s ease;letter-spacing:0.5px;}
+.r-btn-primary{background:var(--text);color:#fff;border:none;}
+.r-btn-primary:hover{background:#333;}
+.r-btn-secondary{background:transparent;color:var(--sub);border:1px solid var(--border);display:none;}
+.r-btn-secondary:hover{border-color:#d1d1ce;color:var(--text);}
+.r-btn-secondary.show{display:block;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="header-meta">
+      <span class="label">SSE8 · Final Quiz</span>
+      <span class="q-counter" id="q-counter">1 / 5</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-bar" id="prog-bar" style="width:0%"></div>
+    </div>
+  </div>
+
+  <div class="scene">
+    <div class="card" id="card">
+      <div class="q-num" id="q-num">01</div>
+      <div class="q-text" id="q-text"></div>
+    </div>
+  </div>
+
+  <div class="options" id="options"></div>
+  <div class="exp" id="exp"></div>
+  <button class="next-btn" id="next-btn">次の問題へ</button>
+
+  <div class="result" id="result">
+    <div class="result-inner">
+      <div class="result-top">
+        <div class="result-big" id="r-score"></div>
+        <div class="result-denom">/ 5問正解</div>
+      </div>
+      <div class="chapters" id="chapters">
+        <div class="chapter-title">Chapter Breakdown</div>
+      </div>
+      <div class="result-msg" id="r-msg"></div>
+      <div class="btn-group">
+        <button class="r-btn r-btn-primary" onclick="restart()">もう一度</button>
+        <button class="r-btn r-btn-secondary" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけ</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+function e(s){return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+const ALL=[
+  {ch:'Webパフォーマンス',q:"Webパフォーマンスが低いサイトはどうなる？",opts:["ユーザーが離脱しやすくなる","文字が小さくなる","画像が消える","CSSが壊れる"],ans:0,exp:"正解！表示が遅いサイトはユーザーが離脱しやすくなります。さらにGoogleのSEO評価にも直結するため、見た目だけでなく「速さ」も作品制作で重要なポイントです！"},
+  {ch:'CMS',q:"CMSとは何ですか？",opts:["CSSの略称","管理画面からWebページを更新できる仕組み","画像編集ソフト","JavaScriptのフレームワーク"],ans:1,exp:"正解！CMSはContent Management Systemの略で、ブログのような管理画面からWebページを更新できる仕組みです。WordPressは世界で最も使われているCMSで、全Webサイトの約4割を占めています！"},
+  {ch:'バリデーター',q:"imgタグにalt属性がないとバリデーターでErrorになる。なぜ？",opts:["目の不自由な方が使うスクリーンリーダーが画像の内容を読み上げられないから","画像ファイルが重くなるから","CSSが効かなくなるから","サーバーに保存されないから"],ans:0,exp:"正解！alt属性はアクセシビリティのために必要です。目の不自由な方が使うスクリーンリーダーは、alt属性のテキストを読み上げて画像の内容を伝えます。altがないと内容が伝わらず、ユーザビリティの問題になります。"},
+  {ch:'バリデーター',q:"Webサイトを公開する前に必ずやることは？",opts:["バリデーターでエラーチェック","Photoshopで画像を作り直す","HTMLを全部書き直す","サーバーを買う"],ans:0,exp:"正解！公開前にはバリデーターでエラーチェック・リンクチェック・文章チェック・ブラウザチェックの4点セットを必ず行いましょう。今日の演習でやったHTMLとCSSのバリデーターも公開前チェックの一部です！"},
+  {ch:'バリデーター',q:"HTMLバリデーターでエラーが出たとき、まず何を確認する？",opts:["エラーメッセージに書いてある行番号","CSSファイル","画像フォルダ","サーバー設定"],ans:0,exp:"正解！エラーメッセージには行番号が書いてあります。その行番号をVSCodeで開いてタグの閉じ忘れや属性のミスを探しましょう。今日の演習では23行目のaltなし・53行目の余分な閉じタグを修正しましたね！"}
+];
+
+let qs=[...ALL],wrong=[],cur=0,score=0,answered=false,isRetry=false;
+const chRes={};
+
+function render(){
+  const q=qs[cur],total=qs.length;
+  const card=document.getElementById('card');
+  card.classList.add('flip');
+  setTimeout(()=>{
+    document.getElementById('q-num').textContent=String(cur+1).padStart(2,'0');
+    document.getElementById('q-text').textContent=q.q;
+    document.getElementById('q-counter').textContent=(cur+1)+' / '+total;
+    document.getElementById('prog-bar').style.width=(cur/total*100)+'%';
+    document.getElementById('exp').classList.remove('show');
+    document.getElementById('exp').textContent='';
+    document.getElementById('next-btn').classList.remove('show');
+    answered=false;
+    const opts=document.getElementById('options');
+    opts.innerHTML='';
+    const labels=['A','B','C','D'];
+    q.opts.forEach((o,i)=>{
+      const d=document.createElement('div');
+      d.className='opt';
+      d.innerHTML='<span class="opt-label">'+labels[i]+'</span><span class="opt-text">'+e(o)+'</span>';
+      d.onclick=()=>select(i);
+      opts.appendChild(d);
+    });
+    card.classList.remove('flip');
+    card.classList.add('flip-in');
+    setTimeout(()=>card.classList.remove('flip-in'),500);
+  },250);
+}
+
+function select(i){
+  if(answered)return;
+  answered=true;
+  const q=qs[cur];
+  document.querySelectorAll('.opt').forEach(o=>o.classList.add('disabled'));
+  const opts=document.querySelectorAll('.opt');
+  const ok=i===q.ans;
+  opts[i].classList.add(ok?'correct':'wrong');
+  if(!ok){opts[q.ans].classList.add('correct');if(!isRetry)wrong.push(ALL.indexOf(q));}
+  if(ok)score++;
+  if(!chRes[q.ch])chRes[q.ch]={c:0,t:0};
+  chRes[q.ch].t++;
+  if(ok)chRes[q.ch].c++;
+  const exp=document.getElementById('exp');
+  exp.textContent=q.exp;
+  exp.classList.add('show');
+  const btn=document.getElementById('next-btn');
+  btn.textContent=cur<qs.length-1?'次の問題へ':'結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick=()=>{
+  cur++;
+  if(cur<qs.length)render();
+  else showResult();
+};
+
+function showResult(){
+  document.querySelector('.scene').style.display='none';
+  document.getElementById('options').style.display='none';
+  document.getElementById('exp').style.display='none';
+  document.getElementById('next-btn').style.display='none';
+  document.getElementById('prog-bar').style.width='100%';
+  document.getElementById('q-counter').textContent=score+' / '+qs.length;
+  document.getElementById('result').classList.add('show');
+  document.getElementById('r-score').textContent=score;
+
+  if(!isRetry){
+    const ch=document.getElementById('chapters');
+    Object.entries(chRes).forEach(([name,r])=>{
+      const pct=Math.round(r.c/r.t*100);
+      const item=document.createElement('div');
+      item.className='chapter-item';
+      item.innerHTML='<div class="chapter-name"><span>'+e(name)+'</span><span>'+r.c+'/'+r.t+'</span></div><div class="chapter-track"><div class="chapter-fill" data-pct="'+pct+'"></div></div>';
+      ch.appendChild(item);
+    });
+    setTimeout(()=>{
+      document.querySelectorAll('.chapter-fill').forEach(el=>{
+        el.style.width=el.dataset.pct+'%';
+      });
+    },200);
+  }
+
+  const msgs=["0問正解！大丈夫、間違えた瞬間が一番記憶に残ります。今日ここに来て手を動かしてくれただけで十分すごい！","1問正解！今日学んだこと、確実に頭に入ってきてる証拠です。真剣に取り組んでくれた、それだけでもう十分えらいです！","2問正解！今日の内容、自分のものになってきてる。頑張っててとってもえらいです！","3問正解！しっかり聞けてた証拠。バリデーター・CMS・Webパフォーマンス、全部理解できてきてる！","4問正解！ほぼ完璧！今日の内容しっかり自分のものになってる。最高です！","満点！完璧！！全部バッチリ！今日ここに来て最後まで頑張ってくれた、それがもう最高にえらい！！"];
+  document.getElementById('r-msg').textContent=msgs[score];
+  if(wrong.length>0&&!isRetry)document.getElementById('retry-wrong-btn').classList.add('show');
+}
+
+function restart(){
+  qs=[...ALL];wrong=[];cur=0;score=0;answered=false;isRetry=false;
+  Object.keys(chRes).forEach(k=>delete chRes[k]);
+  document.querySelector('.scene').style.display='';
+  document.getElementById('options').style.display='';
+  document.getElementById('exp').style.display='';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  const ch=document.getElementById('chapters');
+  ch.innerHTML='<div class="chapter-title">Chapter Breakdown</div>';
+  render();
+}
+
+function retryWrong(){
+  qs=wrong.map(i=>ALL[i]);cur=0;score=0;answered=false;isRetry=true;
+  document.querySelector('.scene').style.display='';
+  document.getElementById('options').style.display='';
+  document.getElementById('exp').style.display='';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
