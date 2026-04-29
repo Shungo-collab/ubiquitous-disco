@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>作品制作講座 総復習クイズ</title>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Press+Start+2P&family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+#particle-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
+body{font-family:'Noto Sans JP',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px;transition:background 0.8s ease;}
+body.mode-select{background:#0d0d1a;}
+body.mode-mario{background:#5c94fc;background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(255,255,255,0.04) 39px,rgba(255,255,255,0.04) 40px);}
+body.mode-dq{background:#07071a;}
+body.mode-poke{background:#e8f0ff;}
+body.mode-ending{background:#0d0d1a;}
+.wrap{width:100%;max-width:600px;position:relative;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px);}to{opacity:1;transform:translateY(0);}}
+@keyframes popIn{from{opacity:0;transform:scale(0.8);}to{opacity:1;transform:scale(1);}}
+@keyframes shake{0%,100%{transform:translateX(0);}20%{transform:translateX(-8px);}60%{transform:translateX(8px);}}
+@keyframes bounce{0%,100%{transform:translateY(0);}50%{transform:translateY(-10px);}}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0;}}
+@keyframes flash{0%,100%{opacity:1;}50%{opacity:0.2;}}
+@keyframes coinFloat{0%{transform:translateY(0);opacity:1;}100%{transform:translateY(-50px);opacity:0;}}
+@keyframes levelUp{0%{transform:scale(1);}50%{transform:scale(1.3);}100%{transform:scale(1);}}
+@keyframes starGlow{0%,100%{text-shadow:0 0 10px #ffd700;}50%{text-shadow:0 0 30px #ffd700,0 0 60px #ffaa00;}}
+@keyframes twinkle{0%,100%{opacity:0.3;}50%{opacity:1;}}
+@keyframes rainbowColor{0%{color:#ff6666;}16%{color:#ffaa44;}33%{color:#ffff44;}50%{color:#44ff88;}66%{color:#44aaff;}83%{color:#aa66ff;}100%{color:#ff6666;}}
+@keyframes endingScale{0%,100%{transform:scale(1);}50%{transform:scale(1.04);}}
+@keyframes slideDown{from{opacity:0;transform:translateY(-10px);}to{opacity:1;transform:translateY(0);}}
+@keyframes dqType{from{opacity:0;}to{opacity:1;}}
+.star-dot{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;animation:twinkle 2s step-end infinite;}
+.stars-bg{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;overflow:hidden;z-index:0;}
+
+/* ─── SELECT ─── */
+.select-wrap{animation:fadeUp 0.6s ease both;position:relative;z-index:1;}
+.game-title{font-family:'Press Start 2P',monospace;font-size:11px;color:#ffd700;letter-spacing:2px;line-height:2.5;text-align:center;text-shadow:2px 2px 0 #7a5800;animation:starGlow 2s ease infinite;margin-bottom:8px;}
+.select-sub{text-align:center;font-size:11px;color:#5555aa;letter-spacing:3px;margin-bottom:6px;}
+.resume-hint{text-align:center;font-family:'DotGothic16',monospace;font-size:11px;color:#666699;animation:blink 1.5s step-end infinite;margin-bottom:20px;min-height:18px;}
+.stage-list{display:flex;flex-direction:column;gap:14px;margin-bottom:16px;}
+.stage-btn{border-radius:12px;padding:18px 22px;cursor:pointer;display:flex;align-items:center;gap:18px;transition:transform 0.15s,box-shadow 0.15s;position:relative;overflow:hidden;border:none;text-align:left;}
+.stage-btn:hover{transform:translate(-3px,-3px);}
+.stage-btn:active{transform:translate(1px,1px);}
+.s-mario{background:#e8380d;border:3px solid #ff6644;box-shadow:5px 5px 0 #7a1800;}
+.s-mario:hover{box-shadow:8px 8px 0 #7a1800;}
+.s-dq{background:#111855;border:3px solid #3344bb;box-shadow:5px 5px 0 #050520;}
+.s-dq:hover{box-shadow:8px 8px 0 #050520;}
+.s-poke{background:#cc0000;border:3px solid #ff4444;box-shadow:5px 5px 0 #660000;}
+.s-poke:hover{box-shadow:8px 8px 0 #660000;}
+.stage-btn::after{content:'▶';position:absolute;right:18px;font-size:14px;color:rgba(255,215,0,0.7);}
+.s-icon{font-size:40px;flex-shrink:0;}
+.s-info{flex:1;}
+.s-name{font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;margin-bottom:5px;}
+.s-desc{font-size:12px;color:rgba(255,255,255,0.8);line-height:1.5;}
+.s-meta{display:flex;gap:8px;margin-top:6px;align-items:center;}
+.s-bar{flex:1;height:6px;background:rgba(0,0,0,0.3);border-radius:6px;overflow:hidden;}
+.s-bar-fill{height:100%;background:#ffd700;border-radius:6px;transition:width 0.5s ease;}
+.s-bar-lbl{font-size:10px;color:#ffd700;font-family:'DotGothic16',monospace;min-width:32px;text-align:right;}
+.s-resume{font-size:10px;color:#ffd700;font-family:'DotGothic16',monospace;animation:blink 1s step-end infinite;margin-top:3px;display:none;}
+.s-resume.show{display:block;}
+.cleared-badge{position:absolute;top:8px;right:42px;font-family:'Press Start 2P',monospace;font-size:7px;background:#ffd700;color:#333;padding:3px 7px;border-radius:4px;display:none;animation:starGlow 1.5s ease infinite;}
+.cleared-badge.show{display:block;}
+.key-hint{text-align:center;font-size:11px;color:#333355;font-family:'DotGothic16',monospace;}
+.kbd{display:inline-block;background:#1a1a2e;border:1px solid #444;border-radius:3px;padding:1px 5px;font-size:10px;color:#8888aa;}
+
+/* ─── COMMON ─── */
+.game-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
+.pause-btn{font-family:'DotGothic16',monospace;font-size:11px;background:transparent;border:1px solid #444;border-radius:4px;padding:4px 10px;cursor:pointer;transition:all 0.15s;}
+
+/* ─── MARIO ─── */
+.mario-hud{background:#e8380d;border:3px solid #ff8866;border-radius:8px;padding:10px 16px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.mario-hud-l{font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;}
+.mario-score{font-family:'Press Start 2P',monospace;font-size:11px;color:#ffd700;text-shadow:1px 1px 0 #8b6914;}
+.coins-row{display:flex;gap:7px;margin-bottom:12px;justify-content:center;flex-wrap:wrap;}
+.coin{width:28px;height:28px;border-radius:50%;background:#555;border:2px solid #444;display:flex;align-items:center;justify-content:center;font-size:13px;transition:all 0.25s;}
+.coin.done{background:#ffd700;border-color:#b8860b;box-shadow:0 0 8px rgba(255,215,0,0.5);}
+.coin.cur{background:#888;border-color:#aaa;animation:blink 0.7s step-end infinite;}
+.mario-card{background:#fff;border:4px solid #333;border-radius:8px;box-shadow:4px 4px 0 #333;padding:26px 22px 22px;margin-bottom:12px;position:relative;min-height:110px;}
+.mario-q-badge{position:absolute;top:-13px;left:16px;background:#c8a000;border:3px solid #333;border-radius:4px;padding:2px 10px;font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;box-shadow:2px 2px 0 #333;}
+.mario-q-text{font-size:15px;font-weight:700;line-height:1.7;color:#222;margin-top:8px;}
+.mario-opts{display:flex;flex-direction:column;gap:8px;margin-bottom:12px;}
+.mario-opt{display:flex;align-items:center;gap:12px;padding:12px 15px;background:#fff;border:3px solid #333;border-radius:6px;box-shadow:3px 3px 0 #333;cursor:pointer;font-size:13px;font-weight:700;color:#333;transition:all 0.12s;opacity:0;animation:slideDown 0.25s ease forwards;}
+.mario-opt:nth-child(1){animation-delay:.04s;}.mario-opt:nth-child(2){animation-delay:.08s;}.mario-opt:nth-child(3){animation-delay:.12s;}.mario-opt:nth-child(4){animation-delay:.16s;}
+.mario-opt:hover:not(.disabled){transform:translate(-3px,-3px);box-shadow:6px 6px 0 #333;}
+.mario-opt-lbl{width:26px;height:26px;background:#e8380d;border:2px solid #333;border-radius:4px;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;flex-shrink:0;}
+.mario-opt.correct{background:#c8ffc8;border-color:#228b22;animation:bounce .4s ease!important;}
+.mario-opt.correct .mario-opt-lbl{background:#228b22;}
+.mario-opt.wrong{background:#ffc8c8;border-color:#cc0000;animation:shake .4s ease!important;}
+.mario-opt.wrong .mario-opt-lbl{background:#cc0000;}
+.mario-opt.disabled{cursor:default;}
+.mario-opt.disabled:hover:not(.correct):not(.wrong){transform:none;box-shadow:3px 3px 0 #333;}
+.mario-exp{background:#fffbe6;border:3px solid #c8a000;border-radius:6px;padding:13px 15px;font-size:13px;line-height:1.9;color:#333;display:none;margin-bottom:12px;}
+.mario-exp.show{display:block;animation:fadeUp .3s ease both;}
+.mario-exp-hd{font-family:'Press Start 2P',monospace;font-size:7px;color:#c8a000;margin-bottom:7px;}
+.mario-next{width:100%;padding:13px;background:#e8380d;border:3px solid #333;border-radius:6px;box-shadow:3px 3px 0 #333;font-family:'Press Start 2P',monospace;font-size:9px;color:#fff;cursor:pointer;display:none;transition:all .12s;letter-spacing:1px;}
+.mario-next:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #333;}
+.mario-next.show{display:block;animation:fadeUp .25s ease both;}
+.mario-result{display:none;}.mario-result.show{display:block;animation:popIn .5s ease both;}
+.mario-result-card{background:#fff;border:4px solid #333;border-radius:8px;box-shadow:6px 6px 0 #333;padding:32px 24px;text-align:center;}
+.mario-rhd{font-family:'Press Start 2P',monospace;font-size:13px;color:#e8380d;margin-bottom:16px;text-shadow:2px 2px 0 #8b1a00;display:inline-block;}
+.mario-rhd.go{animation:bounce 1s ease infinite;}
+.mario-stars{font-size:30px;margin-bottom:12px;letter-spacing:6px;animation:starGlow 1.5s ease infinite;}
+.mario-rnum{font-family:'Press Start 2P',monospace;font-size:26px;color:#333;margin-bottom:4px;}
+.mario-rsub{font-size:12px;color:#888;margin-bottom:16px;}
+.mario-rmsg{font-size:13px;line-height:1.9;color:#555;background:#f9f9f9;border:2px solid #eee;border-radius:6px;padding:14px;text-align:left;margin-bottom:16px;}
+.mario-btns{display:flex;flex-direction:column;gap:8px;}
+.m-btn{padding:12px;border:3px solid #333;border-radius:6px;font-family:'Press Start 2P',monospace;font-size:8px;cursor:pointer;transition:all .12s;box-shadow:3px 3px 0 #333;letter-spacing:1px;}
+.m-btn:hover{transform:translate(-2px,-2px);box-shadow:5px 5px 0 #333;}
+.m-red{background:#e8380d;color:#fff;}
+.m-blue{background:#2244cc;color:#fff;}
+.m-gray{background:#888;color:#fff;display:none;}
+.m-gray.show{display:block;}
+
+/* ─── DQ ─── */
+.dq-wrap{color:#e8e8e8;}
+.dq-hud{background:#0a0a28;border:3px solid #ffd700;border-radius:4px;padding:8px 15px;margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;}
+.dq-hud-l{font-family:'DotGothic16',monospace;font-size:12px;color:#ffd700;}
+.dq-hud-r{font-family:'DotGothic16',monospace;font-size:12px;color:#7fcfff;display:flex;align-items:center;gap:8px;}
+.dq-mp-track{width:90px;height:8px;background:#111;border:1px solid #444;border-radius:4px;overflow:hidden;display:inline-block;}
+.dq-mp-fill{height:100%;background:#3388ff;border-radius:4px;transition:width .4s ease;}
+.dq-q-meta{font-family:'DotGothic16',monospace;font-size:11px;color:#555;text-align:right;margin-bottom:8px;}
+.dq-field{background:#000a18;border:3px solid #ffd700;border-radius:4px;padding:18px;margin-bottom:10px;min-height:90px;}
+.dq-msg{font-family:'DotGothic16',monospace;font-size:14px;color:#e8e8e8;line-height:2;min-height:56px;}
+.dq-cursor{display:inline-block;color:#ffd700;animation:blink .6s step-end infinite;}
+.dq-window{background:#000a18;border:3px solid #ffd700;border-radius:4px;overflow:hidden;margin-bottom:10px;}
+.dq-cmd{display:flex;align-items:center;padding:11px 18px;font-family:'DotGothic16',monospace;font-size:14px;color:#e8e8e8;cursor:pointer;transition:all .1s;border-bottom:1px solid rgba(255,215,0,.1);position:relative;gap:10px;}
+.dq-cmd:last-child{border-bottom:none;}
+.dq-cmd-arrow{width:16px;flex-shrink:0;color:#ffd700;}
+.dq-cmd:hover:not(.disabled){background:rgba(255,215,0,.1);color:#ffd700;}
+.dq-cmd.correct{color:#7fff7f;background:rgba(0,200,0,.08);}
+.dq-cmd.correct .dq-cmd-arrow::after{content:'★';}
+.dq-cmd.wrong{color:#ff8888;background:rgba(200,0,0,.08);animation:shake .4s ease;}
+.dq-cmd.wrong .dq-cmd-arrow::after{content:'✗';}
+.dq-cmd:hover:not(.disabled) .dq-cmd-arrow::after{content:'▶';}
+.dq-cmd.disabled{cursor:default;}
+.dq-levelup{display:none;text-align:center;padding:10px;font-family:'DotGothic16',monospace;font-size:13px;color:#ffd700;background:rgba(255,215,0,.08);border:1px solid rgba(255,215,0,.3);border-radius:4px;margin-bottom:10px;}
+.dq-exp{background:#000a18;border:3px solid #7fcfff;border-radius:4px;padding:13px 16px;font-family:'DotGothic16',monospace;font-size:13px;color:#7fcfff;line-height:2;display:none;margin-bottom:10px;}
+.dq-exp.show{display:block;animation:fadeUp .3s ease both;}
+.dq-next{width:100%;padding:11px;background:#0a0a28;border:3px solid #ffd700;border-radius:4px;font-family:'DotGothic16',monospace;font-size:13px;color:#ffd700;cursor:pointer;display:none;transition:background .15s;text-align:center;}
+.dq-next:hover{background:rgba(255,215,0,.12);}
+.dq-next.show{display:block;animation:fadeUp .25s ease both;}
+.dq-result{display:none;}.dq-result.show{display:block;animation:fadeUp .5s ease both;}
+.dq-result-card{background:#000a18;border:3px solid #ffd700;border-radius:4px;padding:30px 22px;}
+.dq-result-title{font-family:'DotGothic16',monospace;font-size:15px;color:#ffd700;text-align:center;border:2px solid #ffd700;padding:18px;margin-bottom:16px;line-height:2;}
+.dq-result-sub{font-family:'DotGothic16',monospace;font-size:11px;color:#7fff7f;text-align:center;margin-bottom:16px;animation:blink 1.5s step-end infinite;}
+.dq-result-stats{font-family:'DotGothic16',monospace;font-size:12px;color:#888;background:rgba(0,0,0,.3);padding:14px;border-radius:4px;line-height:2;margin-bottom:16px;}
+.dq-btns{display:flex;flex-direction:column;gap:8px;}
+.dq-btn{padding:11px;background:#0a0a28;border:3px solid #ffd700;border-radius:4px;font-family:'DotGothic16',monospace;font-size:13px;color:#ffd700;cursor:pointer;transition:background .15s;text-align:center;}
+.dq-btn:hover{background:rgba(255,215,0,.12);}
+.dq-btn-cyan{border-color:#7fcfff;color:#7fcfff;display:none;}
+.dq-btn-cyan:hover{background:rgba(127,207,255,.1);}
+.dq-btn-cyan.show{display:block;}
+.dq-btn-dim{border-color:#3344aa;color:#3344aa;}
+.dq-btn-dim:hover{background:rgba(51,68,170,.1);}
+
+/* ─── POKEMON ─── */
+.poke-field{background:linear-gradient(to bottom,#87ceeb 55%,#90ee90 55%);border:4px solid #333;border-radius:10px;margin-bottom:10px;overflow:hidden;}
+.poke-field-inner{display:flex;justify-content:space-between;align-items:flex-end;padding:16px 20px 10px;min-height:130px;}
+.poke-enemy-hud{background:rgba(255,255,255,.9);border:2px solid #333;border-radius:6px;padding:6px 12px;min-width:150px;margin-bottom:6px;}
+.poke-ename{font-family:'DotGothic16',monospace;font-size:12px;color:#222;margin-bottom:4px;}
+.poke-hp-row{display:flex;align-items:center;gap:6px;}
+.poke-hp-lbl{font-family:'DotGothic16',monospace;font-size:10px;color:#333;flex-shrink:0;}
+.poke-hp-track{flex:1;height:8px;background:#555;border-radius:4px;overflow:hidden;}
+.poke-hp-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.hp-high{background:linear-gradient(to right,#44dd44,#22bb22);}
+.hp-mid{background:linear-gradient(to right,#ffcc00,#ee9900);}
+.hp-low{background:linear-gradient(to right,#ff4444,#cc0000);animation:blink .4s step-end infinite;}
+.poke-esp{font-size:52px;display:block;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.2));transition:all .2s;}
+.poke-esp.hit{animation:flash .4s ease;}
+.poke-player-hud{background:rgba(255,255,255,.9);border:2px solid #333;border-radius:6px;padding:6px 12px;min-width:110px;margin-top:6px;}
+.poke-pname{font-family:'DotGothic16',monospace;font-size:11px;color:#222;margin-bottom:2px;}
+.poke-plv{font-family:'DotGothic16',monospace;font-size:10px;color:#555;}
+.poke-psp{font-size:42px;display:block;filter:drop-shadow(2px 2px 0 rgba(0,0,0,.2));}
+.poke-msg{background:#f5f5f5;border:4px solid #333;border-radius:6px;padding:14px 18px;margin-bottom:10px;font-family:'DotGothic16',monospace;font-size:14px;color:#222;line-height:1.8;min-height:64px;}
+.poke-msg.flash{animation:flash .2s ease 3;}
+.poke-grid{background:#f5f5f5;border:4px solid #333;border-radius:6px;padding:10px;margin-bottom:10px;display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.poke-cmd{padding:11px 13px;background:#fff;border:2px solid #333;border-radius:6px;font-family:'DotGothic16',monospace;font-size:12px;color:#222;cursor:pointer;transition:all .12s;opacity:0;animation:slideDown .2s ease forwards;}
+.poke-cmd:nth-child(1){animation-delay:.04s;}.poke-cmd:nth-child(2){animation-delay:.08s;}.poke-cmd:nth-child(3){animation-delay:.12s;}.poke-cmd:nth-child(4){animation-delay:.16s;}
+.poke-cmd:hover:not(.disabled){background:#e8eeff;border-color:#3366cc;color:#3366cc;}
+.poke-cmd.correct{background:#e0ffe0;border-color:#228b22;color:#228b22;animation:bounce .4s ease!important;}
+.poke-cmd.wrong{background:#ffe0e0;border-color:#cc2222;color:#cc2222;animation:shake .4s ease!important;}
+.poke-cmd.disabled{cursor:default;}
+.poke-cmd.disabled:hover:not(.correct):not(.wrong){background:#fff;border-color:#333;color:#222;}
+.poke-exp{background:#fff;border:3px solid #3366cc;border-radius:6px;padding:12px 16px;font-family:'DotGothic16',monospace;font-size:12px;color:#333;line-height:2;display:none;margin-bottom:10px;}
+.poke-exp.show{display:block;animation:fadeUp .3s ease both;}
+.poke-exp-hd{color:#3366cc;font-size:11px;margin-bottom:5px;}
+.poke-next{width:100%;padding:12px;background:#3366cc;border:3px solid #333;border-radius:6px;font-family:'DotGothic16',monospace;font-size:12px;color:#fff;cursor:pointer;display:none;transition:background .15s;}
+.poke-next:hover{background:#2255bb;}
+.poke-next.show{display:block;animation:fadeUp .25s ease both;}
+.poke-result{display:none;}.poke-result.show{display:block;animation:popIn .5s ease both;}
+.poke-result-card{background:#f5f5f5;border:4px solid #333;border-radius:10px;padding:30px 22px;text-align:center;}
+.poke-rsp{font-size:68px;display:block;margin-bottom:10px;animation:bounce 1s ease infinite;}
+.poke-rtitle{font-family:'DotGothic16',monospace;font-size:18px;color:#cc0000;margin-bottom:14px;}
+.poke-rnum{font-family:'DotGothic16',monospace;font-size:22px;color:#222;margin-bottom:4px;}
+.poke-rsub{font-size:11px;color:#888;font-family:'DotGothic16',monospace;margin-bottom:16px;}
+.poke-rmsg{font-family:'DotGothic16',monospace;font-size:12px;line-height:2;color:#444;background:#fff;border:2px solid #ccc;border-radius:6px;padding:14px;text-align:left;margin-bottom:16px;}
+.poke-btns{display:flex;flex-direction:column;gap:8px;}
+.p-btn{padding:12px;border:3px solid #333;border-radius:6px;font-family:'DotGothic16',monospace;font-size:12px;cursor:pointer;transition:background .15s;}
+.p-blue{background:#3366cc;color:#fff;}.p-blue:hover{background:#2255bb;}
+.p-red{background:#cc2222;color:#fff;display:none;}.p-red:hover{background:#bb1111;}.p-red.show{display:block;}
+.p-dark{background:#333;color:#fff;}.p-dark:hover{background:#222;}
+
+/* ─── ENDING ─── */
+.ending-wrap{text-align:center;animation:fadeUp .8s ease both;position:relative;z-index:1;}
+.ending-icons{font-size:50px;margin-bottom:14px;letter-spacing:12px;animation:starGlow 1.5s ease infinite;}
+.ending-title{font-family:'Press Start 2P',monospace;font-size:10px;letter-spacing:2px;line-height:2.5;margin-bottom:22px;animation:endingScale 2s ease infinite,rainbowColor 2s linear infinite;}
+.ending-scores{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:20px;margin-bottom:22px;}
+.e-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.05);}
+.e-row:last-child{border-bottom:none;}
+.e-name{font-family:'DotGothic16',monospace;font-size:13px;color:#aaa;}
+.e-val{font-family:'Press Start 2P',monospace;font-size:11px;color:#ffd700;}
+.ending-msg{font-size:13px;color:#888;line-height:1.9;margin-bottom:22px;font-family:'DotGothic16',monospace;}
+.ending-btn{padding:14px 32px;background:#ffd700;border:none;border-radius:8px;font-family:'Press Start 2P',monospace;font-size:9px;color:#333;cursor:pointer;transition:all .15s;box-shadow:0 4px 0 #8b6914;letter-spacing:1px;}
+.ending-btn:hover{transform:translateY(-2px);box-shadow:0 6px 0 #8b6914;}
+.ending-btn:active{transform:translateY(2px);box-shadow:0 2px 0 #8b6914;}
+</style>
+</head>
+<body class="mode-select">
+<canvas id="particle-canvas"></canvas>
+<div class="stars-bg" id="stars-bg"></div>
+<div class="wrap">
+
+<!-- SELECT -->
+<div id="screen-select">
+<div class="select-wrap">
+<div class="game-title">作品制作講座<br>総復習クイズ</div>
+<div class="select-sub">— STAGE SELECT —</div>
+<div class="resume-hint" id="resume-hint"></div>
+<div class="stage-list">
+<button class="stage-btn s-mario" onclick="startStage('mario')">
+  <span class="s-icon">🍄</span>
+  <div class="s-info">
+    <div class="s-name">STAGE 1</div>
+    <div class="s-desc">企画・制作工程</div>
+    <div class="s-meta"><div class="s-bar"><div class="s-bar-fill" id="sp-mario" style="width:0%"></div></div><div class="s-bar-lbl" id="sl-mario">0/10</div></div>
+    <div class="s-resume" id="sr-mario">▶ 続きから再開</div>
+  </div>
+  <div class="cleared-badge" id="cb-mario">CLEAR!</div>
+</button>
+<button class="stage-btn s-dq" onclick="startStage('dq')">
+  <span class="s-icon">⚔️</span>
+  <div class="s-info">
+    <div class="s-name">STAGE 2</div>
+    <div class="s-desc">コーディング</div>
+    <div class="s-meta"><div class="s-bar"><div class="s-bar-fill" id="sp-dq" style="width:0%"></div></div><div class="s-bar-lbl" id="sl-dq">0/10</div></div>
+    <div class="s-resume" id="sr-dq">▶ 続きから再開</div>
+  </div>
+  <div class="cleared-badge" id="cb-dq">CLEAR!</div>
+</button>
+<button class="stage-btn s-poke" onclick="startStage('poke')">
+  <span class="s-icon">⚡</span>
+  <div class="s-info">
+    <div class="s-name">STAGE 3</div>
+    <div class="s-desc">公開前チェック</div>
+    <div class="s-meta"><div class="s-bar"><div class="s-bar-fill" id="sp-poke" style="width:0%"></div></div><div class="s-bar-lbl" id="sl-poke">0/10</div></div>
+    <div class="s-resume" id="sr-poke">▶ 続きから再開</div>
+  </div>
+  <div class="cleared-badge" id="cb-poke">CLEAR!</div>
+</button>
+</div>
+<div class="key-hint">キーボード: <span class="kbd">1〜4</span> 選択 / <span class="kbd">Enter</span> 次へ</div>
+</div>
+</div>
+
+<!-- MARIO -->
+<div id="screen-mario" style="display:none;">
+<div id="mario-quiz">
+<div class="game-header">
+<button class="pause-btn" style="color:#ffcc88;border-color:#cc6600;" onclick="pauseStage('mario')">⏸ 保存して戻る</button>
+<span style="font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;text-shadow:1px 1px 0 #8b1a00;">STAGE 1</span>
+</div>
+<div class="mario-hud">
+<span class="mario-hud-l">🍄 企画・工程</span>
+<span class="mario-score" id="mario-score">×0</span>
+<span id="mario-lives" style="font-size:15px;">🌟🌟🌟</span>
+</div>
+<div class="coins-row" id="mario-coins"></div>
+<div class="mario-card"><div class="mario-q-badge" id="mario-q-badge">Q ?</div><div class="mario-q-text" id="mario-q-text"></div></div>
+<div class="mario-opts" id="mario-opts"></div>
+<div class="mario-exp" id="mario-exp"><div class="mario-exp-hd">💡 POINT!</div><div id="mario-exp-txt"></div></div>
+<button class="mario-next" id="mario-next">NEXT ▶</button>
+</div>
+<div class="mario-result" id="mario-result">
+<div class="mario-result-card">
+<div class="mario-rhd" id="mario-rhd"></div>
+<div class="mario-stars" id="mario-stars"></div>
+<div class="mario-rnum" id="mario-rnum"></div>
+<div class="mario-rsub">/ 10問正解</div>
+<div class="mario-rmsg" id="mario-rmsg"></div>
+<div class="mario-btns">
+<button class="m-btn m-red" onclick="restartStage('mario')">もう一度</button>
+<button class="m-btn m-gray" id="mario-wrong-btn" onclick="retryWrong('mario')">間違えた問題だけ</button>
+<button class="m-btn m-blue" onclick="goSelect()">ステージ選択へ</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- DQ -->
+<div id="screen-dq" style="display:none;">
+<div id="dq-quiz">
+<div class="game-header">
+<button class="pause-btn" style="color:#ffcc44;border-color:#887700;" onclick="pauseStage('dq')">⏸ 保存して戻る</button>
+<span style="font-family:'DotGothic16',monospace;font-size:12px;color:#ffd700;">STAGE 2</span>
+</div>
+<div class="dq-wrap">
+<div class="dq-hud">
+<span class="dq-hud-l">⚔️ コーディング</span>
+<span class="dq-hud-r">MP <span id="dq-mp">0</span>/10 <div class="dq-mp-track"><div class="dq-mp-fill" id="dq-mp-fill" style="width:0%"></div></div></span>
+</div>
+<div class="dq-q-meta" id="dq-q-meta">問題 1/10</div>
+<div class="dq-field"><div class="dq-msg" id="dq-msg"></div></div>
+<div class="dq-window" id="dq-cmds"></div>
+<div class="dq-levelup" id="dq-levelup">✨ せいかい！ MP +1 ✨</div>
+<div class="dq-exp" id="dq-exp"></div>
+<button class="dq-next" id="dq-next">▶ つぎへ</button>
+</div>
+</div>
+<div class="dq-result" id="dq-result">
+<div class="dq-result-card">
+<div class="dq-result-title" id="dq-result-title"></div>
+<div class="dq-result-sub">★ けいけんちを かくとく！ ★</div>
+<div class="dq-result-stats" id="dq-stats"></div>
+<div class="dq-btns">
+<button class="dq-btn" onclick="restartStage('dq')">もう一度いどむ</button>
+<button class="dq-btn dq-btn-cyan" id="dq-wrong-btn" onclick="retryWrong('dq')">まちがえた もんだいだけ</button>
+<button class="dq-btn dq-btn-dim" onclick="goSelect()">ステージ せんたくへ</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- POKE -->
+<div id="screen-poke" style="display:none;">
+<div id="poke-quiz">
+<div class="game-header">
+<button class="pause-btn" style="color:#3366cc;border-color:#99aadd;" onclick="pauseStage('poke')">⏸ 保存して戻る</button>
+<span style="font-family:'DotGothic16',monospace;font-size:12px;color:#333;">STAGE 3</span>
+</div>
+<div class="poke-field">
+<div class="poke-field-inner">
+<div>
+<div class="poke-enemy-hud"><div class="poke-ename" id="poke-ename">???</div><div class="poke-hp-row"><span class="poke-hp-lbl">HP</span><div class="poke-hp-track"><div class="poke-hp-fill hp-high" id="poke-hp" style="width:100%"></div></div></div></div>
+<span class="poke-esp" id="poke-esp">❓</span>
+</div>
+<div style="text-align:right;">
+<span class="poke-psp">🧑‍💻</span>
+<div class="poke-player-hud"><div class="poke-pname">インストラクター</div><div class="poke-plv" id="poke-score">こうげきりょく: 0</div></div>
+</div>
+</div>
+</div>
+<div class="poke-msg" id="poke-msg"></div>
+<div class="poke-grid" id="poke-cmds"></div>
+<div class="poke-exp" id="poke-exp"><div class="poke-exp-hd">▼ トレーナーコメント</div><div id="poke-exp-txt"></div></div>
+<button class="poke-next" id="poke-next">▶ つぎのもんだいへ</button>
+</div>
+<div class="poke-result" id="poke-result">
+<div class="poke-result-card">
+<span class="poke-rsp" id="poke-rsp">🏆</span>
+<div class="poke-rtitle" id="poke-rtitle"></div>
+<div class="poke-rnum" id="poke-rnum"></div>
+<div class="poke-rsub">/ 10もんせいかい</div>
+<div class="poke-rmsg" id="poke-rmsg"></div>
+<div class="poke-btns">
+<button class="p-btn p-blue" onclick="restartStage('poke')">もう一度チャレンジ</button>
+<button class="p-btn p-red" id="poke-wrong-btn" onclick="retryWrong('poke')">まちがえた問題だけ</button>
+<button class="p-btn p-dark" onclick="goSelect()">ステージ選択へ</button>
+</div>
+</div>
+</div>
+</div>
+
+<!-- ENDING -->
+<div id="screen-ending" style="display:none;">
+<div class="ending-wrap">
+<div class="ending-icons">🍄⚔️⚡</div>
+<div class="ending-title">全ステージクリア！！</div>
+<div class="ending-scores" id="ending-scores"></div>
+<div class="ending-msg" id="ending-msg"></div>
+<button class="ending-btn" onclick="goSelect()">もう一度あそぶ</button>
+</div>
+</div>
+
+</div>
+<script>
+/* UTILS */
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+
+/* STARS */
+(function(){const bg=document.getElementById('stars-bg');for(let i=0;i<60;i++){const d=document.createElement('div');d.className='star-dot';d.style.cssText='left:'+Math.random()*100+'%;top:'+Math.random()*100+'%;animation-delay:'+Math.random()*3+'s;opacity:'+(0.2+Math.random()*0.8);bg.appendChild(d);}})();
+
+/* PARTICLES */
+const canvas=document.getElementById('particle-canvas');
+const ctx=canvas.getContext('2d');
+let particles=[];
+function resizeCanvas(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;}
+resizeCanvas();window.addEventListener('resize',resizeCanvas);
+function spawnParticles(x,y,colors,n=16){
+  for(let i=0;i<n;i++){
+    const a=Math.random()*Math.PI*2,v=2+Math.random()*5;
+    particles.push({x,y,vx:Math.cos(a)*v,vy:Math.sin(a)*v-2,life:1,decay:0.02+Math.random()*0.02,size:3+Math.random()*5,color:colors[Math.floor(Math.random()*colors.length)]});
+  }
+}
+(function loop(){
+  ctx.clearRect(0,0,canvas.width,canvas.height);
+  particles=particles.filter(p=>p.life>0);
+  particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.12;p.life-=p.decay;ctx.save();ctx.globalAlpha=p.life;ctx.fillStyle=p.color;ctx.beginPath();ctx.rect(p.x-p.size/2,p.y-p.size/2,p.size,p.size);ctx.fill();ctx.restore();});
+  requestAnimationFrame(loop);
+})();
+
+/* AUDIO */
+let audioCtx=null;
+function getAudio(){if(!audioCtx){try{audioCtx=new(window.AudioContext||window.webkitAudioContext)();}catch(e){}}return audioCtx;}
+function tone(f,d,t='square',v=0.08){const ac=getAudio();if(!ac)return;const o=ac.createOscillator(),g=ac.createGain();o.connect(g);g.connect(ac.destination);o.type=t;o.frequency.setValueAtTime(f,ac.currentTime);g.gain.setValueAtTime(v,ac.currentTime);g.gain.exponentialRampToValueAtTime(0.001,ac.currentTime+d);o.start();o.stop(ac.currentTime+d);}
+function sfxOK(){tone(523,.08);setTimeout(()=>tone(659,.08),90);setTimeout(()=>tone(784,.12),180);}
+function sfxNG(){tone(200,.18,'sawtooth',.07);}
+function sfxCoin(){tone(988,.07);setTimeout(()=>tone(1319,.1),75);}
+function sfxNext(){tone(440,.05,'square',.05);}
+function sfxLevel(){[523,587,659,784,988].forEach((f,i)=>setTimeout(()=>tone(f,.1,'triangle',.07),i*75));}
+
+/* SAVE */
+const SK='sse_review_v3';
+function loadSave(){try{const d=localStorage.getItem(SK);return d?JSON.parse(d):{};} catch(e){return {};}}
+function writeSave(d){try{localStorage.setItem(SK,JSON.stringify(d));}catch(e){}}
+function clearSave(n){const d=loadSave();delete d[n];writeSave(d);}
+
+/* DATA */
+const MARIO_Q=[
+  {q:"Webサイト制作の正しい流れはどれ？",opts:["企画→デザインカンプ→画像の書き出し→コーディング","コーディング→企画→デザインカンプ","デザインカンプ→企画→コーディング","公開→企画→コーディング"],ans:0,exp:"企画→デザインカンプ→画像の書き出し→コーディングが基本フローです！この順番で進めることでHTMLの修正回数を減らせます。"},
+  {q:"デザインカンプとは何ですか？",opts:["コーディング作業のこと","Webサイトの完成見本","サーバーのこと","HTMLファイルのこと"],ans:1,exp:"デザインカンプはWebサイトの完成見本！PhotoshopやFigmaで作ります。デザインを先に決めることでコーディングがスムーズになります。"},
+  {q:"要件定義で特に重要な2つは？",opts:["予算とスケジュール","Webサイトの目的とターゲットユーザー","フォントと色","サーバーとドメイン"],ans:1,exp:"「Webサイトの目的」と「ターゲットユーザー」が最重要！これが曖昧だとクライアントとのズレが生じてトラブルになります。"},
+  {q:"サイト構成図は何階層までに抑えると使いやすい？",opts:["1階層","3階層","10階層","階層は関係ない"],ans:1,exp:"3階層までの浅い構成にするとユーザーが情報を探しやすくなります！深すぎるとユーザーが迷子になります。"},
+  {q:"ワイヤーフレームとは何ですか？",opts:["完成したデザイン","Webページの設計図","画像ファイルの形式","コーディングツール"],ans:1,exp:"ワイヤーフレームはWebページの設計図！色や画像は決めず、パーツの配置や情報の優先順位を設計します。"},
+  {q:"RFP（提案依頼書）はなぜ作る？",opts:["デザインを決めるため","クライアントの要望を漏れなく聞くため","予算を計算するため","コードを書くため"],ans:1,exp:"RFP（Request For Proposal）はクライアントの要望を漏れなく聞くための書類！認識のズレを防げます。"},
+  {q:"ターゲットユーザーを決めずに作り始めると？",opts:["完成が早くなる","ユーザーの関心を引きにくく離脱されやすくなる","デザインが自動で決まる","コードが減る"],ans:1,exp:"ターゲットが不明確だとデザインやコピーが的外れになり離脱されやすくなります。ターゲットは最初に明確にしましょう！"},
+  {q:"画像の書き出しで最近よく使われる方法は？",opts:["スライス","画像アセット","スクリーンショット","コピペ"],ans:1,exp:"最近は「画像アセット」が主流！Photoshopでレイヤー名を設定するだけで自動的に画像を書き出せます。"},
+  {q:"デザインカンプ作成に使うソフトはどれ？",opts:["Excel・Word","Photoshop・Figma","VSCode・メモ帳","Chrome・Firefox"],ans:1,exp:"デザインカンプはPhotoshop・Figma・Illustratorで作ります。VSCodeはコーディングツールです！"},
+  {q:"ターゲットユーザーを絞り込む3つの軸は？",opts:["予算・スケジュール・品質","属性・価値観・悩みや課題","HTML・CSS・JavaScript","色・フォント・レイアウト"],ans:1,exp:"「属性（年齢・性別など）」「価値観（趣味・ライフスタイル）」「悩みや課題・夢や願望」の3つを軸に絞り込みます！"}
+];
+const DQ_Q=[
+  {q:"HTMLの内容を書く場所はどこ？",opts:["headタグの中","bodyタグの中","htmlタグの外","scriptタグだけ"],ans:1,exp:"ページに表示される内容はbodyタグの中！headタグにはタイトルやCSSの読み込みなど「ページの情報」を書きます。"},
+  {q:"CSSでテキストを中央揃えにするプロパティは？",opts:["align: center","text-align: center","position: center","float: center"],ans:1,exp:"text-align: center でテキストを中央揃えにできます。left・right・centerが基本の3つの値です！"},
+  {q:"要素を横並びにする現代の主流CSSは？",opts:["float","display: flex","position: absolute","margin: auto"],ans:1,exp:"現在の実務ではdisplay: flexが主流！floatは古い方法。flexboxはシンプルに横並びが実現できます。"},
+  {q:"レスポンシブデザインに使うCSS機能は？",opts:["transition","animation","メディアクエリ","transform"],ans:2,exp:"メディアクエリ（@media）で画面幅に応じてCSSを切り替えることでレスポンシブデザインが実現できます！"},
+  {q:"spanタグはデフォルトでどちらの要素？",opts:["ブロック要素","インライン要素","フレックス要素","グリッド要素"],ans:1,exp:"spanはデフォルトでインライン要素！display: blockを書くことでブロック要素に変えられ、幅・高さが指定できます。"},
+  {q:"::beforeを表示させるために必ず書くプロパティは？",opts:["display: block","background-color","content: ''","position: absolute"],ans:2,exp:"::beforeはcontent: ''を書かないと表示されません！中身なしでもcontent: ''は必須です。"},
+  {q:"CSSのidセレクタで使えない書き方はどれ？",opts:["#main-content","#header","#2banner","#footer"],ans:2,exp:"idは数字から始めることができません！#2bannerはエラーになります。#banner2のように英字から始めましょう。"},
+  {q:"CSSで要素をスペースごと消すには？",opts:["visibility: hidden","opacity: 0","display: none","position: fixed"],ans:2,exp:"display: noneはスペースごと消えます！visibility: hiddenはスペースを残したまま透明になります。"},
+  {q:"orderプロパティが使えるのはどんな要素？",opts:["全ての要素","floatの子要素","flexboxの子要素","position: fixedの要素"],ans:2,exp:"orderプロパティはflexboxの子要素にしか使えません！display: flexが設定された親の直接の子要素に指定します。"},
+  {q:"インライン要素をブロック要素に変えるには？",opts:["float: left","margin: auto","display: block","position: relative"],ans:2,exp:"display: blockでインライン要素をブロック要素に変えられます！幅・高さが自由に指定できるようになります。"}
+];
+const POKE_Q=[
+  {q:"Webサイト公開前のチェックは全部で何つ？",opts:["2つ","4つ","8つ","1つ"],ans:1,exp:"リンク・文章・ブラウザ・バリデーター（文法）の4つが公開前チェック4点セット！公開前に必ず全部やる習慣をつけましょう。",sp:"📋",nm:"よんてんセット"},
+  {q:"HTMLのバリデーターURLはどれ？",opts:["https://validator.w3.org/","https://google.com/","https://jigsaw.w3.org/css-validator/","https://github.com/"],ans:0,exp:"HTMLバリデーターはhttps://validator.w3.org/！CSSバリデーターはhttps://jigsaw.w3.org/css-validator/ です。混同しないように。",sp:"🔍",nm:"HTMLバリデーター"},
+  {q:"バリデーターのError・Warning・Infoで修正必要なのは？",opts:["Infoだけ","Errorだけ","ErrorとWarning","全部不要"],ans:2,exp:"ErrorとWarningは修正が必要！InfoはHTMLの書き方へのアドバイスで表示には影響しないので無視してOKです。",sp:"⚠️",nm:"みっつのかみなり"},
+  {q:"imgタグにalt属性が必要な理由は？",opts:["画像を大きくするため","スクリーンリーダーが読み上げられないから","CSSが効かなくなるから","画像が消えるから"],ans:1,exp:"altはアクセシビリティのため！目の不自由な方が使うスクリーンリーダーがalt属性のテキストを読み上げて画像の内容を伝えます。",sp:"♿",nm:"アクセシビリティ"},
+  {q:"開発者ツールを開く方法は？",opts:["Wordを開く","ページ上で右クリック→検証","ファイルメニュー→設定","スマホを振る"],ans:1,exp:"ページ上で右クリック→「検証」で開きます！ChromeでHTMLとCSSをリアルタイムで確認・編集できます。",sp:"🔧",nm:"かいはつしゃツール"},
+  {q:"開発者ツールのCSSに打ち消し線がついている意味は？",opts:["正しく効いている","他のCSSに上書きされている","ファイルが壊れている","対応外のブラウザ"],ans:1,exp:"打ち消し線は「他のCSSに上書きされている」という意味！セレクタの詳細度が原因のことが多いです。デバッグが速くなります。",sp:"✏️",nm:"うわがきCSS"},
+  {q:"Webパフォーマンスとは何のこと？",opts:["デザインのきれいさ","ページの表示速度や快適さ","HTMLの行数","画像の枚数"],ans:1,exp:"Webパフォーマンスはページの表示速度・快適さのこと！表示が遅いとユーザーが離脱しやすくなり、SEO評価にも影響します。",sp:"⚡",nm:"ひょうじそくど"},
+  {q:"CMSとは何の略？",opts:["Cool Modern Style","Content Management System","Chrome Mobile Safari","Create My Site"],ans:1,exp:"CMSはContent Management System！管理画面からHTMLを書かずにWebページを更新できる仕組みです。WordPressが最も使われています。",sp:"📝",nm:"CMS"},
+  {q:"バリデーターを使うタイミングはいつ？",opts:["表示がおかしいとき","マンツーマン予約前","作品公開前","全部"],ans:3,exp:"おかしいとき・マンツーマン前・公開前、全部のタイミングで使います！特に公開前は必ずチェックする習慣をつけましょう。",sp:"📋",nm:"ぜんぶただしい"},
+  {q:"CSSのidセレクタを数字から始めるとどうなる？",opts:["問題ない","バリデーターでErrorになる","CSSが速くなる","画像が消える"],ans:1,exp:"idセレクタは数字から始めることができません！#2bannerはエラーになります。#banner2のように英字から始めましょう。",sp:"❌",nm:"#2バナー"}
+];
+
+/* STATE */
+const S={
+  mario:{q:[...MARIO_Q],all:MARIO_Q,wrong:[],cur:0,sc:0,ans:false,retry:false},
+  dq:   {q:[...DQ_Q],  all:DQ_Q,  wrong:[],cur:0,sc:0,ans:false,retry:false},
+  poke: {q:[...POKE_Q],all:POKE_Q, wrong:[],cur:0,sc:0,ans:false,retry:false}
+};
+const cleared={mario:false,dq:false,poke:false};
+const finalSc={mario:0,dq:0,poke:0};
+let curStage=null;
+
+/* KEYBOARD */
+document.addEventListener('keydown',e=>{
+  const keys={'1':0,'2':1,'3':2,'4':3};
+  if(e.key in keys){
+    const i=keys[e.key];
+    if(curStage==='mario')selectMario(i);
+    else if(curStage==='dq')selectDQ(i);
+    else if(curStage==='poke')selectPoke(i);
+  }
+  if(e.key==='Enter'){
+    ['mario-next','dq-next','poke-next'].forEach(id=>{
+      const b=document.getElementById(id);
+      if(b&&b.classList.contains('show'))b.click();
+    });
+  }
+});
+
+/* SCREEN */
+function showScreen(n){
+  ['select','mario','dq','poke','ending'].forEach(s=>{
+    const el=document.getElementById('screen-'+s);
+    if(el)el.style.display='none';
+  });
+  document.getElementById('screen-'+n).style.display='block';
+  curStage=['mario','dq','poke'].includes(n)?n:null;
+}
+
+function goSelect(){
+  document.body.className='mode-select';curStage=null;
+  updateSelectUI();showScreen('select');
+}
+
+function updateSelectUI(){
+  const save=loadSave();let any=false;
+  ['mario','dq','poke'].forEach(n=>{
+    const d=save[n],total=10;
+    const done=d?Math.min(d.cur,total):0;
+    document.getElementById('sp-'+n).style.width=(done/total*100)+'%';
+    document.getElementById('sl-'+n).textContent=done+'/'+total;
+    const rt=document.getElementById('sr-'+n);
+    if(d&&d.cur>0&&d.cur<total){rt.classList.add('show');any=true;}else rt.classList.remove('show');
+    if(cleared[n])document.getElementById('cb-'+n).classList.add('show');
+  });
+  const rh=document.getElementById('resume-hint');
+  rh.textContent=any?'▼ セーブデータがあります':'';
+}
+
+/* PAUSE */
+function pauseStage(n){
+  const s=S[n],d=loadSave();
+  d[n]={cur:s.cur,sc:s.sc,wrong:s.wrong,retry:s.retry,ts:Date.now()};
+  writeSave(d);sfxNext();goSelect();
+}
+
+/* START */
+function startStage(n){
+  document.body.className='mode-'+n;
+  const s=S[n],save=loadSave(),saved=save[n];
+  if(saved&&saved.cur>0&&saved.cur<s.all.length&&!cleared[n]){
+    s.q=[...s.all];s.cur=saved.cur;s.sc=saved.sc;s.wrong=saved.wrong||[];s.retry=saved.retry||false;
+  }else{
+    s.q=[...s.all];s.wrong=[];s.cur=0;s.sc=0;s.retry=false;clearSave(n);
+  }
+  s.ans=false;
+  document.getElementById(n+'-quiz').style.display='block';
+  document.getElementById(n+'-result').style.display='none';
+  showScreen(n);
+  if(n==='mario')renderMario();else if(n==='dq')renderDQ();else renderPoke();
+}
+
+function restartStage(n){
+  clearSave(n);const s=S[n];
+  s.q=[...s.all];s.wrong=[];s.cur=0;s.sc=0;s.ans=false;s.retry=false;
+  document.getElementById(n+'-quiz').style.display='block';
+  document.getElementById(n+'-result').style.display='none';
+  if(n==='mario')renderMario();else if(n==='dq')renderDQ();else renderPoke();
+}
+
+function retryWrong(n){
+  const s=S[n];
+  s.q=s.wrong.map(i=>s.all[i]);s.wrong=[];s.cur=0;s.sc=0;s.ans=false;s.retry=true;
+  document.getElementById(n+'-quiz').style.display='block';
+  document.getElementById(n+'-result').style.display='none';
+  if(n==='mario')renderMario();else if(n==='dq')renderDQ();else renderPoke();
+}
+
+function checkEnding(){if(cleared.mario&&cleared.dq&&cleared.poke)showEnding();}
+
+/* MARIO */
+function renderMario(){
+  const s=S.mario,q=s.q[s.cur],tot=s.q.length;
+  document.getElementById('mario-score').textContent='×'+s.sc;
+  document.getElementById('mario-lives').textContent='🌟'.repeat(Math.max(0,3-Math.floor((s.cur-s.sc)/3)));
+  document.getElementById('mario-q-badge').textContent='Q '+(s.cur+1);
+  document.getElementById('mario-q-text').textContent=q.q;
+  document.getElementById('mario-exp').classList.remove('show');
+  document.getElementById('mario-next').classList.remove('show');
+  s.ans=false;
+  const cr=document.getElementById('mario-coins');cr.innerHTML='';
+  for(let i=0;i<tot;i++){const c=document.createElement('div');c.className='coin'+(i<s.cur?' done':i===s.cur?' cur':'');c.textContent=i<s.cur?'🪙':'○';cr.appendChild(c);}
+  const opts=document.getElementById('mario-opts');opts.innerHTML='';
+  ['A','B','C','D'].forEach((lb,i)=>{
+    if(i>=q.opts.length)return;
+    const d=document.createElement('div');d.className='mario-opt';
+    d.innerHTML='<span class="mario-opt-lbl">'+lb+'</span><span>'+esc(q.opts[i])+'</span>';
+    d.onclick=()=>selectMario(i);opts.appendChild(d);
+  });
+}
+function selectMario(i){
+  const s=S.mario,q=s.q[s.cur];if(s.ans)return;s.ans=true;
+  const opts=document.querySelectorAll('.mario-opt');opts.forEach(o=>o.classList.add('disabled'));
+  const ok=i===q.ans;
+  opts[i].classList.add(ok?'correct':'wrong');
+  if(!ok){opts[q.ans].classList.add('correct');if(!s.retry)s.wrong.push(MARIO_Q.indexOf(q));}
+  if(ok){s.sc++;sfxOK();const r=opts[i].getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top,['#ffd700','#ffaa00','#e8380d'],20);}else sfxNG();
+  document.getElementById('mario-exp-txt').textContent=q.exp;
+  document.getElementById('mario-exp').classList.add('show');
+  const btn=document.getElementById('mario-next');
+  btn.textContent=s.cur<s.q.length-1?'NEXT ▶':'RESULT ▶';btn.classList.add('show');
+}
+document.getElementById('mario-next').onclick=()=>{sfxNext();const s=S.mario;s.cur++;if(s.cur<s.q.length)renderMario();else showMarioResult();};
+function showMarioResult(){
+  cleared.mario=true;clearSave('mario');finalSc.mario=S.mario.sc;
+  document.getElementById('mario-quiz').style.display='none';
+  const r=document.getElementById('mario-result');r.style.display='block';r.classList.add('show');
+  const sc=S.mario.sc,pct=sc/10;
+  const hd=document.getElementById('mario-rhd');
+  hd.textContent=pct===1?'PERFECT!!':pct>=.7?'STAGE CLEAR!':pct>=.4?'NICE TRY!':'TRY AGAIN...';
+  if(pct>=.7)hd.classList.add('go');
+  document.getElementById('mario-stars').textContent=pct===1?'⭐⭐⭐':pct>=.7?'⭐⭐':pct>=.4?'⭐':'';
+  document.getElementById('mario-rnum').textContent=sc+' / 10';
+  document.getElementById('mario-rmsg').textContent=["0問正解！「企画→デザインカンプ→書き出し→コーディング」の流れだけ覚えてもらえれば今日はOK！","1〜3問正解！制作フロー、少しずつ頭に入ってきてる！","4〜6問正解！半分以上正解！制作フローの基本がしっかり身についてきてる！","7〜9問正解！ほぼ完璧！企画から工程まで全部わかってる！","満点！完璧！！制作フロー・要件定義・ワイヤーフレーム・RFP、全部バッチリ！！"][sc===10?4:sc>=7?3:sc>=4?2:sc>=1?1:0];
+  if(s_mario_wrong())document.getElementById('mario-wrong-btn').classList.add('show');
+  if(pct===1){sfxLevel();setTimeout(()=>spawnParticles(window.innerWidth/2,window.innerHeight/3,['#ffd700','#ff6600','#e8380d'],40),300);}
+  updateSelectUI();checkEnding();
+}
+function s_mario_wrong(){return S.mario.wrong.length>0&&!S.mario.retry;}
+
+/* DQ */
+let dqTm=null;
+function renderDQ(){
+  const s=S.dq,q=s.q[s.cur],tot=s.q.length;
+  document.getElementById('dq-q-meta').textContent='問題 '+(s.cur+1)+'/'+tot;
+  document.getElementById('dq-mp').textContent=s.sc;
+  document.getElementById('dq-mp-fill').style.width=(s.sc/tot*100)+'%';
+  document.getElementById('dq-exp').classList.remove('show');document.getElementById('dq-exp').textContent='';
+  document.getElementById('dq-next').classList.remove('show');
+  document.getElementById('dq-levelup').style.display='none';
+  s.ans=false;
+  if(dqTm)clearInterval(dqTm);
+  const el=document.getElementById('dq-msg');el.innerHTML='';let i=0;
+  dqTm=setInterval(()=>{
+    if(i<q.q.length){el.innerHTML=q.q.slice(0,++i)+'<span class="dq-cursor">▼</span>';}
+    else{clearInterval(dqTm);dqTm=null;}
+  },22);
+  const cmds=document.getElementById('dq-cmds');cmds.innerHTML='';
+  ['A','B','C','D'].forEach((lb,i)=>{
+    if(i>=q.opts.length)return;
+    const d=document.createElement('div');d.className='dq-cmd';
+    d.innerHTML='<span class="dq-cmd-arrow"></span>'+lb+'. '+esc(q.opts[i]);
+    d.onclick=()=>selectDQ(i);cmds.appendChild(d);
+  });
+}
+function selectDQ(i){
+  const s=S.dq,q=s.q[s.cur];if(s.ans)return;s.ans=true;
+  if(dqTm){clearInterval(dqTm);dqTm=null;}
+  document.getElementById('dq-msg').innerHTML=q.q;
+  const cmds=document.querySelectorAll('.dq-cmd');cmds.forEach(c=>c.classList.add('disabled'));
+  const ok=i===q.ans;
+  cmds[i].classList.add(ok?'correct':'wrong');
+  if(!ok){cmds[q.ans].classList.add('correct');if(!s.retry)s.wrong.push(DQ_Q.indexOf(q));}
+  if(ok){
+    s.sc++;sfxOK();
+    const lu=document.getElementById('dq-levelup');lu.style.display='block';
+    setTimeout(()=>{lu.style.animation='levelUp .5s ease';},10);
+    setTimeout(()=>{lu.style.display='none';lu.style.animation='';},1400);
+    document.getElementById('dq-mp').textContent=s.sc;
+    document.getElementById('dq-mp-fill').style.width=(s.sc/s.q.length*100)+'%';
+  }else sfxNG();
+  document.getElementById('dq-exp').textContent=q.exp;document.getElementById('dq-exp').classList.add('show');
+  const btn=document.getElementById('dq-next');btn.textContent=s.cur<s.q.length-1?'▶ つぎへ':'▶ けっかをみる';btn.classList.add('show');
+}
+document.getElementById('dq-next').onclick=()=>{sfxNext();const s=S.dq;s.cur++;if(s.cur<s.q.length)renderDQ();else showDQResult();};
+function showDQResult(){
+  cleared.dq=true;clearSave('dq');finalSc.dq=S.dq.sc;
+  document.getElementById('dq-quiz').style.display='none';
+  const r=document.getElementById('dq-result');r.style.display='block';r.classList.add('show');
+  const sc=S.dq.sc,pct=sc/10;
+  document.getElementById('dq-result-title').innerHTML=['たたかうのは むずかしいな...','まだまだ これから！','なかなか やるな！','ゆうしゃ あらわる！','でんせつの ゆうしゃだ！！'][sc===10?4:sc>=7?3:sc>=4?2:sc>=1?1:0]+'<br><br>'+sc+' もん せいかい！';
+  document.getElementById('dq-stats').textContent='flexbox・display・セレクタ・メディアクエリ...\nコーディングの知識、'+sc+'問正解でした！';
+  if(S.dq.wrong.length>0&&!S.dq.retry)document.getElementById('dq-wrong-btn').classList.add('show');
+  if(pct===1)sfxLevel();
+  updateSelectUI();checkEnding();
+}
+
+/* POKEMON */
+function renderPoke(){
+  const s=S.poke,q=s.q[s.cur],tot=s.q.length;
+  const hpPct=Math.round((tot-s.cur)/tot*100);
+  const hpEl=document.getElementById('poke-hp');
+  hpEl.style.width=hpPct+'%';hpEl.className='poke-hp-fill '+(hpPct>60?'hp-high':hpPct>30?'hp-mid':'hp-low');
+  document.getElementById('poke-esp').textContent=q.sp||'❓';
+  document.getElementById('poke-ename').textContent=q.nm||'???';
+  document.getElementById('poke-score').textContent='こうげきりょく: '+s.sc;
+  document.getElementById('poke-msg').textContent=q.q;
+  document.getElementById('poke-exp').classList.remove('show');
+  document.getElementById('poke-next').classList.remove('show');
+  s.ans=false;
+  const cmds=document.getElementById('poke-cmds');cmds.innerHTML='';
+  ['A','B','C','D'].forEach((lb,i)=>{
+    if(i>=q.opts.length)return;
+    const d=document.createElement('div');d.className='poke-cmd';
+    d.textContent=lb+'. '+q.opts[i];d.onclick=()=>selectPoke(i);cmds.appendChild(d);
+  });
+}
+function selectPoke(i){
+  const s=S.poke,q=s.q[s.cur];if(s.ans)return;s.ans=true;
+  const cmds=document.querySelectorAll('.poke-cmd');cmds.forEach(c=>c.classList.add('disabled'));
+  const ok=i===q.ans;
+  cmds[i].classList.add(ok?'correct':'wrong');
+  if(!ok){cmds[q.ans].classList.add('correct');if(!s.retry)s.wrong.push(POKE_Q.indexOf(q));}
+  const msgEl=document.getElementById('poke-msg');
+  if(ok){
+    s.sc++;sfxOK();
+    msgEl.textContent='こうかはばつぐんだ！';
+    msgEl.classList.add('flash');setTimeout(()=>msgEl.classList.remove('flash'),600);
+    document.getElementById('poke-score').textContent='こうげきりょく: '+s.sc;
+    const sp=document.getElementById('poke-esp');sp.classList.add('hit');setTimeout(()=>sp.classList.remove('hit'),400);
+    const r=sp.getBoundingClientRect();spawnParticles(r.left+r.width/2,r.top+r.height/2,['#ffcc00','#ff4444','#4444ff'],18);
+    const tot=s.q.length,np=Math.round((tot-s.cur-1)/tot*100);
+    const hpEl=document.getElementById('poke-hp');
+    setTimeout(()=>{hpEl.style.width=np+'%';hpEl.className='poke-hp-fill '+(np>60?'hp-high':np>30?'hp-mid':'hp-low');},200);
+  }else{sfxNG();msgEl.textContent='こうかがいまひとつのようだ...';}
+  document.getElementById('poke-exp-txt').textContent=q.exp;document.getElementById('poke-exp').classList.add('show');
+  const btn=document.getElementById('poke-next');btn.textContent=s.cur<s.q.length-1?'▶ つぎのもんだいへ':'▶ けっかをみる';btn.classList.add('show');
+}
+document.getElementById('poke-next').onclick=()=>{sfxNext();const s=S.poke;s.cur++;if(s.cur<s.q.length)renderPoke();else showPokeResult();};
+function showPokeResult(){
+  cleared.poke=true;clearSave('poke');finalSc.poke=S.poke.sc;
+  document.getElementById('poke-quiz').style.display='none';
+  const r=document.getElementById('poke-result');r.style.display='block';r.classList.add('show');
+  const sc=S.poke.sc,pct=sc/10;
+  document.getElementById('poke-rsp').textContent=pct===1?'🏆':pct>=.7?'🥇':pct>=.4?'🎖️':'📚';
+  document.getElementById('poke-rtitle').textContent=pct===1?'かんぺきしょうり！':pct>=.7?'しょうりだ！':pct>=.4?'よくたたかった！':'もっとれんしゅうだ！';
+  document.getElementById('poke-rnum').textContent=sc+' / 10';
+  document.getElementById('poke-rmsg').textContent=["0問正解！バリデーターは使いながら覚えていきます。今日ここで挑戦してくれただけで十分えらい！","1〜3問正解！バリデーターを使うタイミング（おかしいとき・公開前・マンツーマン前）を覚えておこう！","4〜6問正解！半分以上正解！公開前チェック4点セット、しっかり頭に入ってきてる！","7〜9問正解！ほぼ完璧！バリデーターも開発者ツールも全部わかってる。実務で必ず役立ちます！","満点！完璧！！公開前チェック・バリデーター・CMS、全部バッチリ！最高にえらい！！"][sc===10?4:sc>=7?3:sc>=4?2:sc>=1?1:0];
+  if(S.poke.wrong.length>0&&!S.poke.retry)document.getElementById('poke-wrong-btn').classList.add('show');
+  if(pct===1)sfxLevel();
+  updateSelectUI();checkEnding();
+}
+
+/* ENDING */
+function showEnding(){
+  document.body.className='mode-ending';showScreen('ending');
+  const tot=finalSc.mario+finalSc.dq+finalSc.poke;
+  document.getElementById('ending-scores').innerHTML=
+    '<div class="e-row"><span class="e-name">🍄 企画・工程</span><span class="e-val">'+finalSc.mario+' / 10</span></div>'+
+    '<div class="e-row"><span class="e-name">⚔️ コーディング</span><span class="e-val">'+finalSc.dq+' / 10</span></div>'+
+    '<div class="e-row"><span class="e-name">⚡ 公開前チェック</span><span class="e-val">'+finalSc.poke+' / 10</span></div>'+
+    '<div class="e-row" style="border-top:1px solid rgba(255,215,0,.3);margin-top:8px;padding-top:8px;"><span class="e-name" style="color:#ffd700;">TOTAL</span><span class="e-val" style="font-size:14px;">'+tot+' / 30</span></div>';
+  const pct=tot/30;
+  document.getElementById('ending-msg').textContent=pct===1?'全30問満点！！作品制作の全工程を完璧にマスターしてる！企画からコーディング・公開前チェックまで全部理解できてる。本当に最高！！':pct>=.7?'全30問中'+tot+'問正解！制作フロー・コーディング・公開前チェック、全部バッチリ身についてる！':'全30問中'+tot+'問正解！苦手な問題はステージを選んで再チャレンジしてみてください！';
+  sfxLevel();
+  for(let i=0;i<6;i++){setTimeout(()=>{spawnParticles(window.innerWidth*Math.random(),window.innerHeight*.3,['#ffd700','#ff4444','#4488ff','#44ff88'],25);},i*280);}
+}
+
+/* INIT */
+updateSelectUI();showScreen('select');
+</script>
+</body>
+</html>
