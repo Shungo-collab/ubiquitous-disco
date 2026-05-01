@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 GW Recreation｜INTERNET ACADEMY</title>
+<meta name="description" content="本日はようこそ。2つのゲームの遊びかたをご紹介します。">
+<meta name="theme-color" content="#0B1E2C">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@500;700;800&family=Fraunces:opsz,wght,SOFT@9..144,300;9..144,400;9..144,700;9..144,900&family=Noto+Sans+JP:wght@400;500;700;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   1. RESET & BASE
+   ============================================================ */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --ia-blue: #0B6FA8;
+  --ia-blue-light: #4FC3F7;
+  --ia-blue-bg: #E8F6FD;
+  --coral: #FF6B5B;
+  --coral-d: #E54A3A;
+  --sun: #FFC857;
+  --leaf: #6FCF97;
+  --plum: #5B3A86;
+  --ink: #0B1E2C;
+  --ink-70: #3D4A56;
+  --ink-50: #6E7780;
+  --line: #DCE5EC;
+  --line-l: #EEF2F6;
+  --paper: #FBFCFE;
+  --cream: #F4EFE6;
+
+  --serif: "Shippori Mincho", "游明朝", serif;
+  --display: "Fraunces", "Shippori Mincho", serif;
+  --sans: "Noto Sans JP", "Hiragino Sans", system-ui, sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, monospace;
+
+  --pad: 20px;
+}
+
+@media (min-width: 768px) {
+  :root { --pad: 32px; }
+}
+
+html, body {
+  background: var(--paper);
+}
+
+body {
+  font-family: var(--sans);
+  font-size: 15px;
+  line-height: 1.7;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  font-feature-settings: "palt" 1;
+}
+
+img, svg { max-width: 100%; display: block; }
+button { font: inherit; cursor: pointer; border: 0; background: none; color: inherit; }
+:focus-visible { outline: 2px solid var(--coral); outline-offset: 3px; border-radius: 4px; }
+a { color: inherit; text-decoration: none; }
+ul, ol { list-style: none; }
+
+/* ============================================================
+   2. HEADER (sticky top bar)
+   ============================================================ */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px var(--pad);
+  background: rgba(251, 252, 254, 0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--line-l);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--display);
+  font-weight: 700;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+
+.brand-mark {
+  width: 22px;
+  height: 22px;
+  background: var(--ink);
+  border-radius: 3px;
+  position: relative;
+}
+
+.brand-mark::before {
+  content: "";
+  position: absolute;
+  inset: 4px;
+  background: white;
+  clip-path: polygon(0 0, 100% 0, 100% 50%, 50% 50%, 50% 100%, 0 100%);
+}
+
+.menu-btn {
+  width: 44px;
+  height: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border-radius: 50%;
+  background: var(--ink);
+  box-shadow: 0 6px 18px -6px rgba(11, 30, 44, 0.4);
+}
+
+.menu-btn span {
+  display: block;
+  width: 16px;
+  height: 1.5px;
+  background: white;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   3. HERO
+   ============================================================ */
+.hero {
+  padding: 56px var(--pad) 64px;
+  background:
+    radial-gradient(ellipse 80% 60% at 80% 20%, rgba(79, 195, 247, 0.18), transparent 60%),
+    radial-gradient(ellipse 80% 60% at 20% 80%, rgba(255, 200, 87, 0.20), transparent 60%),
+    linear-gradient(180deg, #FFFFFF 0%, var(--paper) 50%, #FFF6E7 100%);
+}
+
+.hero-meta {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  color: var(--ink-50);
+  text-transform: uppercase;
+  line-height: 1.7;
+  margin-bottom: 32px;
+}
+
+.hero-meta strong { color: var(--ink); font-size: 10px; }
+.hero-meta-right { text-align: right; }
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.25em;
+  color: var(--ia-blue);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.hero-eyebrow::before {
+  content: "";
+  width: 28px;
+  height: 1px;
+  background: var(--ia-blue);
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: 52px;
+  line-height: 0.92;
+  letter-spacing: -0.04em;
+  font-weight: 400;
+  font-variation-settings: "opsz" 144;
+}
+
+.hero-title .line1 { display: block; font-style: italic; font-weight: 300; color: var(--ink-70); }
+.hero-title .line2 {
+  display: block;
+  font-weight: 700;
+  margin-top: 0.04em;
+  background: linear-gradient(135deg, var(--ia-blue) 0%, var(--ia-blue-light) 50%, var(--coral) 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.hero-title .amp { font-style: italic; font-weight: 300; color: var(--coral); -webkit-text-fill-color: var(--coral); }
+
+@media (min-width: 480px) { .hero-title { font-size: 72px; } }
+@media (min-width: 768px) { .hero-title { font-size: 120px; } }
+@media (min-width: 1200px) { .hero-title { font-size: 168px; } }
+
+.hero-greeting {
+  margin-top: 24px;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.95;
+  color: var(--ink-70);
+  max-width: 480px;
+}
+
+.hero-greeting strong {
+  color: var(--ink);
+  font-weight: 700;
+  background: linear-gradient(transparent 65%, rgba(255, 200, 87, 0.55) 65%);
+  padding: 0 3px;
+}
+
+.hero-stats {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  max-width: 480px;
+}
+
+.hero-stats li {
+  padding-right: 8px;
+  border-right: 1px solid var(--line);
+  overflow: hidden;
+}
+.hero-stats li:last-child { border-right: 0; padding-right: 0; }
+
+.hero-stat-num {
+  display: block;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 26px;
+  line-height: 1;
+  color: var(--ia-blue);
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 480px) { .hero-stat-num { font-size: 36px; } }
+
+.hero-stat-label {
+  display: block;
+  margin-top: 4px;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  color: var(--ink-50);
+  text-transform: uppercase;
+}
+
+.cta-list { margin-top: 28px; display: flex; flex-direction: column; gap: 10px; max-width: 380px; }
+
+.cta {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: 100%;
+  padding: 16px 18px;
+  background: var(--ink);
+  color: white;
+  border-radius: 14px;
+  text-align: left;
+  box-shadow: 0 8px 24px -8px rgba(11, 30, 44, 0.25);
+  transition: transform 0.2s;
+}
+
+.cta:hover { transform: translateY(-2px); }
+.cta:active { transform: scale(0.98); }
+
+.cta-num {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 26px;
+  color: var(--sun);
+  width: 30px;
+  flex-shrink: 0;
+}
+
+.cta-text { flex: 1; min-width: 0; }
+.cta-label { display: block; font-family: var(--mono); font-size: 9px; letter-spacing: 0.18em; color: var(--sun); text-transform: uppercase; }
+.cta-name { display: block; margin-top: 2px; font-family: var(--serif); font-weight: 700; font-size: 15px; }
+.cta-arrow { color: rgba(255, 255, 255, 0.5); font-family: var(--mono); }
+
+/* ============================================================
+   4. GAMES
+   ============================================================ */
+.games {
+  padding: 56px var(--pad);
+  background: var(--paper);
+}
+
+.games-eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.3em;
+  color: var(--ia-blue);
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.games-eyebrow::before { content: ""; width: 28px; height: 1px; background: var(--ia-blue); }
+
+.games-headline {
+  font-family: var(--display);
+  font-size: 36px;
+  line-height: 1;
+  letter-spacing: -0.03em;
+  font-weight: 700;
+}
+.games-headline em { font-style: italic; font-weight: 400; color: var(--coral); }
+
+@media (min-width: 480px) { .games-headline { font-size: 44px; } }
+@media (min-width: 768px) { .games-headline { font-size: 56px; } }
+
+.games-lede {
+  margin-top: 16px;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink-70);
+  max-width: 580px;
+}
+
+/* Tabs */
+.tabs {
+  margin-top: 32px;
+  display: flex;
+  gap: 6px;
+  padding: 4px;
+  background: var(--line-l);
+  border-radius: 14px;
+}
+
+.tab {
+  flex: 1;
+  padding: 12px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: left;
+  color: var(--ink-50);
+  min-width: 0;
+}
+
+.tab[aria-selected="true"] { background: var(--ink); color: white; }
+.tab-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.15em; }
+.tab[aria-selected="true"] .tab-num { color: var(--sun); }
+.tab-name { font-family: var(--serif); font-weight: 700; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Panels */
+.panel { display: none; padding-top: 32px; }
+.panel.is-active { display: block; }
+
+.game-title {
+  font-family: var(--display);
+  font-size: 40px;
+  line-height: 1;
+  letter-spacing: -0.035em;
+  font-weight: 700;
+}
+.game-title em { font-style: italic; font-weight: 400; color: var(--ia-blue); }
+.game-title .accent { font-style: italic; font-weight: 400; color: var(--coral); }
+.game-title-jp { display: block; margin-top: 8px; font-family: var(--serif); font-weight: 700; font-size: 16px; color: var(--ink-70); }
+
+@media (min-width: 480px) { .game-title { font-size: 56px; } .game-title-jp { font-size: 18px; } }
+@media (min-width: 768px) { .game-title { font-size: 72px; } }
+
+.game-lede {
+  margin-top: 20px;
+  font-family: var(--serif);
+  font-size: 15px;
+  line-height: 1.9;
+  color: var(--ink-70);
+  max-width: 600px;
+}
+
+.game-lede strong {
+  color: var(--ink);
+  font-weight: 700;
+  background: linear-gradient(transparent 65%, var(--ia-blue-bg) 65%);
+  padding: 0 2px;
+}
+
+/* Flow card (Game 1) */
+.flow-card {
+  margin-top: 32px;
+  padding: 22px;
+  background: var(--ink);
+  color: white;
+  border-radius: 16px;
+}
+
+.flow-card-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; color: var(--ia-blue-light); text-transform: uppercase; }
+.flow-card-title {
+  margin: 6px 0 22px;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 1.1;
+}
+.flow-card-title em { font-style: italic; font-weight: 900; color: var(--sun); }
+
+.stage-bar { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; margin-bottom: 18px; }
+
+.stage-block { background: rgba(255, 255, 255, 0.05); border-radius: 8px; padding: 10px 4px; text-align: center; }
+.stage-block.active { background: linear-gradient(135deg, var(--coral), var(--coral-d)); }
+.stage-block-num { display: block; font-family: var(--display); font-style: italic; font-weight: 900; font-size: 16px; color: rgba(255, 255, 255, 0.4); }
+.stage-block.active .stage-block-num { color: white; }
+.stage-block-time { display: block; margin-top: 3px; font-family: var(--mono); font-size: 9px; color: rgba(255, 255, 255, 0.5); }
+.stage-block.active .stage-block-time { color: white; }
+
+.stage-list li {
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.07);
+  align-items: center;
+}
+.stage-list li:first-child { border-top: 0; padding-top: 0; }
+.stage-step-num { font-family: var(--mono); font-size: 10.5px; color: rgba(255, 255, 255, 0.4); }
+.stage-step-text { font-family: var(--serif); font-weight: 500; font-size: 14px; }
+.stage-step-dur { font-family: var(--mono); font-size: 11px; color: var(--coral); white-space: nowrap; }
+
+/* Rules */
+.rules { margin-top: 16px; display: flex; flex-direction: column; gap: 10px; }
+
+.rule {
+  display: grid;
+  grid-template-columns: 52px 1fr;
+  gap: 14px;
+  padding: 16px;
+  align-items: center;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+}
+
+.rule-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--ia-blue-bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--ia-blue);
+}
+
+.panel-game2 .rule-icon { background: rgba(255, 107, 91, 0.10); color: var(--coral-d); }
+.rule-icon svg { width: 26px; height: 26px; fill: currentColor; }
+.rule-num { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--coral); text-transform: uppercase; }
+.rule-title { margin: 3px 0 4px; font-family: var(--serif); font-weight: 700; font-size: 15px; }
+.rule-body { font-size: 13px; color: var(--ink-70); line-height: 1.65; }
+
+/* Field (Game 2) */
+.field-card {
+  margin-top: 32px;
+  padding: 22px;
+  background: var(--ink);
+  color: white;
+  border-radius: 16px;
+}
+
+.field-card-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; color: var(--coral); text-transform: uppercase; }
+.field-card-title { margin: 6px 0 18px; font-family: var(--display); font-style: italic; font-weight: 700; font-size: 24px; line-height: 1.1; }
+.field-card-title em { font-style: italic; font-weight: 900; color: var(--sun); }
+
+.field {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  position: relative;
+  border: 2px dashed rgba(255, 255, 255, 0.3);
+  border-radius: 12px;
+  background:
+    repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 28px),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.05) 0, rgba(255, 255, 255, 0.05) 1px, transparent 1px, transparent 28px),
+    linear-gradient(135deg, rgba(111, 207, 151, 0.15), rgba(79, 195, 247, 0.10));
+  overflow: hidden;
+}
+
+.field-corner { position: absolute; width: 18px; height: 18px; }
+.field-corner.tl { top: 8px; left: 8px; border-top: 2px solid var(--coral); border-left: 2px solid var(--coral); }
+.field-corner.tr { top: 8px; right: 8px; border-top: 2px solid var(--coral); border-right: 2px solid var(--coral); }
+.field-corner.bl { bottom: 8px; left: 8px; border-bottom: 2px solid var(--coral); border-left: 2px solid var(--coral); }
+.field-corner.br { bottom: 8px; right: 8px; border-bottom: 2px solid var(--coral); border-right: 2px solid var(--coral); }
+
+.runner {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 2px solid white;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+.runner::after {
+  content: "";
+  position: absolute;
+  width: 5px;
+  height: 9px;
+  bottom: -7px;
+  left: 50%;
+  background: currentColor;
+  transform: translateX(-50%) rotate(15deg);
+  border-radius: 1px;
+  opacity: 0.65;
+}
+
+.runner.r1 { top: 25%; left: 20%; background: var(--coral); color: var(--coral); animation: dart1 4s ease-in-out infinite; }
+.runner.r2 { top: 60%; left: 70%; background: var(--ia-blue-light); color: var(--ia-blue-light); animation: dart2 5s ease-in-out infinite; }
+.runner.r3 { top: 40%; left: 45%; background: var(--sun); color: var(--sun); animation: dart3 4.5s ease-in-out infinite; }
+.runner.r4 { top: 70%; left: 30%; background: var(--leaf); color: var(--leaf); animation: dart4 5.5s ease-in-out infinite; }
+
+@keyframes dart1 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(40px, -10px); } }
+@keyframes dart2 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-50px, 20px); } }
+@keyframes dart3 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(30px, 30px); } }
+@keyframes dart4 { 0%, 100% { transform: translate(0, 0); } 50% { transform: translate(-30px, -25px); } }
+
+.legend { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 10px 16px; font-family: var(--mono); font-size: 10px; color: rgba(255, 255, 255, 0.7); }
+.legend li { display: flex; align-items: center; gap: 6px; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; border: 1.5px solid white; }
+
+/* Bracket */
+.bracket {
+  margin-top: 16px;
+  padding: 20px;
+  background: white;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+}
+
+.bracket-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.bracket-eyebrow { font-family: var(--mono); font-size: 9px; letter-spacing: 0.22em; color: var(--coral); text-transform: uppercase; }
+.bracket-title { margin-top: 6px; font-family: var(--display); font-style: italic; font-weight: 700; font-size: 22px; }
+
+.reload-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  background: var(--ink);
+  color: white;
+  border-radius: 100px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.reload-btn svg { width: 14px; height: 14px; fill: currentColor; }
+.reload-btn:active { transform: scale(0.96); }
+
+.bracket-note { font-size: 12px; color: var(--ink-50); line-height: 1.6; margin-bottom: 18px; }
+
+.stage { margin-bottom: 20px; }
+.stage:last-child { margin-bottom: 0; }
+.stage-label { font-family: var(--mono); font-size: 10px; letter-spacing: 0.15em; color: var(--ink-50); text-transform: uppercase; margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+.stage-label::after { content: ""; flex: 1; height: 1px; background: var(--line); }
+.stage.final .stage-label { color: var(--coral); font-weight: 700; }
+
+.match {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  gap: 8px;
+  align-items: center;
+  padding: 10px 12px;
+  background: var(--paper);
+  border: 1px solid var(--line-l);
+  border-radius: 10px;
+  margin-bottom: 6px;
+  position: relative;
+}
+.stage.final .match { background: linear-gradient(135deg, white, #FFF6F4); border-color: var(--coral); }
+
+.match-num {
+  position: absolute;
+  top: -8px;
+  left: 12px;
+  background: var(--ink);
+  color: white;
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 0.1em;
+  padding: 2px 7px;
+  border-radius: 3px;
+}
+.stage.final .match-num { background: var(--coral); }
+
+.side { display: flex; align-items: center; gap: 7px; font-family: var(--serif); font-weight: 700; font-size: 13px; min-width: 0; }
+.side.right { justify-content: flex-end; }
+.vs { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--ink-50); }
+
+.team {
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 900;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.team[data-team="A"] { background: var(--ia-blue); }
+.team[data-team="B"] { background: var(--coral); }
+.team[data-team="C"] { background: var(--sun); color: var(--ink); }
+.team[data-team="D"] { background: var(--leaf); }
+.team[data-team="E"] { background: var(--plum); }
+.team[data-team="F"] { background: var(--ia-blue-light); }
+.team[data-team="?"] { background: white; border: 1.5px dashed var(--ink-50); color: var(--ink-50); }
+
+/* Family note */
+.family-note {
+  margin-top: 22px;
+  padding: 14px 16px;
+  border-radius: 0 10px 10px 0;
+  font-size: 13px;
+  color: var(--ink-70);
+  line-height: 1.75;
+  background: var(--ia-blue-bg);
+  border-left: 3px solid var(--ia-blue-light);
+}
+.family-note strong { display: block; margin-bottom: 4px; font-family: var(--serif); color: var(--ia-blue); font-weight: 700; font-size: 14px; }
+.panel-game2 .family-note { background: rgba(255, 200, 87, 0.15); border-left-color: var(--sun); }
+.panel-game2 .family-note strong { color: var(--coral); }
+
+/* ============================================================
+   5. FOOTER
+   ============================================================ */
+.footer {
+  background: var(--ink);
+  color: white;
+  padding: 56px var(--pad) 28px;
+  position: relative;
+}
+
+.footer::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--ia-blue-light), var(--coral), var(--sun), transparent);
+}
+
+.credo {
+  font-family: var(--display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  max-width: 720px;
+}
+.credo strong {
+  font-style: normal;
+  font-weight: 700;
+  background: linear-gradient(135deg, var(--ia-blue-light), var(--sun));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@media (min-width: 480px) { .credo { font-size: 40px; } }
+@media (min-width: 768px) { .credo { font-size: 56px; } }
+
+.credo-ja { margin-top: 16px; font-family: var(--serif); font-size: 13px; color: rgba(255, 255, 255, 0.55); line-height: 1.7; }
+
+.since-block { margin-top: 36px; padding-top: 24px; border-top: 1px solid rgba(255, 255, 255, 0.10); }
+.since-title { font-family: var(--display); font-style: italic; font-weight: 700; font-size: 13px; margin-bottom: 10px; }
+
+.tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.tags li { display: inline-block; padding: 4px 10px; border-radius: 100px; border: 1px solid rgba(255, 255, 255, 0.22); font-family: var(--mono); font-size: 9px; color: rgba(255, 255, 255, 0.7); letter-spacing: 0.1em; }
+
+.copyright { margin-top: 32px; padding-top: 16px; border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px; font-family: var(--mono); font-size: 9px; color: rgba(255, 255, 255, 0.4); letter-spacing: 0.15em; }
+
+/* ============================================================
+   6. DIALOG (Hamburger menu) — Native <dialog> element
+   ============================================================ */
+dialog.menu {
+  margin: 0;
+  padding: 0;
+  border: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+  max-height: none;
+  background: var(--paper);
+  color: var(--ink);
+  overflow: hidden;
+}
+
+dialog.menu::backdrop { background: rgba(11, 30, 44, 0.55); }
+
+@media (min-width: 768px) {
+  dialog.menu {
+    width: 480px;
+    margin-left: auto;
+    margin-right: 0;
+    height: 100%;
+    box-shadow: -20px 0 60px -20px rgba(11, 30, 44, 0.4);
+  }
+}
+
+.menu-inner {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.menu-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px var(--pad);
+  border-bottom: 1px solid var(--line-l);
+  flex-shrink: 0;
+}
+
+.menu-close {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--ink);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.menu-close svg { width: 18px; height: 18px; fill: currentColor; }
+
+.menu-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 32px var(--pad);
+}
+
+.menu-section { margin-bottom: 36px; }
+.menu-section:last-child { margin-bottom: 0; }
+.menu-section-head { display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
+.menu-section-num { font-family: var(--display); font-style: italic; font-weight: 900; font-size: 13px; color: var(--ia-blue); }
+.menu-section-name { font-family: var(--serif); font-weight: 700; font-size: 18px; }
+.menu-section-en { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--ink-50); text-transform: uppercase; }
+
+/* Timeline list */
+.timeline li {
+  display: grid;
+  grid-template-columns: 60px 1fr;
+  gap: 14px;
+  padding: 11px 0;
+  align-items: baseline;
+  border-bottom: 1px solid var(--line-l);
+}
+.timeline li:last-child { border-bottom: 0; }
+.timeline li.key { position: relative; }
+.timeline li.key::before { content: ""; position: absolute; left: -8px; top: 50%; width: 3px; height: 18px; background: var(--coral); border-radius: 2px; transform: translateY(-50%); }
+.timeline time { font-family: var(--mono); font-weight: 600; font-size: 13px; color: var(--ia-blue); }
+.timeline li > span:last-child { font-family: var(--serif); font-weight: 500; font-size: 14px; line-height: 1.55; }
+
+/* BBQ */
+.bbq-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+.bbq-col { background: var(--cream); border-radius: 12px; padding: 14px; }
+.bbq-col h4 { font-family: var(--mono); font-size: 9px; color: var(--coral-d); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 8px; }
+.bbq-col ul { font-family: var(--serif); font-size: 13.5px; line-height: 1.95; font-weight: 500; }
+
+.stalls { background: linear-gradient(135deg, var(--cream), rgba(255, 200, 87, 0.18)); border-radius: 12px; padding: 14px; }
+.stalls h4 { font-family: var(--mono); font-size: 9px; color: var(--coral-d); letter-spacing: 0.18em; text-transform: uppercase; margin-bottom: 10px; }
+.stalls ul li { padding: 4px 0; font-family: var(--serif); font-size: 13px; }
+.stalls ul strong { font-weight: 700; display: inline-block; min-width: 80px; }
+.stalls ul li.featured { color: var(--coral-d); margin-top: 6px; padding-top: 8px; border-top: 1px dashed rgba(255, 107, 91, 0.3); }
+
+/* Bus */
+.bus-route {
+  position: relative;
+  padding: 14px 16px 4px 28px;
+  background: var(--cream);
+  border-radius: 12px;
+}
+.bus-route::before { content: ""; position: absolute; left: 16px; top: 28px; bottom: 24px; width: 2px; background: linear-gradient(180deg, var(--coral), var(--ia-blue)); border-radius: 1px; }
+.bus-route li { position: relative; padding: 8px 0; }
+.bus-route li::before { content: ""; position: absolute; left: -19px; top: 14px; width: 12px; height: 12px; border-radius: 50%; background: var(--coral); box-shadow: 0 0 0 3px var(--cream); }
+.bus-route li:last-child::before { background: var(--ia-blue); }
+.bus-route time { display: block; font-family: var(--mono); font-weight: 600; font-size: 11px; color: var(--coral-d); }
+.bus-route li:last-child time { color: var(--ia-blue); }
+.bus-route .stop { display: block; margin-top: 2px; font-family: var(--serif); font-weight: 700; font-size: 15px; }
+
+.bus-note { margin-top: 12px; padding: 12px 14px; background: rgba(255, 107, 91, 0.08); border-left: 3px solid var(--coral); border-radius: 0 8px 8px 0; font-size: 12.5px; color: var(--ink-70); line-height: 1.7; }
+.bus-note strong { color: var(--coral-d); font-weight: 700; }
+
+/* Body lock when dialog open */
+body.menu-open { overflow: hidden; }
+</style>
+</head>
+
+<body>
+
+<!-- =========================== HEADER =========================== -->
+<header class="header">
+  <p class="brand">
+    <span class="brand-mark" aria-hidden="true"></span>
+    <span lang="en">IA × GW REC '26</span>
+  </p>
+  <button type="button" class="menu-btn" id="menuOpen" aria-label="メニューを開く">
+    <span aria-hidden="true"></span>
+    <span aria-hidden="true"></span>
+  </button>
+</header>
+
+
+<!-- =========================== MAIN =========================== -->
+<main>
+
+<!-- Hero -->
+<section class="hero" aria-labelledby="heroTitle">
+  <p class="hero-meta">
+    <span><strong lang="en">INTERNET ACADEMY</strong> presents<br><span lang="en">Golden Week Recreation 2026</span></span>
+    <span class="hero-meta-right"><span lang="en">since 1995</span><br><span lang="en">W3C Member</span></span>
+  </p>
+
+  <p class="hero-eyebrow"><time datetime="2026-05">2026 / 05</time> — <span>Fuchu, Tokyo</span></p>
+
+  <h1 class="hero-title" id="heroTitle" lang="en">
+    <span class="line1">Family,</span>
+    <span class="line2">Fire <span class="amp">&amp;</span> Friends.</span>
+  </h1>
+
+  <p class="hero-greeting">
+    ご家族の皆さま、<strong>ようこそ</strong>。<br>
+    2つのゲームで楽しんだあと、BBQへ。
+  </p>
+
+  <ul class="hero-stats">
+    <li><span class="hero-stat-num">02</span><span class="hero-stat-label" lang="en">Games</span></li>
+    <li><span class="hero-stat-num">06</span><span class="hero-stat-label" lang="en">Teams</span></li>
+    <li><span class="hero-stat-num">04.5</span><span class="hero-stat-label" lang="en">Hours</span></li>
+  </ul>
+
+  <ul class="cta-list">
+    <li><button type="button" class="cta" data-tab="game1">
+      <span class="cta-num">01</span>
+      <span class="cta-text">
+        <span class="cta-label"><time datetime="10:15">10:15</time> — 40 min</span>
+        <span class="cta-name">チームジェスチャー</span>
+      </span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
+    </button></li>
+    <li><button type="button" class="cta" data-tab="game2">
+      <span class="cta-num">02</span>
+      <span class="cta-text">
+        <span class="cta-label"><time datetime="11:00">11:00</time> — 45 min</span>
+        <span class="cta-name">チーム対抗しっぽ取り</span>
+      </span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
+    </button></li>
+  </ul>
+</section>
+
+
+<!-- Games -->
+<section class="games" aria-labelledby="gamesHeadline">
+  <p class="games-eyebrow" lang="en">Today's Games — 2 rounds</p>
+  <h2 class="games-headline" id="gamesHeadline" lang="en">Two games, <em>one team.</em></h2>
+  <p class="games-lede">体を動かして、声を出して、笑い合う。お子さまも、ご家族も、思いきり参加してください。</p>
+
+  <div class="tabs" role="tablist">
+    <button type="button" class="tab" role="tab" aria-selected="true" aria-controls="panel-game1" id="tab-game1" data-tab="game1">
+      <span class="tab-num" lang="en">GAME 01 — 10:15</span>
+      <span class="tab-name">チームジェスチャー</span>
+    </button>
+    <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="panel-game2" id="tab-game2" data-tab="game2" tabindex="-1">
+      <span class="tab-num" lang="en">GAME 02 — 11:00</span>
+      <span class="tab-name">しっぽ取り</span>
+    </button>
+  </div>
+
+  <!-- Panel 1: Gesture -->
+  <article class="panel panel-game1 is-active" id="panel-game1" role="tabpanel" aria-labelledby="tab-game1">
+    <h3 class="game-title">
+      <span lang="en">Team <em>Gesture.</em></span>
+      <span class="game-title-jp">チームジェスチャー（組体操Ver.）</span>
+    </h3>
+    <p class="game-lede">
+      チーム全員で体を使ってお題を表現します。<strong>声は出せません</strong>。当てた側にも当てられた側にも得点が入ります。
+    </p>
+
+    <section class="flow-card">
+      <p class="flow-card-eyebrow" lang="en">Game Flow</p>
+      <h4 class="flow-card-title"><em>90秒</em>の真剣勝負。</h4>
+
+      <div class="stage-bar">
+        <div class="stage-block"><span class="stage-block-num">01</span><span class="stage-block-time">くじ</span></div>
+        <div class="stage-block"><span class="stage-block-num">02</span><span class="stage-block-time">30s</span></div>
+        <div class="stage-block active"><span class="stage-block-num">03</span><span class="stage-block-time">30s</span></div>
+        <div class="stage-block"><span class="stage-block-num">04</span><span class="stage-block-time">30s</span></div>
+        <div class="stage-block"><span class="stage-block-num">05</span><span class="stage-block-time">発表</span></div>
+      </div>
+
+      <ol class="stage-list">
+        <li><span class="stage-step-num">01</span><span class="stage-step-text">くじを引いて、お題を確認</span><span class="stage-step-dur">— —</span></li>
+        <li><span class="stage-step-num">02</span><span class="stage-step-text">作戦会議</span><span class="stage-step-dur">30 sec</span></li>
+        <li><span class="stage-step-num">03</span><span class="stage-step-text">本番ポージング</span><span class="stage-step-dur">30 sec</span></li>
+        <li><span class="stage-step-num">04</span><span class="stage-step-text">他チームが回答</span><span class="stage-step-dur">30 sec</span></li>
+        <li><span class="stage-step-num">05</span><span class="stage-step-text">正解発表 → 加点</span><span class="stage-step-dur">— —</span></li>
+      </ol>
+    </section>
+
+    <ol class="rules">
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.59 3l2.7-2.7-1.42-1.41-2.7 2.7-2.7-2.7-1.41 1.41 2.7 2.7-2.7 2.7 1.41 1.41 2.7-2.7 2.7 2.7 1.42-1.41-2.71-2.7z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 01</p>
+          <h5 class="rule-title">声は出さない</h5>
+          <p class="rule-body">ジェスチャーのみで表現を。本番中は無言で。</p>
+        </div>
+      </article></li>
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M16.5 12c1.38 0 2.49-1.12 2.49-2.5S17.88 7 16.5 7 14 8.12 14 9.5s1.12 2.5 2.5 2.5zM9 11c1.66 0 2.99-1.34 2.99-3S10.66 5 9 5C7.34 5 6 6.34 6 8s1.34 3 3 3zm7.5 3c-1.83 0-5.5.92-5.5 2.75V19h11v-2.25c0-1.83-3.67-2.75-5.5-2.75zM9 13c-2.33 0-7 1.17-7 3.5V19h7v-2.25c0-.85.33-2.34 2.37-3.47C10.5 13.1 9.66 13 9 13z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 02</p>
+          <h5 class="rule-title">チーム全員で</h5>
+          <p class="rule-body">7名全員で表現。誰かに任せきりはNG。</p>
+        </div>
+      </article></li>
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M13 2c1.1 0 2 .9 2 2s-.9 2-2 2-2-.9-2-2 .9-2 2-2zm-2 8.5L8 15l-3.5-2-.5 1.5L8 17l3-4.5V22h2v-9l3-3.5 4 1.5.5-1.5L16 7l-3 3.5z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 03</p>
+          <h5 class="rule-title">配置と動きで</h5>
+          <p class="rule-body">全員同じポーズはNG。立ち位置と動きを工夫。</p>
+        </div>
+      </article></li>
+    </ol>
+
+    <aside class="family-note">
+      <strong>お子さまも、ご家族も、大歓迎。</strong>
+      ぜひ思いきり体を動かして、表現に参加してください。お子さんの自由な発想が、勝敗を分けるかもしれません。
+    </aside>
+  </article>
+
+
+  <!-- Panel 2: Tail-take -->
+  <article class="panel panel-game2" id="panel-game2" role="tabpanel" aria-labelledby="tab-game2" hidden>
+    <h3 class="game-title">
+      <span lang="en">Tail-take <span class="accent">tournament.</span></span>
+      <span class="game-title-jp">チーム対抗しっぽ取り</span>
+    </h3>
+    <p class="game-lede">
+      スズランテープを「しっぽ」にして取り合います。コートから出たら退場、しっぽを取られても退場。<strong>最後まで多く残ったチームの勝ち</strong>。
+    </p>
+
+    <section class="field-card">
+      <p class="field-card-eyebrow" lang="en">Field</p>
+      <h4 class="field-card-title">指定の<em>四角いコート</em>内で。</h4>
+      <div class="field" aria-hidden="true">
+        <span class="field-corner tl"></span>
+        <span class="field-corner tr"></span>
+        <span class="field-corner bl"></span>
+        <span class="field-corner br"></span>
+        <span class="runner r1"></span>
+        <span class="runner r2"></span>
+        <span class="runner r3"></span>
+        <span class="runner r4"></span>
+      </div>
+      <ul class="legend">
+        <li><span class="legend-dot" style="background: var(--coral);" aria-hidden="true"></span><span lang="en">RED</span></li>
+        <li><span class="legend-dot" style="background: var(--ia-blue-light);" aria-hidden="true"></span><span lang="en">BLUE</span></li>
+        <li><span class="legend-dot" style="background: var(--sun);" aria-hidden="true"></span><span lang="en">YELLOW</span></li>
+        <li><span class="legend-dot" style="background: var(--leaf);" aria-hidden="true"></span><span lang="en">GREEN</span></li>
+      </ul>
+    </section>
+
+    <ol class="rules">
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M3 5v14h18V5H3zm16 12H5V7h14v10z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 01</p>
+          <h5 class="rule-title">コート内のみ</h5>
+          <p class="rule-body">範囲を出たらアウト。指定の四角いコート内で動き回ります。</p>
+        </div>
+      </article></li>
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 02</p>
+          <h5 class="rule-title">最大4分・1試合</h5>
+          <p class="rule-body">時間内にしっぽを取りきるか、より多く残ったチームの勝ち。</p>
+        </div>
+      </article></li>
+      <li><article class="rule">
+        <span class="rule-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+        </span>
+        <div>
+          <p class="rule-num" lang="en">RULE 03</p>
+          <h5 class="rule-title">敗者復活アリ</h5>
+          <p class="rule-body">時間によっては敗者復活戦も。決勝は3チームでの三つ巴。</p>
+        </div>
+      </article></li>
+    </ol>
+
+    <!--
+      ============================================================
+      主催者の方へ：トーナメント結果の更新方法
+      ============================================================
+      下のセクションの data-team="?" の "?" を、勝者のチーム名（A〜F）に
+      書き換えるだけで、表示も色も自動で切り替わります。
+      表示文字（最後の > と < の間の文字）も同じ値に揃えてください。
+      ============================================================
+    -->
+    <section class="bracket">
+      <header class="bracket-head">
+        <div>
+          <p class="bracket-eyebrow" lang="en">Bracket</p>
+          <h4 class="bracket-title">トーナメント</h4>
+        </div>
+        <button type="button" class="reload-btn" id="reloadBtn">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+          <span>最新化</span>
+        </button>
+      </header>
+      <p class="bracket-note">主催者が結果を更新するため、随時「最新化」ボタンを押して最新の状態をご確認ください。</p>
+
+      <section class="stage">
+        <h5 class="stage-label" lang="en">Round 01 / 予選</h5>
+        <ol>
+          <li class="match">
+            <span class="match-num" lang="en">M1</span>
+            <span class="side"><span class="team" data-team="A">A</span></span>
+            <span class="vs" lang="en">VS</span>
+            <span class="side right"><span class="team" data-team="B">B</span></span>
+          </li>
+          <li class="match">
+            <span class="match-num" lang="en">M2</span>
+            <span class="side"><span class="team" data-team="C">C</span></span>
+            <span class="vs" lang="en">VS</span>
+            <span class="side right"><span class="team" data-team="D">D</span></span>
+          </li>
+          <li class="match">
+            <span class="match-num" lang="en">M3</span>
+            <span class="side"><span class="team" data-team="E">E</span></span>
+            <span class="vs" lang="en">VS</span>
+            <span class="side right"><span class="team" data-team="F">F</span></span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="stage">
+        <h5 class="stage-label" lang="en">Round 02 / 準決勝・敗者復活</h5>
+        <ol>
+          <li class="match">
+            <span class="match-num" lang="en">M4</span>
+            <span class="side"><span class="team" data-team="?">?</span>勝者</span>
+            <span class="vs" lang="en">VS</span>
+            <span class="side right">勝者<span class="team" data-team="?">?</span></span>
+          </li>
+          <li class="match">
+            <span class="match-num" lang="en">REV</span>
+            <span class="side"><span class="team" data-team="?">?</span>敗者</span>
+            <span class="vs" lang="en">VS</span>
+            <span class="side right">敗者<span class="team" data-team="?">?</span></span>
+          </li>
+        </ol>
+      </section>
+
+      <section class="stage final">
+        <h5 class="stage-label" lang="en">★ Final / 決勝・三つ巴</h5>
+        <ol>
+          <li class="match">
+            <span class="match-num" lang="en">FINAL</span>
+            <span class="side"><span class="team" data-team="?">?</span></span>
+            <span class="vs">×</span>
+            <span class="side right"><span class="team" data-team="?">?</span></span>
+          </li>
+        </ol>
+      </section>
+    </section>
+
+    <aside class="family-note">
+      <strong>お子さまも一緒にどうぞ。</strong>
+      お父さま・お母さまと同じチームで、思いきり走り回ってください。優勝チームには、BBQでうれしい特典が待っています。
+    </aside>
+  </article>
+
+</section>
+
+</main>
+
+
+<!-- =========================== FOOTER =========================== -->
+<footer class="footer">
+  <p class="credo" lang="en">Education for <strong>everyone.</strong></p>
+  <p class="credo-ja">— 世界中の人々へ教育を。<br>インターネット・ビジネス・ジャパン株式会社の経営理念。</p>
+
+  <section class="since-block">
+    <h2 class="since-title" lang="en">SINCE 1995 — 30 YEARS</h2>
+    <ul class="tags">
+      <li>日本初 Web専門スクール</li>
+      <li lang="en">W3C Member</li>
+      <li>縦書きWeb 国際標準化</li>
+    </ul>
+  </section>
+
+  <p class="copyright">
+    <small lang="en">© INTERNET ACADEMY / IBJ</small>
+    <small lang="en">HCD × UI/UX × W3C</small>
+  </p>
+</footer>
+
+
+<!-- =========================== DIALOG (Hamburger menu) =========================== -->
+<dialog class="menu" id="menu" aria-label="本日のご案内">
+  <div class="menu-inner">
+
+    <div class="menu-head">
+      <p class="brand">
+        <span class="brand-mark" aria-hidden="true"></span>
+        <span lang="en">IA × GW REC '26</span>
+      </p>
+      <button type="button" class="menu-close" id="menuClose" aria-label="メニューを閉じる">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>
+      </button>
+    </div>
+
+    <div class="menu-body">
+
+      <section class="menu-section">
+        <header class="menu-section-head">
+          <span class="menu-section-num" lang="en">01</span>
+          <h3 class="menu-section-name">本日のながれ</h3>
+          <span class="menu-section-en" lang="en">Timeline</span>
+        </header>
+        <ol class="timeline">
+          <li><time datetime="10:05">10:05</time><span>オープニング・ご家族紹介</span></li>
+          <li class="key"><time datetime="10:15">10:15</time><span>第1ゲーム：チームジェスチャー</span></li>
+          <li class="key"><time datetime="11:00">11:00</time><span>第2ゲーム：チーム対抗しっぽ取り</span></li>
+          <li><time datetime="11:45">11:45</time><span>結果発表・集合写真</span></li>
+          <li><time datetime="12:10">12:10</time><span>乾杯 → BBQパート</span></li>
+          <li><time datetime="14:30">14:30</time><span>中締め・ご挨拶</span></li>
+          <li><time datetime="14:40">14:40</time><span>バス停へ移動開始</span></li>
+        </ol>
+      </section>
+
+      <section class="menu-section">
+        <header class="menu-section-head">
+          <span class="menu-section-num" lang="en">02</span>
+          <h3 class="menu-section-name">BBQメニュー</h3>
+          <span class="menu-section-en" lang="en">Menu</span>
+        </header>
+
+        <div class="bbq-cols">
+          <section class="bbq-col">
+            <h4>各自で焼く</h4>
+            <ul>
+              <li>餃子の皮ピザ</li>
+              <li>マシュマロ</li>
+              <li>ポップコーン</li>
+              <li>果物</li>
+            </ul>
+          </section>
+          <section class="bbq-col">
+            <h4>運営が用意</h4>
+            <ul>
+              <li>海鮮焼き</li>
+              <li>焼きそば</li>
+              <li>お肉</li>
+              <li>野菜・アヒージョ</li>
+            </ul>
+          </section>
+        </div>
+
+        <section class="stalls">
+          <h4>マネージャー屋台</h4>
+          <ul>
+            <li><strong>有滝さん</strong>焼そば</li>
+            <li><strong>稲葉さん</strong>牛串・型抜き</li>
+            <li><strong>神永さん</strong>海鮮焼き</li>
+            <li><strong>西川さん</strong>焼トウモロコシ</li>
+            <li><strong>小松さん</strong>じゃがバター</li>
+            <li class="featured"><strong>★ 小薗井シェフ</strong>特製メニュー</li>
+          </ul>
+        </section>
+      </section>
+
+      <section class="menu-section">
+        <header class="menu-section-head">
+          <span class="menu-section-num" lang="en">03</span>
+          <h3 class="menu-section-name">お帰りのご案内</h3>
+          <span class="menu-section-en" lang="en">Bus</span>
+        </header>
+
+        <ol class="bus-route">
+          <li>
+            <time datetime="15:05">15:05 出発</time>
+            <span class="stop">郷土の森公園正門前</span>
+          </li>
+          <li>
+            <time datetime="15:23">15:23 到着</time>
+            <span class="stop">分倍河原駅</span>
+          </li>
+        </ol>
+
+        <p class="bus-note">
+          <strong>ちゅうバスは1時間に1本</strong>のため、お乗り遅れにご注意を。<time datetime="14:40">14:40</time>頃に移動を始めると安心です。お声がけいただければ、ノベルティをお渡しします。
+        </p>
+      </section>
+
+    </div>
+  </div>
+</dialog>
+
+
+<script>
+(function() {
+  'use strict';
+
+  // === Hamburger menu (native <dialog>) ===
+  const menu = document.getElementById('menu');
+  const menuOpen = document.getElementById('menuOpen');
+  const menuClose = document.getElementById('menuClose');
+
+  menuOpen.addEventListener('click', () => {
+    if (typeof menu.showModal === 'function') {
+      menu.showModal();
+    } else {
+      menu.setAttribute('open', '');
+    }
+    document.body.classList.add('menu-open');
+  });
+
+  menuClose.addEventListener('click', () => {
+    menu.close();
+  });
+
+  menu.addEventListener('close', () => {
+    document.body.classList.remove('menu-open');
+  });
+
+  // Click backdrop to close (click on dialog itself, not children)
+  menu.addEventListener('click', (e) => {
+    if (e.target === menu) menu.close();
+  });
+
+  // === Tabs ===
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('.panel');
+
+  function switchTab(target, scrollToTabs) {
+    tabs.forEach(t => {
+      const isActive = t.dataset.tab === target;
+      t.setAttribute('aria-selected', isActive ? 'true' : 'false');
+      t.tabIndex = isActive ? 0 : -1;
+    });
+    panels.forEach(p => {
+      const isVisible = p.id === 'panel-' + target;
+      p.classList.toggle('is-active', isVisible);
+      if (isVisible) p.removeAttribute('hidden');
+      else p.setAttribute('hidden', '');
+    });
+    if (scrollToTabs) {
+      const tabsEl = document.querySelector('.tabs');
+      if (tabsEl) {
+        const top = tabsEl.getBoundingClientRect().top + window.scrollY - 70;
+        window.scrollTo({ top, behavior: 'smooth' });
+      }
+    }
+  }
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.tab, false));
+  });
+
+  document.querySelectorAll('.cta[data-tab]').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab, true));
+  });
+
+  // === Reload ===
+  const reloadBtn = document.getElementById('reloadBtn');
+  if (reloadBtn) {
+    reloadBtn.addEventListener('click', () => {
+      reloadBtn.disabled = true;
+      reloadBtn.style.opacity = '0.6';
+      setTimeout(() => location.reload(), 200);
+    });
+  }
+})();
+</script>
+
+</body>
+</html>
