@@ -293,6 +293,23 @@ ul, ol { list-style: none; }
 .cta-name { display: block; margin-top: 2px; font-family: var(--serif); font-weight: 700; font-size: 15px; }
 .cta-arrow { color: rgba(255, 255, 255, 0.5); font-family: var(--mono); }
 
+.cta-bracket {
+  background: linear-gradient(135deg, var(--coral), var(--coral-d));
+  box-shadow: 0 8px 24px -8px rgba(255, 107, 91, 0.45);
+}
+.cta-bracket .cta-label { color: rgba(255, 255, 255, 0.85); }
+.cta-bracket .cta-arrow { color: rgba(255, 255, 255, 0.7); }
+.cta-icon {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.cta-icon svg { width: 26px; height: 26px; fill: currentColor; }
+
 /* ============================================================
    4. GAMES
    ============================================================ */
@@ -765,12 +782,28 @@ dialog.menu::backdrop { background: rgba(11, 30, 44, 0.55); }
   padding: 32px var(--pad);
 }
 
-.menu-section { margin-bottom: 36px; }
+.menu-section { margin-bottom: 14px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; background: white; }
 .menu-section:last-child { margin-bottom: 0; }
-.menu-section-head { display: flex; align-items: baseline; gap: 10px; padding-bottom: 12px; border-bottom: 1px solid var(--line); margin-bottom: 16px; }
-.menu-section-num { font-family: var(--display); font-style: italic; font-weight: 900; font-size: 13px; color: var(--ia-blue); }
-.menu-section-name { font-family: var(--serif); font-weight: 700; font-size: 18px; }
-.menu-section-en { margin-left: auto; font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--ink-50); text-transform: uppercase; }
+.menu-section[open] { border-color: var(--ia-blue-light); }
+.menu-section-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 18px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.menu-section-head::-webkit-details-marker { display: none; }
+.menu-section-head::marker { content: ""; }
+.menu-section-num { font-family: var(--display); font-style: italic; font-weight: 900; font-size: 14px; color: var(--ia-blue); flex-shrink: 0; }
+.menu-section-name { font-family: var(--serif); font-weight: 700; font-size: 17px; flex: 1; min-width: 0; }
+.menu-section-en { font-family: var(--mono); font-size: 9px; letter-spacing: 0.2em; color: var(--ink-50); text-transform: uppercase; flex-shrink: 0; }
+.menu-section-chev { width: 16px; height: 16px; color: var(--ink-50); flex-shrink: 0; transition: transform 0.25s ease; }
+.menu-section-chev svg { width: 100%; height: 100%; fill: currentColor; }
+.menu-section[open] .menu-section-chev { transform: rotate(180deg); }
+.menu-section-body { padding: 4px 18px 20px; border-top: 1px solid var(--line-l); }
 
 /* Timeline list */
 .timeline li {
@@ -879,6 +912,16 @@ body.menu-open { overflow: hidden; }
       <span class="cta-text">
         <span class="cta-label"><time datetime="11:00">11:00</time> — 45 min</span>
         <span class="cta-name">チーム対抗しっぽ取り</span>
+      </span>
+      <span class="cta-arrow" aria-hidden="true">→</span>
+    </button></li>
+    <li><button type="button" class="cta cta-bracket" id="bracketShortcut">
+      <span class="cta-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="M5 3h4v4H5V3m10 0h4v4h-4V3M5 17h4v4H5v-4m10 0h4v4h-4v-4M11 9h2v6h-2V9m-2 1H7v2H4v2h3v2h2v-2h6v2h2v-2h3v-2h-3v-2h-2v2h-6v-2z"/></svg>
+      </span>
+      <span class="cta-text">
+        <span class="cta-label" lang="en">★ Bracket</span>
+        <span class="cta-name">トーナメント表を見る</span>
       </span>
       <span class="cta-arrow" aria-hidden="true">→</span>
     </button></li>
@@ -1047,7 +1090,7 @@ body.menu-open { overflow: hidden; }
       表示文字（最後の > と < の間の文字）も同じ値に揃えてください。
       ============================================================
     -->
-    <section class="bracket">
+    <section class="bracket" id="bracket">
       <header class="bracket-head">
         <div>
           <p class="bracket-eyebrow" lang="en">Bracket</p>
@@ -1163,86 +1206,99 @@ body.menu-open { overflow: hidden; }
 
     <div class="menu-body">
 
-      <section class="menu-section">
-        <header class="menu-section-head">
+      <details class="menu-section">
+        <summary class="menu-section-head">
           <span class="menu-section-num" lang="en">01</span>
           <h3 class="menu-section-name">本日のながれ</h3>
           <span class="menu-section-en" lang="en">Timeline</span>
-        </header>
-        <ol class="timeline">
-          <li><time datetime="10:05">10:05</time><span>オープニング・ご家族紹介</span></li>
-          <li class="key"><time datetime="10:15">10:15</time><span>第1ゲーム：チームジェスチャー</span></li>
-          <li class="key"><time datetime="11:00">11:00</time><span>第2ゲーム：チーム対抗しっぽ取り</span></li>
-          <li><time datetime="11:45">11:45</time><span>結果発表・集合写真</span></li>
-          <li><time datetime="12:10">12:10</time><span>乾杯 → BBQパート</span></li>
-          <li><time datetime="14:30">14:30</time><span>中締め・ご挨拶</span></li>
-          <li><time datetime="14:40">14:40</time><span>バス停へ移動開始</span></li>
-        </ol>
-      </section>
+          <span class="menu-section-chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </span>
+        </summary>
+        <div class="menu-section-body">
+          <ol class="timeline">
+            <li><time datetime="10:05">10:05</time><span>オープニング・ご家族紹介</span></li>
+            <li class="key"><time datetime="10:15">10:15</time><span>第1ゲーム：チームジェスチャー</span></li>
+            <li class="key"><time datetime="11:00">11:00</time><span>第2ゲーム：チーム対抗しっぽ取り</span></li>
+            <li><time datetime="11:45">11:45</time><span>結果発表・集合写真</span></li>
+            <li><time datetime="12:10">12:10</time><span>乾杯 → BBQパート</span></li>
+            <li><time datetime="14:30">14:30</time><span>中締め・ご挨拶</span></li>
+            <li><time datetime="14:40">14:40</time><span>バス停へ移動開始</span></li>
+          </ol>
+        </div>
+      </details>
 
-      <section class="menu-section">
-        <header class="menu-section-head">
+      <details class="menu-section">
+        <summary class="menu-section-head">
           <span class="menu-section-num" lang="en">02</span>
           <h3 class="menu-section-name">BBQメニュー</h3>
           <span class="menu-section-en" lang="en">Menu</span>
-        </header>
+          <span class="menu-section-chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </span>
+        </summary>
+        <div class="menu-section-body">
+          <div class="bbq-cols">
+            <section class="bbq-col">
+              <h4>各自で焼く</h4>
+              <ul>
+                <li>餃子の皮ピザ</li>
+                <li>マシュマロ</li>
+                <li>ポップコーン</li>
+                <li>果物</li>
+              </ul>
+            </section>
+            <section class="bbq-col">
+              <h4>運営が用意</h4>
+              <ul>
+                <li>海鮮焼き</li>
+                <li>焼きそば</li>
+                <li>お肉</li>
+                <li>野菜・アヒージョ</li>
+              </ul>
+            </section>
+          </div>
 
-        <div class="bbq-cols">
-          <section class="bbq-col">
-            <h4>各自で焼く</h4>
+          <section class="stalls">
+            <h4>マネージャー屋台</h4>
             <ul>
-              <li>餃子の皮ピザ</li>
-              <li>マシュマロ</li>
-              <li>ポップコーン</li>
-              <li>果物</li>
-            </ul>
-          </section>
-          <section class="bbq-col">
-            <h4>運営が用意</h4>
-            <ul>
-              <li>海鮮焼き</li>
-              <li>焼きそば</li>
-              <li>お肉</li>
-              <li>野菜・アヒージョ</li>
+              <li><strong>有滝さん</strong>焼そば</li>
+              <li><strong>稲葉さん</strong>牛串・型抜き</li>
+              <li><strong>神永さん</strong>海鮮焼き</li>
+              <li><strong>西川さん</strong>焼トウモロコシ</li>
+              <li><strong>小松さん</strong>じゃがバター</li>
+              <li class="featured"><strong>★ 小薗井シェフ</strong>特製メニュー</li>
             </ul>
           </section>
         </div>
+      </details>
 
-        <section class="stalls">
-          <h4>マネージャー屋台</h4>
-          <ul>
-            <li><strong>有滝さん</strong>焼そば</li>
-            <li><strong>稲葉さん</strong>牛串・型抜き</li>
-            <li><strong>神永さん</strong>海鮮焼き</li>
-            <li><strong>西川さん</strong>焼トウモロコシ</li>
-            <li><strong>小松さん</strong>じゃがバター</li>
-            <li class="featured"><strong>★ 小薗井シェフ</strong>特製メニュー</li>
-          </ul>
-        </section>
-      </section>
-
-      <section class="menu-section">
-        <header class="menu-section-head">
+      <details class="menu-section">
+        <summary class="menu-section-head">
           <span class="menu-section-num" lang="en">03</span>
           <h3 class="menu-section-name">お帰りのご案内</h3>
           <span class="menu-section-en" lang="en">Bus</span>
-        </header>
+          <span class="menu-section-chev" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M7.41 8.59L12 13.17l4.59-4.58L18 10l-6 6-6-6 1.41-1.41z"/></svg>
+          </span>
+        </summary>
+        <div class="menu-section-body">
+          <ol class="bus-route">
+            <li>
+              <time datetime="15:05">15:05 出発</time>
+              <span class="stop">郷土の森公園正門前</span>
+            </li>
+            <li>
+              <time datetime="15:23">15:23 到着</time>
+              <span class="stop">分倍河原駅</span>
+            </li>
+          </ol>
 
-        <ol class="bus-route">
-          <li>
-            <time datetime="15:05">15:05 出発</time>
-            <span class="stop">郷土の森公園正門前</span>
-          </li>
-          <li>
-            <time datetime="15:23">15:23 到着</time>
-            <span class="stop">分倍河原駅</span>
-          </li>
-        </ol>
-
-        <p class="bus-note">
-          <strong>ちゅうバスは1時間に1本</strong>のため、お乗り遅れにご注意を。<time datetime="14:40">14:40</time>頃に移動を始めると安心です。お声がけいただければ、ノベルティをお渡しします。
-        </p>
-      </section>
+          <p class="bus-note">
+            <strong>ちゅうバスは1時間に1本</strong>のため、お乗り遅れにご注意を。<time datetime="14:40">14:40</time>頃に移動を始めると安心です。お声がけいただければ、ノベルティをお渡しします。
+          </p>
+        </div>
+      </details>
 
     </div>
   </div>
@@ -1320,6 +1376,22 @@ body.menu-open { overflow: hidden; }
       reloadBtn.disabled = true;
       reloadBtn.style.opacity = '0.6';
       setTimeout(() => location.reload(), 200);
+    });
+  }
+
+  // === Bracket shortcut: switch to game2 tab and scroll to bracket ===
+  const bracketShortcut = document.getElementById('bracketShortcut');
+  if (bracketShortcut) {
+    bracketShortcut.addEventListener('click', () => {
+      switchTab('game2', false);
+      // wait for panel to render before scrolling
+      requestAnimationFrame(() => {
+        const target = document.getElementById('bracket');
+        if (target) {
+          const top = target.getBoundingClientRect().top + window.scrollY - 70;
+          window.scrollTo({ top, behavior: 'smooth' });
+        }
+      });
     });
   }
 })();
