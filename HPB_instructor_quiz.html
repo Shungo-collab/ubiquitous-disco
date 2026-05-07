@@ -1,0 +1,2485 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HPB1〜HPB4 インストラクター向けクイズ - 小川花</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;500;700;900&family=Space+Mono:wght@400;700&display=swap');
+  
+  :root {
+    --bg: #0f0f14;
+    --bg-elevated: #1a1a24;
+    --bg-card: #20202d;
+    --border: #2a2a3a;
+    --border-strong: #3a3a4a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --accent3: #59c0ff;
+    --text: #f0f0f0;
+    --text-sub: #aaa;
+    --text-muted: #666;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+    --warn: #f39c12;
+    --info: #3498db;
+  }
+  
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Zen Kaku Gothic New', sans-serif;
+    min-height: 100vh;
+    padding: 20px;
+    line-height: 1.6;
+  }
+  
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+  
+  /* === ヘッダー === */
+  .main-header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 32px 20px;
+    background: linear-gradient(135deg, rgba(155,89,255,0.1), rgba(255,89,160,0.1));
+    border-radius: 16px;
+    border: 1px solid var(--border);
+  }
+  
+  .main-badge {
+    display: inline-block;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    padding: 6px 18px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+  }
+  
+  .main-title {
+    font-size: 28px;
+    font-weight: 900;
+    margin-bottom: 8px;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .main-subtitle {
+    font-size: 14px;
+    color: var(--text-sub);
+  }
+  
+  .main-description {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-top: 12px;
+    line-height: 1.8;
+  }
+  
+  /* === タブ === */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .tab-btn {
+    flex: 1;
+    min-width: 150px;
+    padding: 12px 16px;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .tab-btn:hover {
+    border-color: var(--accent1);
+    color: var(--text);
+  }
+  
+  .tab-btn.active {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    border-color: transparent;
+    color: #fff;
+  }
+  
+  /* === 共通パネル === */
+  .panel {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    margin-bottom: 20px;
+  }
+  
+  .panel-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 16px;
+    color: var(--text);
+  }
+  
+  /* === ホーム画面 === */
+  .home-section { display: none; }
+  .home-section.active { display: block; }
+  
+  .quiz-set-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+  
+  .quiz-set-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+    transition: all 0.2s;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .quiz-set-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--accent1), var(--accent2));
+  }
+  
+  .quiz-set-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--accent1);
+    box-shadow: 0 4px 24px rgba(155,89,255,0.2);
+  }
+  
+  .quiz-set-name {
+    font-size: 14px;
+    color: var(--accent1);
+    font-weight: 700;
+    margin-bottom: 4px;
+    letter-spacing: 1px;
+  }
+  
+  .quiz-set-title {
+    font-size: 18px;
+    font-weight: 700;
+    margin-bottom: 8px;
+  }
+  
+  .quiz-set-desc {
+    font-size: 13px;
+    color: var(--text-sub);
+    margin-bottom: 16px;
+    line-height: 1.7;
+  }
+  
+  .quiz-set-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+  
+  .quiz-set-progress {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+  }
+  
+  .progress-pill {
+    padding: 4px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  
+  .progress-pill.in-progress {
+    background: rgba(243,156,18,0.15);
+    color: var(--warn);
+  }
+  
+  .progress-pill.completed {
+    background: rgba(46,204,113,0.15);
+    color: var(--correct);
+  }
+  
+  .progress-pill.high-score {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #fff;
+  }
+  
+  /* === 全体進捗 === */
+  .overall-stats {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  
+  .overall-stats-title {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 12px;
+  }
+  
+  .overall-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+    gap: 16px;
+  }
+  
+  .stat-item {
+    text-align: center;
+  }
+  
+  .stat-value {
+    font-size: 28px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .stat-label {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 4px;
+    letter-spacing: 1px;
+  }
+  
+  /* === クイズ画面 === */
+  .quiz-section { display: none; }
+  .quiz-section.active { display: block; }
+  
+  .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .quiz-back-btn {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 14px;
+    color: var(--text-sub);
+    font-family: inherit;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  
+  .quiz-back-btn:hover {
+    border-color: var(--accent1);
+    color: var(--text);
+  }
+  
+  .quiz-title {
+    font-size: 16px;
+    font-weight: 700;
+  }
+  
+  .progress-wrap {
+    margin-bottom: 24px;
+  }
+  
+  .progress-info {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: var(--text-sub);
+    margin-bottom: 8px;
+  }
+  
+  .progress-bar {
+    height: 6px;
+    background: var(--border);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  
+  /* === 問題カード === */
+  .question-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 32px;
+  }
+  
+  .q-meta {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .q-number {
+    font-size: 12px;
+    color: var(--accent1);
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  
+  .q-type-badge {
+    padding: 3px 10px;
+    border-radius: 8px;
+    font-size: 11px;
+    font-weight: 700;
+    background: var(--bg-card);
+    color: var(--text-sub);
+  }
+  
+  .q-type-badge.code {
+    background: rgba(89,192,255,0.15);
+    color: var(--accent3);
+  }
+  
+  .q-text {
+    font-size: 17px;
+    font-weight: 500;
+    line-height: 1.7;
+    margin-bottom: 24px;
+    white-space: pre-wrap;
+  }
+  
+  .q-text code, .options code, .explanation code {
+    font-family: 'Space Mono', monospace;
+    background: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.92em;
+    color: var(--accent3);
+  }
+  
+  .options {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    padding: 14px 18px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+  
+  .opt:hover:not(.disabled) {
+    border-color: var(--accent1);
+    background: rgba(155,89,255,0.05);
+  }
+  
+  .opt-label {
+    width: 28px;
+    height: 28px;
+    background: var(--border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    flex-shrink: 0;
+    font-family: 'Space Mono', monospace;
+  }
+  
+  .opt.correct {
+    border-color: var(--correct);
+    background: rgba(46,204,113,0.08);
+  }
+  
+  .opt.correct .opt-label {
+    background: var(--correct);
+    color: #000;
+  }
+  
+  .opt.wrong {
+    border-color: var(--wrong);
+    background: rgba(231,76,60,0.08);
+  }
+  
+  .opt.wrong .opt-label {
+    background: var(--wrong);
+    color: #fff;
+  }
+  
+  .opt.disabled {
+    cursor: default;
+  }
+  
+  .opt-text {
+    flex: 1;
+    white-space: pre-wrap;
+  }
+  
+  .explanation {
+    margin-top: 20px;
+    padding: 16px 18px;
+    background: rgba(155,89,255,0.06);
+    border-left: 3px solid var(--accent1);
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    line-height: 1.8;
+    display: none;
+  }
+  
+  .explanation.show {
+    display: block;
+  }
+  
+  .exp-title {
+    font-weight: 700;
+    color: var(--accent1);
+    margin-bottom: 8px;
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+  
+  /* === ボタン群 === */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 24px;
+    flex-wrap: wrap;
+  }
+  
+  .btn {
+    padding: 12px 24px;
+    border: none;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: inherit;
+    transition: all 0.2s;
+  }
+  
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    color: #fff;
+    flex: 1;
+  }
+  
+  .btn-primary:hover { opacity: 0.9; }
+  
+  .btn-secondary {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+  }
+  
+  .btn-secondary:hover {
+    border-color: var(--accent1);
+  }
+  
+  .btn-ghost {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+  }
+  
+  .btn-ghost:hover {
+    border-color: var(--accent1);
+    color: var(--text);
+  }
+  
+  /* === 結果画面 === */
+  .result-section { display: none; }
+  .result-section.active { display: block; }
+  
+  .result-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 36px 28px;
+    text-align: center;
+  }
+  
+  .result-score {
+    font-size: 80px;
+    font-weight: 900;
+    background: linear-gradient(135deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  
+  .result-label {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 16px;
+  }
+  
+  .result-percentage {
+    font-size: 18px;
+    margin-bottom: 24px;
+    font-weight: 700;
+  }
+  
+  .result-msg {
+    font-size: 15px;
+    line-height: 1.8;
+    margin-bottom: 28px;
+    padding: 16px;
+    background: var(--bg-card);
+    border-radius: 10px;
+    text-align: left;
+  }
+  
+  .result-rank-badge {
+    display: inline-block;
+    padding: 8px 24px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-bottom: 16px;
+  }
+  
+  .rank-S { background: linear-gradient(135deg, #ffd700, #ff9900); color: #000; }
+  .rank-A { background: linear-gradient(135deg, var(--accent1), var(--accent2)); color: #fff; }
+  .rank-B { background: linear-gradient(135deg, var(--accent3), var(--accent1)); color: #fff; }
+  .rank-C { background: rgba(243,156,18,0.2); color: var(--warn); }
+  .rank-D { background: rgba(231,76,60,0.2); color: var(--wrong); }
+  
+  /* === 履歴セクション === */
+  .history-list {
+    list-style: none;
+  }
+  
+  .history-item {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .history-info {
+    flex: 1;
+  }
+  
+  .history-quiz-name {
+    font-size: 13px;
+    color: var(--accent1);
+    font-weight: 700;
+  }
+  
+  .history-date {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+  
+  .history-score {
+    font-size: 18px;
+    font-weight: 900;
+    color: var(--text);
+  }
+  
+  .history-empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+  
+  /* === 確認ダイアログ === */
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    padding: 20px;
+  }
+  
+  .modal-overlay.show { display: flex; }
+  
+  .modal {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    max-width: 420px;
+    width: 100%;
+  }
+  
+  .modal-title {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+  
+  .modal-msg {
+    font-size: 14px;
+    color: var(--text-sub);
+    margin-bottom: 20px;
+    line-height: 1.7;
+  }
+  
+  .modal-btns {
+    display: flex;
+    gap: 10px;
+  }
+  
+  /* === 中断バナー === */
+  .resume-banner {
+    background: rgba(243,156,18,0.1);
+    border: 1px solid var(--warn);
+    border-radius: 10px;
+    padding: 14px 18px;
+    margin-bottom: 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .resume-text {
+    color: var(--warn);
+    font-size: 13px;
+    font-weight: 700;
+  }
+  
+  .resume-actions {
+    display: flex;
+    gap: 8px;
+  }
+  
+  .resume-btn {
+    padding: 6px 14px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+  }
+  
+  .resume-btn-primary {
+    background: var(--warn);
+    color: #000;
+  }
+  
+  .resume-btn-secondary {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--text-sub);
+  }
+  
+  /* === レスポンシブ === */
+  @media (max-width: 600px) {
+    body { padding: 12px; }
+    .main-title { font-size: 22px; }
+    .panel, .question-card, .result-card { padding: 20px; }
+    .q-text { font-size: 15px; }
+    .opt { font-size: 13px; padding: 12px 14px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ===== ヘッダー ===== -->
+  <header class="main-header">
+    <div class="main-badge">INSTRUCTOR QUIZ · HPB</div>
+    <h1 class="main-title">ホームページB シリーズ<br>インストラクター向け本格クイズ</h1>
+    <p class="main-subtitle">担当：小川花さん</p>
+    <p class="main-description">
+      HPB1〜HPB4 各20問・計80問の本格クイズです。<br>
+      満点取れたら自信を持ってライブ授業に出れるレベルで作成しました。<br>
+      途中保存・履歴確認機能付きで、継続的に練習できます。
+    </p>
+  </header>
+
+  <!-- ===== タブ ===== -->
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="home">📚 ホーム</button>
+    <button class="tab-btn" data-tab="history">📊 履歴</button>
+    <button class="tab-btn" data-tab="settings">⚙️ 設定</button>
+  </nav>
+
+  <!-- ===== ホーム画面 ===== -->
+  <section id="tab-home" class="home-section active">
+
+    <!-- 全体統計 -->
+    <div class="overall-stats">
+      <div class="overall-stats-title">📈 全体の挑戦状況</div>
+      <div class="overall-stats-grid" id="overallStats">
+        <!-- JS で生成 -->
+      </div>
+    </div>
+
+    <!-- クイズセット一覧 -->
+    <div class="quiz-set-grid" id="quizSetGrid">
+      <!-- JS で生成 -->
+    </div>
+  </section>
+
+  <!-- ===== クイズ画面 ===== -->
+  <section id="tab-quiz" class="quiz-section">
+    <div class="quiz-header">
+      <button class="quiz-back-btn" onclick="confirmExitQuiz()">← ホームに戻る</button>
+      <span class="quiz-title" id="quizTitle"></span>
+    </div>
+
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span id="progText">問題 1 / 20</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="progress-bar">
+        <div class="progress-fill" id="progFill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <div class="question-card" id="questionCard">
+      <div class="q-meta">
+        <div class="q-number" id="qNum">QUESTION 01</div>
+        <div class="q-type-badge" id="qTypeBadge">4択問題</div>
+      </div>
+      <div class="q-text" id="qText"></div>
+      <div class="options" id="options"></div>
+      <div class="explanation" id="explanation">
+        <div class="exp-title">💡 解説</div>
+        <div id="expText"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" id="prevBtn" onclick="prevQuestion()" style="display:none;">← 前の問題</button>
+        <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()" style="display:none;">次の問題へ →</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 結果画面 ===== -->
+  <section id="tab-result" class="result-section">
+    <div class="result-card">
+      <div class="result-rank-badge" id="rankBadge"></div>
+      <div class="result-score" id="resultScore"></div>
+      <div class="result-label" id="resultLabel"></div>
+      <div class="result-percentage" id="resultPercentage"></div>
+      <div class="result-msg" id="resultMsg"></div>
+      <div class="btn-row">
+        <button class="btn btn-secondary" onclick="reviewWrong()" id="reviewBtn">間違えた問題を確認</button>
+        <button class="btn btn-primary" onclick="restartQuiz()">もう一度挑戦</button>
+      </div>
+      <div class="btn-row" style="margin-top:8px;">
+        <button class="btn btn-ghost" onclick="goHome()">ホームに戻る</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 履歴画面 ===== -->
+  <section id="tab-history" class="home-section">
+    <div class="panel">
+      <h2 class="panel-title">📊 挑戦履歴（最新20件）</h2>
+      <ul class="history-list" id="historyList">
+        <!-- JS で生成 -->
+      </ul>
+    </div>
+  </section>
+
+  <!-- ===== 設定画面 ===== -->
+  <section id="tab-settings" class="home-section">
+    <div class="panel">
+      <h2 class="panel-title">⚙️ 設定</h2>
+      <p style="color:var(--text-sub); font-size:13px; margin-bottom:20px;">
+        進捗データはブラウザのローカルストレージに保存されます。<br>
+        履歴・途中経過を全てリセットしたい場合は以下から削除できます。
+      </p>
+      <button class="btn btn-secondary" onclick="confirmResetAll()" style="background:rgba(231,76,60,0.1); border-color:var(--wrong); color:var(--wrong);">
+        🗑️ 全データを削除
+      </button>
+    </div>
+    <div class="panel">
+      <h2 class="panel-title">📖 このクイズについて</h2>
+      <p style="color:var(--text-sub); font-size:13px; line-height:1.8;">
+        <strong style="color:var(--text);">対象：</strong>HPB1〜HPB4 を担当するインストラクター<br>
+        <strong style="color:var(--text);">問題数：</strong>各セット20問 × 4セット = 80問<br>
+        <strong style="color:var(--text);">問題形式：</strong>4択問題（コードリーディング・ケーススタディを含む）<br>
+        <strong style="color:var(--text);">推奨スコア：</strong>各セット 18/20 以上で授業対応OK<br>
+        <strong style="color:var(--text);">満点目安：</strong>満点取れたら自信を持ってライブ授業に登壇できるレベル
+      </p>
+    </div>
+  </section>
+</div>
+
+<!-- ===== モーダル ===== -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-msg" id="modalMsg"></div>
+    <div class="modal-btns">
+      <button class="btn btn-ghost" onclick="closeModal()">キャンセル</button>
+      <button class="btn btn-primary" id="modalConfirmBtn">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// インストラクター向け本格クイズ - HPB1〜HPB4
+// 各20問×4 = 80問
+// 形式：4択 + 正誤判定 + コードリーディング + ケーススタディ
+// 満点取れたら自信を持ってライブ授業に出れるレベル
+
+const QUIZ_DATA = {
+  hpb1: {
+    title: "HPB1 - CSS基礎",
+    description: "CSSとは・基本文法・セレクター・継承・フォント関連プロパティ",
+    questions: [
+      {
+        id: "b1-01",
+        type: "single",
+        question: "CSSの正式名称として正しいものはどれですか？",
+        options: [
+          "Computer Style Sheets",
+          "Cascading Style Sheets",
+          "Coded Style System",
+          "Creative Styling Service"
+        ],
+        answer: 1,
+        explanation: "CSSは『Cascading Style Sheets』の略で、カスケーディング＝『階段状の滝』を意味します。後に書いたスタイルが優先されるという特徴を表しています。受講生が腑に落ちないと感じやすいポイントなので、語源から伝えるのがおすすめです。"
+      },
+      {
+        id: "b1-02",
+        type: "single",
+        question: "次のCSSコードのうち、構文として正しいものはどれですか？",
+        options: [
+          "h1 { color: red, font-size: 20px; }",
+          "h1 { color: red; font-size: 20px; }",
+          "h1: { color = red; font-size = 20px; }",
+          "h1 [ color: red; font-size: 20px; ]"
+        ],
+        answer: 1,
+        explanation: "CSSの基本文法は『セレクター { プロパティ: 値; }』。プロパティと値の間は半角コロン（:）、宣言の終わりは半角セミコロン（;）。複数の宣言の間はカンマ（,）ではなくセミコロンで区切ります。受講生が最初に必ずつまずくポイントです。"
+      },
+      {
+        id: "b1-03",
+        type: "single",
+        question: "次のうち、idセレクターの書き方として正しいものはどれですか？",
+        options: [
+          ".header { color: blue; }",
+          "*header { color: blue; }",
+          "#header { color: blue; }",
+          "@header { color: blue; }"
+        ],
+        answer: 2,
+        explanation: "idセレクターは『#（ハッシュ）』、classセレクターは『.（ドット）』で始めます。HTMLで id=\"header\" と書いた要素を指すには #header と書きます。受講生は#と.の使い分けをよく混同します。"
+      },
+      {
+        id: "b1-04",
+        type: "single",
+        question: "idセレクターについて、正しい説明はどれですか？",
+        options: [
+          "1ページに複数の同じidを使用しても問題ない",
+          "1ページに1つだけ使うべきで、同じid名は1ページに1つのみ",
+          "classよりも優先度が低い",
+          "値はかならず英数字3文字以内でなければならない"
+        ],
+        answer: 1,
+        explanation: "idは『そのページで一意の識別子』なので、原則1ページに1つだけ。同じid名を複数使うのはHTMLの仕様違反です。複数の要素に同じスタイルを当てたい場合はclassを使うべきです。"
+      },
+      {
+        id: "b1-05",
+        type: "single",
+        question: "次のCSSの実行結果として正しいのはどれですか？\n\nbody { color: navy; }\nh1 { color: red; }",
+        options: [
+          "h1のテキストもbody内のpテキストもネイビーになる",
+          "h1のテキストはネイビー、body内のpテキストは赤になる",
+          "h1のテキストは赤、body内のpテキストはネイビーになる",
+          "両方とも黒（デフォルト）のままになる"
+        ],
+        answer: 2,
+        explanation: "bodyに当てたcolorは『継承』により子要素（pなど）にも伝わります。一方、h1にはより具体的なスタイル指定があるため、上書きされて赤になります。継承と優先順位の理解度を確認する問題です。"
+      },
+      {
+        id: "b1-06",
+        type: "single",
+        question: "次のうち、CSSが反映されないときに最初にチェックすべきポイントとして【適切でない】ものはどれですか？",
+        options: [
+          "linkタグのhrefのファイル名が正しいか",
+          "CSSファイルを保存したか",
+          "ブラウザを再読み込みしたか",
+          "VSCodeを管理者権限で開いているか"
+        ],
+        answer: 3,
+        explanation: "管理者権限はCSSの反映には関係しません。受講生が「CSSが反映されない」と言ってきたら、①ファイル名のスペル ②保存忘れ ③ブラウザ更新 の順で確認するのが現場の鉄則。Ctrl+Shift+Rのスーパーリロードで解決することもあります。"
+      },
+      {
+        id: "b1-07",
+        type: "code",
+        question: "次のCSSで、最終的に <p class=\"note important\"> の文字色は何色になりますか？\n\np { color: black; }\n.note { color: blue; }\n.important { color: red; }",
+        options: [
+          "黒（black）",
+          "青（blue）",
+          "赤（red）",
+          "ブラウザによって変わる"
+        ],
+        answer: 2,
+        explanation: "後に書かれた『.important』が優先されるため赤になります。CSSは『カスケーディング』の名の通り、同じ詳細度なら後に書いた方が勝ちます。要素セレクター（p）よりclassセレクター（.note, .important）の方が優先度が高く、その中でも .important が後に書かれているため赤が適用されます。"
+      },
+      {
+        id: "b1-08",
+        type: "single",
+        question: "linkタグでCSSを読み込む正しい書き方はどれですか？",
+        options: [
+          "<link rel=\"stylesheet\" href=\"style.css\">",
+          "<link type=\"css\" src=\"style.css\">",
+          "<style src=\"style.css\"></style>",
+          "<import css=\"style.css\">"
+        ],
+        answer: 0,
+        explanation: "linkタグでCSSを読み込むには rel=\"stylesheet\" でスタイルシートであることを示し、href でファイルパスを指定します。受講生が間違えがちなのが src=（imgタグと混同）や、=を: にしてしまうケース。書き方をパターンで覚えてもらうのがおすすめです。"
+      },
+      {
+        id: "b1-09",
+        type: "single",
+        question: "linkタグはHTMLのどこに書くべきですか？",
+        options: [
+          "<head>と</head>の間",
+          "<body>と</body>の間",
+          "<html>タグの外側",
+          "どこに書いても挙動は同じ"
+        ],
+        answer: 0,
+        explanation: "linkタグはheadタグ内に書きます。headはブラウザ向けの設定情報を入れる場所で、CSS読み込みもここに含めます。bodyタグ内に書くとHTML仕様違反となり、ブラウザによっては読み込まれません。"
+      },
+      {
+        id: "b1-10",
+        type: "code",
+        question: "次のCSSで、p要素全部に同じスタイルを当てる『複数セレクター』の正しい書き方はどれですか？",
+        options: [
+          "h1 + p + h2 { color: red; }",
+          "h1, p, h2 { color: red; }",
+          "h1 p h2 { color: red; }",
+          "h1 & p & h2 { color: red; }"
+        ],
+        answer: 1,
+        explanation: "複数のセレクターに同じスタイルを当てるには、カンマ（,）で区切ります。スペースで区切ると『子孫セレクター』になり意味が変わるので注意。HPB1演習のh1, pでも使う基本の書き方です。"
+      },
+      {
+        id: "b1-11",
+        type: "single",
+        question: "16進数のカラーコード『#ffcdd2』は次のうちどの色を表していますか？",
+        options: [
+          "黒",
+          "薄いピンク",
+          "深い緑",
+          "鮮やかな青"
+        ],
+        answer: 1,
+        explanation: "#ffcdd2 は薄いピンク色です。HPB1演習ex1で実際に使うカラーコード。RGBで言うと R=ff(255), G=cd(205), B=d2(210) で、赤系の薄い色になります。インストラクターは演習で使う色を即答できるようにしておくと安心です。"
+      },
+      {
+        id: "b1-12",
+        type: "code",
+        question: "次のCSSの実行結果は？\n\np { font-size: 20 }",
+        options: [
+          "20pxの大きさで表示される",
+          "20%の大きさで表示される",
+          "反映されない（無視される）",
+          "デフォルトの大きさで表示される"
+        ],
+        answer: 2,
+        explanation: "font-sizeに単位がないため、ブラウザはこの宣言を無視します。pxやemなどの単位が必須。受講生が「数字だけ書いた」というミスは非常に多いので、必ず単位の必要性を強調してください。なお、答え③と④は実質同じですが、CSSでは『反映されない』が正確な表現です。"
+      },
+      {
+        id: "b1-13",
+        type: "single",
+        question: "次のうち、文字を中央寄せにするCSSプロパティはどれですか？",
+        options: [
+          "align: center",
+          "text-align: center",
+          "center: true",
+          "horizontal-align: center"
+        ],
+        answer: 1,
+        explanation: "テキストの水平方向の配置はtext-alignプロパティです。center / left / right / justify の4つの値がよく使われます。受講生は『align』『center』だけで通じると思いがちなので、フルで書くことを伝えます。"
+      },
+      {
+        id: "b1-14",
+        type: "single",
+        question: "次のうち、:hover疑似クラスの使用例として正しいものはどれですか？",
+        options: [
+          "a hover { color: red; }",
+          "a:hover { color: red; }",
+          "a.hover { color: red; }",
+          "a@hover { color: red; }"
+        ],
+        answer: 1,
+        explanation: "疑似クラスはコロン（:）でセレクターに連結します。スペースを入れたり、ドット（.）にすると別の意味になってしまいます。a:hoverは『aにマウスを乗せたとき』の意味で、リンクのインタラクションを実装する基本です。"
+      },
+      {
+        id: "b1-15",
+        type: "single",
+        question: "CSSのコメントの書き方として正しいものはどれですか？",
+        options: [
+          "// これはコメント",
+          "<!-- これはコメント -->",
+          "/* これはコメント */",
+          "# これはコメント"
+        ],
+        answer: 2,
+        explanation: "CSSのコメントは /* 〜 */ です。HTMLコメント（<!-- -->）やJavaScriptコメント（//）と混同しやすいので注意。複数行にわたるコメントも /* */ で囲みます。"
+      },
+      {
+        id: "b1-16",
+        type: "single",
+        question: "受講生から『同じスタイルを複数の要素に当てたいんですが、idかclassどちらを使うべきですか？』と質問されました。最も適切な回答はどれですか？",
+        options: [
+          "idを使ってください。idの方が新しい仕様だからです",
+          "classを使ってください。idは1ページに1つだけのルールがあるため、複数要素にはclassが適切です",
+          "どちらでも構いません。挙動は完全に同じです",
+          "両方を併用してください。idとclassを同時に書くのが一般的です"
+        ],
+        answer: 1,
+        explanation: "複数要素に同じスタイルを当てる用途には『class』を使います。id=同じものは1つだけ、class=何度でも使えるシール、というイメージで伝えると受講生に伝わりやすいです。"
+      },
+      {
+        id: "b1-17",
+        type: "code",
+        question: "次のCSSで、aタグにマウスを乗せたとき下線が出る正しい書き方はどれですか？",
+        options: [
+          "a { text-decoration: none; }\na:hover { text-decoration: underline; }",
+          "a { underline: false; }\na:hover { underline: true; }",
+          "a { line-through: none; }\na:hover { line-through: underline; }",
+          "a { decoration: off; }\na:over { decoration: line; }"
+        ],
+        answer: 0,
+        explanation: "リンクの下線を制御するのはtext-decorationプロパティ。値はnone（なし）/ underline（下線）/ line-through（取り消し線）など。a要素のデフォルトはunderlineなので、noneで一旦消してhover時に出すのが定番パターンです。"
+      },
+      {
+        id: "b1-18",
+        type: "single",
+        question: "受講生が『CSSをHTMLに直接書く方法もあると聞きました。なぜ別ファイルにする必要があるんですか？』と質問しました。最も重要な答えはどれですか？",
+        options: [
+          "CSSは別ファイルでないと動かない仕様だから",
+          "別ファイルにすると複数ページの修正が1か所で済み、メンテナンス性が大きく向上するから",
+          "別ファイルにしないとSEOで不利になるから",
+          "ブラウザが別ファイルしか読み込めないから"
+        ],
+        answer: 1,
+        explanation: "別ファイルにする最大の理由はメンテナンス性。10ページのサイトの背景色を変えるとき、HTMLに直接書いていたら10回修正必要ですが、CSS別ファイルなら1回でOKです。他にもマルチデバイス対応・アクセシビリティ・SEOなどメリットがあります。"
+      },
+      {
+        id: "b1-19",
+        type: "code",
+        question: "次のCSSで、HTMLが <p class=\"note\" id=\"first\"> の場合、最終的なfont-sizeは？\n\np { font-size: 14px; }\n.note { font-size: 16px; }\n#first { font-size: 18px; }",
+        options: [
+          "14px",
+          "16px",
+          "18px",
+          "上書きできず、エラーになる"
+        ],
+        answer: 2,
+        explanation: "CSSの優先度は idセレクター > classセレクター > 要素セレクター。HTMLの順番ではなく、セレクターの『詳細度』で決まります。よって18pxが適用されます。受講生からの『なぜか色が変わらない』質問の多くはこの優先度問題です。"
+      },
+      {
+        id: "b1-20",
+        type: "single",
+        question: "演習でex1.htmlを開いたら、style.cssと連携させるためにlinkタグを書きました。保存して開いてもCSSが反映されません。最も確認すべきは？",
+        options: [
+          "PCを再起動する",
+          "ブラウザの種類を変える",
+          "ファイル名のスペル（style.css と styles.css 等）と保存忘れ（VSCodeの●マーク）",
+          "VSCodeを再インストールする"
+        ],
+        answer: 2,
+        explanation: "現場で最も多いのが①ファイル名のスペルミスと②保存忘れの2つ。VSCodeでファイル名横の「●」が出ていれば未保存、Ctrl+Sで保存→ブラウザ再読み込みで95%の問題は解決します。受講生から質問されたら最初にこれを確認させましょう。"
+      }
+    ]
+  },
+  hpb2: {
+    title: "HPB2 - CSSレイアウト",
+    description: "ボックスモデル・ブロック/インライン要素・margin/padding/border・float/flexbox",
+    questions: [
+      {
+        id: "b2-01",
+        type: "single",
+        question: "ボックスモデルの『4つの領域』として正しい組み合わせはどれですか？",
+        options: [
+          "title / content / footer / header",
+          "content / padding / border / margin",
+          "outer / inner / middle / center",
+          "main / sub / side / bottom"
+        ],
+        answer: 1,
+        explanation: "HTMLのすべての要素は『四角い箱』として扱われ、その箱はcontent（中身）/padding（内側の余白）/border（枠線）/margin（外側の余白）の4層構造になっています。HPB2の最重要メッセージです。"
+      },
+      {
+        id: "b2-02",
+        type: "single",
+        question: "marginとpaddingの違いとして正しいのはどれですか？",
+        options: [
+          "marginは内側の余白、paddingは外側の余白",
+          "marginは外側の余白、paddingは内側の余白",
+          "両方とも同じ意味で、書き方の違いだけ",
+          "marginはブロック要素専用、paddingはインライン要素専用"
+        ],
+        answer: 1,
+        explanation: "margin=外側の余白（要素同士の距離）、padding=内側の余白（content と border の間）。HPB2の最頻出ポイントで、受講生が必ず混同します。「marginは隣との距離、paddingは服の余裕」のたとえで覚えてもらいます。"
+      },
+      {
+        id: "b2-03",
+        type: "code",
+        question: "次のCSSで、要素の見た目の幅は何pxになりますか？（box-sizingの指定なし）\n\ndiv {\n  width: 200px;\n  padding: 20px;\n  border: 5px solid black;\n}",
+        options: [
+          "200px",
+          "225px",
+          "250px",
+          "260px"
+        ],
+        answer: 2,
+        explanation: "box-sizing未指定の場合、widthはcontent部分のみ。実際の幅は width(200) + padding左右(20×2) + border左右(5×2) = 250px。これがレイアウト崩れの原因No.1。box-sizing: border-box を覚えると幸せになります。"
+      },
+      {
+        id: "b2-04",
+        type: "code",
+        question: "次のCSSで、要素の見た目の幅は何pxになりますか？\n\n* { box-sizing: border-box; }\ndiv {\n  width: 200px;\n  padding: 20px;\n  border: 5px solid black;\n}",
+        options: [
+          "200px",
+          "225px",
+          "250px",
+          "260px"
+        ],
+        answer: 0,
+        explanation: "box-sizing: border-box を指定すると、widthにpadding と border が含まれた数値になります。よって見た目も200px。現場のCSSでは「* { box-sizing: border-box; }」を最初に書くのが定番のおまじないです。"
+      },
+      {
+        id: "b2-05",
+        type: "single",
+        question: "次のうち、ブロックレベル要素として【正しくない】ものはどれですか？",
+        options: [
+          "<p>",
+          "<div>",
+          "<a>",
+          "<h1>"
+        ],
+        answer: 2,
+        explanation: "<a>はインライン要素です。p / div / h1 / section などはブロックレベル要素で、横幅いっぱいに広がり前後に改行が入ります。aのほかにはimg・spanがインライン要素の代表。"
+      },
+      {
+        id: "b2-06",
+        type: "single",
+        question: "ブロックレベル要素の特徴として正しいものはどれですか？",
+        options: [
+          "横幅は文字の分だけになり、改行が入らない",
+          "横幅いっぱいに広がり、前後に改行が入る",
+          "他の要素の中にしか配置できない",
+          "幅と高さの指定が一切できない"
+        ],
+        answer: 1,
+        explanation: "ブロックレベル要素は『一段まるごと使う箱』のイメージ。横幅いっぱいに広がり、前後に改行が入ります。一方、インライン要素は『文章の中に入り込むパーツ』で、文字分の幅しか持ちません。"
+      },
+      {
+        id: "b2-07",
+        type: "code",
+        question: "受講生が次のように書いたが a要素の幅が変わりません。原因として最も可能性が高いのは？\n\na {\n  width: 200px;\n  background-color: red;\n}",
+        options: [
+          "コードが間違っている",
+          "aはインライン要素で、widthが効かないため",
+          "ブラウザのバグ",
+          "background-colorが優先されたため"
+        ],
+        answer: 1,
+        explanation: "インライン要素にはwidthが効きません（HPB2の超重要ポイント）。CSSが効かないときは『要素の種類を疑う』が鉄則。aやspanなどのインライン要素にwidthを効かせたい場合は、display: block; もしくは display: inline-block; を追加します。"
+      },
+      {
+        id: "b2-08",
+        type: "single",
+        question: "『マージンの相殺』の説明として正しいのはどれですか？",
+        options: [
+          "上下のmarginは相殺されず、必ず合算される",
+          "上下のmarginが隣接すると、合算されず大きい方だけが適用される",
+          "左右のmarginが隣接すると、無視される",
+          "marginが負の値になると、エラーになる"
+        ],
+        answer: 1,
+        explanation: "上下のmarginが隣接すると、合算ではなく『大きい方だけ』が適用される現象を『マージンの相殺（マージンの折りたたみ）』と言います。例：上要素の margin-bottom: 30px と下要素の margin-top: 20px → 50pxではなく30pxになる。受講生が混乱しやすいポイント。"
+      },
+      {
+        id: "b2-09",
+        type: "code",
+        question: "次のCSSで、上下左右の余白指定として【正しくない】ものはどれですか？",
+        options: [
+          "margin: 20px;",
+          "margin: 10px 20px;",
+          "margin: 10px 20px 30px 40px;",
+          "margin: top:10px right:20px;"
+        ],
+        answer: 3,
+        explanation: "marginの省略記法は値を半角スペースで区切ります。1値（全方向）/2値（上下,左右）/4値（上,右,下,左）の3パターン。④のような『プロパティ名: 値』形式は無効です。3値（上,左右,下）もあります。"
+      },
+      {
+        id: "b2-10",
+        type: "single",
+        question: "borderプロパティの正しい指定として、【全て同じ意味になる】組み合わせはどれですか？",
+        options: [
+          "border: 1px solid black; / border-width: 1px; border-style: solid; border-color: black;",
+          "border: 1px black solid; / border-color: 1px;",
+          "border-line: 1px black; / border-frame: solid;",
+          "edge: 1px black solid; / margin: black solid;"
+        ],
+        answer: 0,
+        explanation: "border は width / style / color の3つを一括指定するショートハンド。個別指定は border-width / border-style / border-color。受講生は『太さ・線種・色』の3点セットで覚えてもらうとミスが減ります。"
+      },
+      {
+        id: "b2-11",
+        type: "single",
+        question: "floatの本質的な動作として正しい説明はどれですか？",
+        options: [
+          "要素を整列させる命令",
+          "要素を浮かせて、左か右の端に寄せる仕組み",
+          "要素を中央に配置する命令",
+          "要素を非表示にする仕組み"
+        ],
+        answer: 1,
+        explanation: "floatは『整列の命令』ではなく『浮かせて端に寄せる』仕組み。連続して指定すると結果的に横並びに『見える』だけです。この本質を理解していると、回り込みやhigh消失などの現象も理解しやすくなります。HPB2でしっかり伝えるべき重要ポイント。"
+      },
+      {
+        id: "b2-12",
+        type: "code",
+        question: "次のCSSで、box4を消したらナビゲーションが上に潜り込みました。原因と対処として正しいのは？\n\n#box1, #box2, #box3 { float: left; }",
+        options: [
+          "ブラウザのバグ。再読み込みで解決する",
+          "floatの回り込みが原因。次の要素に clear: both; を指定する",
+          "z-indexの問題。z-index: 999; を追加する",
+          "displayの問題。display: none; を削除する"
+        ],
+        answer: 1,
+        explanation: "floatされた要素は『浮く』ため、後の要素がその下に潜り込もうとします。これを解除するのが clear: both;。floatを使ったら必ずセットで覚えるべきプロパティです。HPB2の演習でもこの現象を体感させるのが定番。"
+      },
+      {
+        id: "b2-13",
+        type: "single",
+        question: "flexboxを使うとき、display: flex; を書く場所として正しいのはどれですか？",
+        options: [
+          "並べたい子要素1つ1つに書く",
+          "並べたい要素を囲む親要素（コンテナ）に書く",
+          "bodyタグにのみ書く",
+          "並べたい要素の前後にspanを追加して書く"
+        ],
+        answer: 1,
+        explanation: "flexboxは『親に1回書くだけで子が横並び』の仕組み。並べたい要素を囲む親要素（フレックスコンテナ）に display: flex; を指定します。floatのように1つ1つに書く必要はありません。"
+      },
+      {
+        id: "b2-14",
+        type: "single",
+        question: "受講生から『floatとflexbox、どちらを使えばいいんですか？』と質問されました。最も適切な回答はどれですか？",
+        options: [
+          "必ずfloatを使う。flexboxは現場では非推奨",
+          "現在主流はflexboxで新規実装はflexbox優先。floatは古いコードを読むために学んでおくと良い",
+          "両方を必ず併用する",
+          "状況によらずflexboxは禁止"
+        ],
+        answer: 1,
+        explanation: "現代のWeb制作の主流はflexbox（と grid）。新規実装は基本flexboxでOKです。ただし、古いサイトの改修案件では今でもfloatのコードに出会うため、『読めるコード』を増やす意味で学習する価値があります。中村版の方針もこれです。"
+      },
+      {
+        id: "b2-15",
+        type: "code",
+        question: "次のCSSで、flexコンテナ内の子要素を中央揃え（水平方向）にする正しい指定はどれですか？\n\n.container {\n  display: flex;\n  /* ここに何を書く？ */\n}",
+        options: [
+          "text-align: center;",
+          "justify-content: center;",
+          "align: center;",
+          "flex-center: true;"
+        ],
+        answer: 1,
+        explanation: "flexbox内の子要素を水平方向に中央揃えするには justify-content: center;。垂直方向は align-items: center;。text-alignはテキスト用なので、ここでは効きません。HPB2の発展内容として知っておきたいポイント。"
+      },
+      {
+        id: "b2-16",
+        type: "single",
+        question: "次のうち、display プロパティの値として【存在しない】ものはどれですか？",
+        options: [
+          "display: block;",
+          "display: inline;",
+          "display: flex;",
+          "display: float;"
+        ],
+        answer: 3,
+        explanation: "displayの値には block / inline / inline-block / flex / grid / none などがありますが、float はdisplay値ではなく独立したプロパティです。受講生が混同しやすいポイントです。"
+      },
+      {
+        id: "b2-17",
+        type: "code",
+        question: "次のCSSで、p要素の見た目はどうなりますか？\n\np {\n  width: 200px;\n  margin-left: auto;\n  margin-right: auto;\n}",
+        options: [
+          "左寄せになる",
+          "右寄せになる",
+          "中央寄せになる",
+          "画面の上に固定される"
+        ],
+        answer: 2,
+        explanation: "幅（width）を指定したブロック要素に margin-left: auto; margin-right: auto; を指定すると、左右の余白が自動で同じ大きさになり、結果として中央寄せになります。中央寄せの定番パターン。widthがないと効かないのもポイント。"
+      },
+      {
+        id: "b2-18",
+        type: "single",
+        question: "受講生のp要素にpadding: 50px;を指定しました。a要素にも同じpadding: 50px;を指定したところ、見た目で気付くべき違いは？",
+        options: [
+          "両方とも全方向に余白が広がる",
+          "p要素は箱が大きくなり下の要素を押し出す。a要素は左右は広がるが上下方向の挙動が異なる",
+          "両方とも変化なし",
+          "p要素のみ反映され、a要素は無視される"
+        ],
+        answer: 1,
+        explanation: "ブロック要素（p）のpadding は箱そのものを大きくし、下の要素を押し出します。インライン要素（a）はpaddingが効きますが、行の高さを基準に動くため、上下方向に広がっても他の行の要素と重なる場合があります。HPB2でかなり重要な観察ポイント。"
+      },
+      {
+        id: "b2-19",
+        type: "code",
+        question: "次のCSSは何を実現しようとしていますか？\n\n#box {\n  border: 1px solid red;\n}",
+        options: [
+          "boxの背景色を赤くする",
+          "boxの枠線を赤色の実線で1px太さで引く",
+          "boxの文字色を赤くする",
+          "boxを非表示にする"
+        ],
+        answer: 1,
+        explanation: "borderの一括指定。1px=線の太さ、solid=線種（実線）、red=線の色。現場でよく使われる小ワザとして「要素の位置を確認したいときに一時的にborderをつける」という使い方があります。"
+      },
+      {
+        id: "b2-20",
+        type: "single",
+        question: "演習でfloat:left;を3つの要素に指定して横並びにしましたが、その下の要素が回り込んでしまいました。最も適切な対処は？",
+        options: [
+          "floatを全て削除する",
+          "回り込みを解除したい次の要素に clear: both; を指定する",
+          "z-index を1000に設定する",
+          "親要素の display を hidden にする"
+        ],
+        answer: 1,
+        explanation: "floatを使った後の典型的な対処は clear: both;。これは『左右どちらの回り込みも解除する』指定で、floatセットで覚える鉄板の組み合わせです。HPB2のfloat演習でも必ず登場します。"
+      }
+    ]
+  },
+  hpb3: {
+    title: "HPB3 - コーディングフロー＋VSCode＋Emmet",
+    description: "コーディングの全体フロー・アセット準備・フォルダ構成・VSCodeの基本操作・Emmet",
+    questions: [
+      {
+        id: "b3-01",
+        type: "single",
+        question: "コーディングに入る前にやるべき3ステップとして、正しい順番はどれですか？",
+        options: [
+          "アセット準備 → フォルダ構成 → マークアップ",
+          "マークアップ → アセット準備 → フォルダ構成",
+          "フォルダ構成 → マークアップ → アセット準備",
+          "デザインカンプ → コーディング → 検証"
+        ],
+        answer: 0,
+        explanation: "コーディングに入る前は『①アセット（素材）準備 → ②フォルダ構成決定 → ③マークアップ』の3ステップ。料理に例えると『下ごしらえ→引き出し整理→レシピ作成』。HPB3の超基礎です。"
+      },
+      {
+        id: "b3-02",
+        type: "single",
+        question: "アセット準備時のファイル名の付け方として、最も推奨されるのはどれですか？",
+        options: [
+          "日本語OK・大文字小文字混在もOK・スペースもOK",
+          "半角英数字のみ・小文字推奨・スペースは使わない（ハイフンやアンダースコア）",
+          "必ず全角カタカナで統一する",
+          "番号だけで命名する（001.jpg, 002.jpg…）"
+        ],
+        answer: 1,
+        explanation: "Web制作でのファイル名は『半角英数字・小文字推奨・スペースなし』が鉄則。日本語ファイル名は文字化け、大文字小文字違いはサーバー上でリンク切れの原因になります。命名規則の徹底は必須。"
+      },
+      {
+        id: "b3-03",
+        type: "code",
+        question: "次のフォルダ構成で、index.htmlから見たstyle.cssの相対パスとして正しいのはどれですか？\n\nweb/\n├ index.html\n├ images/\n└ common/\n   ├ css/\n   │ └ style.css\n   └ js/",
+        options: [
+          "style.css",
+          "common/style.css",
+          "common/css/style.css",
+          "/web/common/css/style.css"
+        ],
+        answer: 2,
+        explanation: "相対パスはindex.htmlを起点に『commonフォルダの中のcssフォルダの中のstyle.css』を辿る形で書きます。/から始まる絶対パスはローカルでは動かないので注意。HPB4の演習でも超重要ポイント。"
+      },
+      {
+        id: "b3-04",
+        type: "single",
+        question: "common フォルダの『common』はどんな意味で、どんな用途で使うフォルダですか？",
+        options: [
+          "『コマンド』の略で、サーバーのコマンドを置く",
+          "『共通の』という英語で、複数ページで共通使用するデータ（CSS, JS, 共通画像など）を入れる",
+          "『コメント』の略で、開発メモを置く",
+          "『コミュニティ』の略で、ユーザー投稿を置く"
+        ],
+        answer: 1,
+        explanation: "common（コモン）= 英語で『共通の』。複数ページで共通して使うCSS・JS・画像などを入れる定番のフォルダ名です。フォルダ構成は絶対のルールはないですが、commonは業界標準的な命名なので覚えておくべき。"
+      },
+      {
+        id: "b3-05",
+        type: "single",
+        question: "受講生から『どうしてマークアップを先にやるんですか？いきなりコードを書いた方が早くないですか？』と質問されました。最も適切な回答はどれですか？",
+        options: [
+          "マークアップは時間の無駄なので、いきなり書いてOK",
+          "デザインは『見た目』、HTMLは『構造』なので、構造を先に整理しておかないと後の修正が大変になる",
+          "マークアップはAI が自動でやるので、人間がやる必要はない",
+          "マークアップは法律で義務付けられているから"
+        ],
+        answer: 1,
+        explanation: "デザインは『見た目』、HTMLは『構造』。いきなりコードを書くと、ヘッダー部分の修正が中身に影響したり、同じパーツが何度も書かれたりして手戻りが大量発生します。下書き＝マークアップで構造を整理することの価値を伝えるのが大切。"
+      },
+      {
+        id: "b3-06",
+        type: "single",
+        question: "VSCodeの特徴として【正しくない】ものはどれですか？",
+        options: [
+          "Microsoft社が提供する無料のテキストエディタ",
+          "Emmetという入力補助機能が標準搭載されている",
+          "拡張機能で機能を追加できる",
+          "有料版を購入しないと商用利用できない"
+        ],
+        answer: 3,
+        explanation: "VSCodeは完全無料で、商用利用も可能です。現場のWeb制作で広く使われている定番エディタ。Emmet・拡張機能・Git連携など多機能で、TeraPadやCotEditorからのステップアップにふさわしいツールです。"
+      },
+      {
+        id: "b3-07",
+        type: "single",
+        question: "Emmetの基本的な動作として正しいものはどれですか？",
+        options: [
+          "短い文字を入力 + Tabキーで、長いコードを自動生成する",
+          "ボタンクリックでコードを生成する",
+          "AI が文脈を理解してコードを生成する",
+          "音声入力でコードを生成する"
+        ],
+        answer: 0,
+        explanation: "Emmetは『短い文字 + Tabキー』でコードを展開する補助機能。例：『!』+ Tab → HTML基本構造一発生成、『ul>li*3』+ Tab → ulに3つのli。覚えれば覚えるほど効率が上がる魔法の杖です。"
+      },
+      {
+        id: "b3-08",
+        type: "single",
+        question: "Emmetで『!』 + Tabキーを押したとき、生成されるHTMLとして正しいのはどれですか？",
+        options: [
+          "<html><body></body></html> のみ",
+          "<!DOCTYPE html>から</html>までのHTML基本構造一式",
+          "1行のコメントのみ",
+          "何も生成されない"
+        ],
+        answer: 1,
+        explanation: "『!』+ Tab で、DOCTYPE宣言・html・head・meta charset・viewport・title・bodyを含むHTML基本構造が一発で生成されます。HPB3で受講生に最初に体験してもらう感動体験ポイント。"
+      },
+      {
+        id: "b3-09",
+        type: "single",
+        question: "Emmetが反応しないとき、最も適切な対処は？",
+        options: [
+          "VSCodeをアンインストールして再インストール",
+          "拡張子が.htmlか確認・VSCodeを再起動・アップデートを試す",
+          "PCを工場出荷状態に戻す",
+          "ブラウザを変える"
+        ],
+        answer: 1,
+        explanation: "Emmetはオプション機能で、PC環境により不安定になることも。最初に確認すべきは『拡張子.html』『再起動』『アップデート』。それでも動かない場合は、コードをチャットで共有してコピペで対応するのが現場の対処法。"
+      },
+      {
+        id: "b3-10",
+        type: "code",
+        question: "Emmetの『html:5』+ Tab と『!』+ Tab の動作はどう違いますか？",
+        options: [
+          "完全に異なるコードが生成される",
+          "ほぼ同じHTML5基本構造が生成される（！の方が短い略記法）",
+          "html:5は使えない記法",
+          "！は使えない記法"
+        ],
+        answer: 1,
+        explanation: "両方ともHTML5の基本構造を生成しますが、『!』の方がより短い略記法として広く使われています。受講生には覚えやすい『!』を最初に教えるのがおすすめ。"
+      },
+      {
+        id: "b3-11",
+        type: "code",
+        question: "VSCode上でファイル名の右に『●』が表示されています。これは何を意味しますか？",
+        options: [
+          "ファイルが破損している",
+          "ファイルが未保存である（編集されていて保存されていない）",
+          "ファイルがロックされている",
+          "ファイルが共有モードになっている"
+        ],
+        answer: 1,
+        explanation: "VSCodeで『●』マークは『未保存』のサイン。Ctrl+S（Mac: Command+S）で保存すると『×』ボタンに戻ります。受講生からの『反映されない』質問の半分以上がこの保存忘れが原因。最初にこれを確認させましょう。"
+      },
+      {
+        id: "b3-12",
+        type: "single",
+        question: "受講生がVSCodeで新規ファイル『index.html』を作りたいのですが、なぜか common フォルダの中にできてしまいます。原因として最も可能性が高いのは？",
+        options: [
+          "VSCodeのバグ",
+          "common フォルダを選択した状態で右クリック→New Fileしたため、common 内に作られた",
+          "ファイル名のスペルミス",
+          "ブラウザの問題"
+        ],
+        answer: 1,
+        explanation: "VSCodeでは『選択中のフォルダ』内に新規ファイルが作成されます。受講生がよく陥るミス。webフォルダ直下に作りたいなら、webフォルダ自体を右クリック→New File、もしくは何も選択していない状態にしてから作成します。"
+      },
+      {
+        id: "b3-13",
+        type: "single",
+        question: "<html lang=\"en\"> を日本語サイトにする場合、適切な値は？",
+        options: [
+          "<html lang=\"jp\">",
+          "<html lang=\"japan\">",
+          "<html lang=\"ja\">",
+          "<html lang=\"jpn\">"
+        ],
+        answer: 2,
+        explanation: "HTMLのlang属性は ISO 639-1 の言語コードに従い、日本語は『ja』（Japaneseの2文字略）です。jp / japan / jpn は全て間違い。SEOやスクリーンリーダーへの影響もあるので正しく指定すべき。"
+      },
+      {
+        id: "b3-14",
+        type: "single",
+        question: "<title>タグはWebサイトでどんな役割を持ちますか？",
+        options: [
+          "ページの背景色を決める",
+          "ブラウザのタブに表示されるタイトル・SEO・ブックマーク時の名称になる重要な要素",
+          "JavaScriptで使う変数名",
+          "CSSのID名と一致しなければならない"
+        ],
+        answer: 1,
+        explanation: "<title>はブラウザタブ・検索結果・ブックマーク等に表示される、SEO的にも超重要な要素。忘れずに「Document」のままにしないよう、必ずサイト名に書き換えるよう指導しましょう。"
+      },
+      {
+        id: "b3-15",
+        type: "single",
+        question: "次のうち、コーディング作業で『画像書き出し』に該当するのはどの工程ですか？",
+        options: [
+          "デザインカンプ",
+          "アセット準備",
+          "マークアップ",
+          "公開（デプロイ）"
+        ],
+        answer: 1,
+        explanation: "Photoshopなどでデザインカンプから画像を書き出してフォルダに保存する作業が『アセット準備』。HPA4でも軽く触れた工程です。HPシリーズ全体での位置づけを理解しておきましょう。"
+      },
+      {
+        id: "b3-16",
+        type: "single",
+        question: "VSCode で 1つのフォルダを開く方法として【最もシンプル】なのは？",
+        options: [
+          "コマンドプロンプトでcdコマンドを使う",
+          "フォルダをVSCodeのウィンドウにドラッグ&ドロップする",
+          "VSCodeを管理者権限で開いてから検索する",
+          "拡張機能をインストールする"
+        ],
+        answer: 1,
+        explanation: "ドラッグ&ドロップが最もシンプル。File→Open Folderからも開けます。受講生にはドラッグ&ドロップを最初に教えるのがおすすめ。"
+      },
+      {
+        id: "b3-17",
+        type: "single",
+        question: "受講生から『TeraPadでHTMLを書いていたんですが、何でこれからはVSCodeに変えるんですか？』と質問されました。最も適切な回答は？",
+        options: [
+          "TeraPadは古くて壊れているから",
+          "TeraPadは基本を学ぶトレーニング用、VSCodeは実際のWeb制作のためのツール。Emmetや拡張機能で効率が上がる",
+          "VSCodeの方が高速だから",
+          "ライセンスの問題でTeraPadは禁止になっている"
+        ],
+        answer: 1,
+        explanation: "TeraPadなどのプレーンエディタは『1文字ずつ自分で書く』基本トレーニング用。VSCodeは現場で使う実践ツールで、Emmet・コード補完・拡張機能などで効率が上がります。中村版授業の流れを継承する説明。"
+      },
+      {
+        id: "b3-18",
+        type: "single",
+        question: "<head>タグ内に書く要素として、【誤って書かれる】ことがあるのはどれですか？",
+        options: [
+          "<meta charset=\"UTF-8\">",
+          "<title>サイト名</title>",
+          "<link rel=\"stylesheet\" href=\"style.css\">",
+          "<p>ようこそ</p>"
+        ],
+        answer: 3,
+        explanation: "p要素はbodyタグ内に書くべきで、headタグ内に書くと表示されません。受講生がたまに『なぜか文字が表示されない』と言ってくるとき、p要素がheadタグ内にあるパターンも。"
+      },
+      {
+        id: "b3-19",
+        type: "single",
+        question: "演習でindex.htmlに <p>こんにちは</p> を書いて保存しましたが、ブラウザで何も表示されません。最初に確認すべきは？",
+        options: [
+          "PCの再起動",
+          "ファイルが保存されているか（VSCodeの●マーク）と、ブラウザを再読み込みしたか",
+          "VSCodeの拡張機能",
+          "インターネット接続"
+        ],
+        answer: 1,
+        explanation: "保存忘れと再読み込み忘れがほぼ100%の原因。VSCodeでファイル名横の●が消えているか確認、ブラウザでF5キーで再読み込み。これで95%は解決します。"
+      },
+      {
+        id: "b3-20",
+        type: "single",
+        question: "受講生から『拡張子は付けなくても動きますか？』と質問されました。正しい回答は？",
+        options: [
+          "拡張子はあってもなくても挙動は同じ",
+          "拡張子（.html / .css）は必須。ブラウザはこれでファイル種別を判断するため、ない場合は正しく読み込まれない",
+          "拡張子は美観のためだけ",
+          "拡張子はサーバーで自動付与される"
+        ],
+        answer: 1,
+        explanation: "拡張子はブラウザがファイル種別を判断するための重要な情報。ローカルファイルでは拡張子がないとブラウザが何のファイルか分からず開けないことも。.html / .css / .js などは必ず付けるよう指導すべき。"
+      }
+    ]
+  },
+  hpb4: {
+    title: "HPB4 - CSS設定フロー＋ヘッダーレイアウト",
+    description: "CSSの設定フロー・linkタグ・リセットCSS・floatでのヘッダーレイアウト・開発者ツール",
+    questions: [
+      {
+        id: "b4-01",
+        type: "single",
+        question: "CSSの設定フローの3ステップとして、正しい順番はどれですか？",
+        options: [
+          "リセットCSS → CSSファイル作成 → linkタグ",
+          "CSSファイル作成 → linkタグでリンク → リセットCSS",
+          "linkタグ → CSSファイル作成 → リセットCSS",
+          "デバッグ → コーディング → 公開"
+        ],
+        answer: 1,
+        explanation: "正しい順番は『①CSSファイル作成 → ②linkタグでリンク → ③リセットCSS』。料理に例えると『包丁を準備→食材と並べる→まな板を拭く』の下ごしらえ3点セットです。HPB4の最重要メッセージ。"
+      },
+      {
+        id: "b4-02",
+        type: "single",
+        question: "style.css を作成するのに最も一般的な配置場所は？",
+        options: [
+          "web/index.html と同じ階層",
+          "web/common/css/ の中",
+          "web/images/ の中",
+          "C:/Users/Admin/Desktop"
+        ],
+        answer: 1,
+        explanation: "一般的なフォルダ構成では web/common/css/style.css に配置します。これは複数ページで共通使用することを想定した命名と階層。HPシリーズ全体で統一されているフォルダ構成です。"
+      },
+      {
+        id: "b4-03",
+        type: "code",
+        question: "次のlinkタグのうち、正しい書き方はどれですか？\n\n（前提：style.cssはcommon/css/に置かれている）",
+        options: [
+          "<link rel=\"stylesheet\" href=\"common/css/style.css\">",
+          "<link src=\"common/css/style.css\" type=\"css\">",
+          "<style href=\"common/css/style.css\">",
+          "<import css=\"common/css/style.css\">"
+        ],
+        answer: 0,
+        explanation: "linkタグの正しい書き方は rel=\"stylesheet\" + href=\"パス\"。href（hyper reference）であって、src ではない点に注意。受講生がimgタグのsrcと混同するパターンが多いです。"
+      },
+      {
+        id: "b4-04",
+        type: "single",
+        question: "受講生が『style.css』を『Style.css』と大文字で作成しました。リンクが切れる理由は？",
+        options: [
+          "VSCodeの設定の問題",
+          "ファイル名は大文字小文字を区別するシステムがあり、href=\"style.css\"と書くと別ファイルとして扱われる",
+          "Windowsでは大文字を使えない",
+          "CSSは小文字でしか書けない"
+        ],
+        answer: 1,
+        explanation: "ファイル名の大文字小文字は、Linux系サーバーでは区別され、Windowsでは区別されません。ローカルでは動いても本番でリンク切れになることも。半角小文字を統一するのがベストプラクティス。"
+      },
+      {
+        id: "b4-05",
+        type: "single",
+        question: "次のうち、相対パスの書き方として正しいものはどれですか？\n\n（前提：index.htmlがweb/直下、style.cssがweb/common/css/直下）",
+        options: [
+          "/common/css/style.css",
+          "common/css/style.css",
+          "../common/css/style.css",
+          "C:/web/common/css/style.css"
+        ],
+        answer: 1,
+        explanation: "相対パスは現在のファイル（index.html）を起点に書きます。同階層は何もつけずに書く（common/css/style.css）。/から始まると絶対パス、../は1つ上の階層を表します。受講生が混乱しやすいポイント。"
+      },
+      {
+        id: "b4-06",
+        type: "single",
+        question: "リセットCSSとは何ですか？",
+        options: [
+          "ブラウザを工場出荷状態に戻す機能",
+          "ブラウザの持つ初期CSSスタイルをまっさらにする設定",
+          "CSSファイルを完全削除するコマンド",
+          "PCを再起動するキーボードショートカット"
+        ],
+        answer: 1,
+        explanation: "リセットCSSは『ブラウザの初期スタイルを統一する』ための設定。Chrome / Firefox / Safariで微妙にデフォルトCSSが違うので、これを揃えてから本番のCSSを書き始めます。"
+      },
+      {
+        id: "b4-07",
+        type: "code",
+        question: "次のリセットCSSは何をする目的ですか？\n\nul {\n  list-style: none;\n}",
+        options: [
+          "ulをページから削除する",
+          "ulのリスト項目（li）の前にあるマーカー（黒丸など）を消す",
+          "ulの背景色を白に戻す",
+          "ulの中身を全て大文字にする"
+        ],
+        answer: 1,
+        explanation: "list-style: none; は ul / ol のマーカー（黒丸・数字など）を消すリセットCSS定番の書き方。ナビゲーションメニューを作るときには必須の指定です。"
+      },
+      {
+        id: "b4-08",
+        type: "code",
+        question: "次のリセットCSSの目的として最も適切な説明はどれですか？\n\n* {\n  margin: 0;\n  padding: 0;\n}",
+        options: [
+          "全要素の文字を消す",
+          "全要素のmargin・paddingをゼロにして、ブラウザのデフォルト余白を統一する",
+          "全要素の色を黒にする",
+          "全要素を非表示にする"
+        ],
+        answer: 1,
+        explanation: "* セレクター（全要素）に margin: 0; padding: 0; を指定して、ブラウザごとに異なるデフォルト余白を統一。シンプルなリセットCSSの基本パターンです。"
+      },
+      {
+        id: "b4-09",
+        type: "single",
+        question: "現場でよく使われる本格的なリセットCSSの例として【正しくない】ものはどれですか？",
+        options: [
+          "ress.css",
+          "destyle.css",
+          "Eric Meyer's Reset CSS",
+          "Bootstrap Form CSS"
+        ],
+        answer: 3,
+        explanation: "Bootstrapはリセットライブラリではなく、UIフレームワーク。リセットCSSとしてはress.css / destyle.css / Eric Meyer's Reset CSS / normalize.css などが現場で使われています。"
+      },
+      {
+        id: "b4-10",
+        type: "code",
+        question: "演習で #logo にfloat:left; を指定し、#headerSub にfloat:right; を指定しました。次のナビゲーション(#gNavi)が上の段に潜り込んでしまいます。最適な対処は？",
+        options: [
+          "#gNavi に display: none; を指定",
+          "#gNavi に clear: both; を指定",
+          "#logo の float を削除",
+          "ブラウザを再起動"
+        ],
+        answer: 1,
+        explanation: "floatの後の要素は『回り込む』ため潜り込みます。clear: both; で解除します。HPB4の演習でも、floatの後には必ず clear: both; がセットで登場。"
+      },
+      {
+        id: "b4-11",
+        type: "code",
+        question: "ロゴを左に、資料請求ボタンを右に配置するCSSとして最も適切なのは？\n\n（前提：HTMLは <div id=\"logo\">…</div><div id=\"headerSub\">資料請求</div>）",
+        options: [
+          "#logo { float: right; } #headerSub { float: left; }",
+          "#logo { float: left; } #headerSub { float: right; }",
+          "#logo { display: none; } #headerSub { display: block; }",
+          "#logo { color: left; } #headerSub { color: right; }"
+        ],
+        answer: 1,
+        explanation: "左に置きたいものに float: left;、右に置きたいものに float: right;。HPB4のヘッダーレイアウト演習の核心部分。"
+      },
+      {
+        id: "b4-12",
+        type: "single",
+        question: "ブラウザの開発者ツールを開くショートカットキーとして最も一般的なのは？",
+        options: [
+          "Ctrl + S",
+          "F12（または右クリック→検証）",
+          "Alt + Tab",
+          "Windows + R"
+        ],
+        answer: 1,
+        explanation: "F12キーが業界標準。ブラウザによっては Ctrl+Shift+I / Cmd+Option+I なども使えます。受講生にも『F12』を覚えてもらうのが一番ラク。"
+      },
+      {
+        id: "b4-13",
+        type: "single",
+        question: "開発者ツールでCSSを編集すると、どのファイルが変更されますか？",
+        options: [
+          "ローカルのstyle.cssファイルが直接書き換わる",
+          "ブラウザ内の表示プレビューだけが変わり、ローカルファイルは変更されない",
+          "サーバー上のCSSが変わる",
+          "VSCodeのファイルが自動で書き換わる"
+        ],
+        answer: 1,
+        explanation: "開発者ツールでの編集はブラウザのプレビューのみ。ファイルには反映されません。これを知らない受講生は『開発者ツールで変えたのに、ブラウザ再読み込みしたら戻ってる』と困惑します。プレビューで値を試して、決まったら本物に書き写すのが現場のスタイル。"
+      },
+      {
+        id: "b4-14",
+        type: "single",
+        question: "受講生から『開発者ツールでpaddingを20pxにしたら良くなったので、これを保存したいです』と質問されました。最適な回答は？",
+        options: [
+          "開発者ツールから直接保存ボタンを押せばOK",
+          "開発者ツールの編集はプレビューだけなので、style.cssに同じ値を書き写して保存する必要がある",
+          "ブラウザの設定→保存で保存できる",
+          "F1キーで自動保存される"
+        ],
+        answer: 1,
+        explanation: "開発者ツールはプレビューツールで、ファイルには保存されません。気に入った値が決まったら、style.cssにコピーして保存→ブラウザ再読み込みで本番反映。これが現場のフローです。"
+      },
+      {
+        id: "b4-15",
+        type: "single",
+        question: "中央寄せのCSS指定として最も一般的なのは？",
+        options: [
+          "margin: 0;",
+          "width を指定 + margin-left: auto; + margin-right: auto;",
+          "text-align: center; のみ",
+          "position: center;"
+        ],
+        answer: 1,
+        explanation: "ブロック要素の中央寄せは『width指定 + margin-left/right: auto;』。widthがないと『すでに横幅いっぱい』なので中央寄せが効きません。HPB4の演習でheaderInner などに使う定番テクニック。"
+      },
+      {
+        id: "b4-16",
+        type: "code",
+        question: "次のCSSで、headerInnerが画面の中央に配置されるためには？\n\n#headerInner {\n  margin-left: auto;\n  margin-right: auto;\n  /* 何が必要？ */\n}",
+        options: [
+          "color の指定",
+          "width の指定（例：width: 960px;）",
+          "background の指定",
+          "何も追加しなくて良い（既に中央寄せになる）"
+        ],
+        answer: 1,
+        explanation: "margin auto による中央寄せには width 指定が必須。widthがないと要素は既に横幅いっぱいなので、中央寄せの効果が出ません。受講生が混乱しやすいポイント。"
+      },
+      {
+        id: "b4-17",
+        type: "single",
+        question: "linkタグの記述場所として正しいのは？",
+        options: [
+          "headタグ内（<head>と</head>の間）",
+          "bodyタグ内（<body>と</body>の間）",
+          "html要素の外側",
+          "どこでもOK"
+        ],
+        answer: 0,
+        explanation: "linkタグはheadタグ内に書きます。HTML仕様上、bodyタグ内に書くと無効か警告。CSSはheadで読み込んでから本文を表示するのが望ましい順序です。"
+      },
+      {
+        id: "b4-18",
+        type: "single",
+        question: "開発者ツールのボックスモデル表示で、緑色の領域は何を表していますか？",
+        options: [
+          "content（中身）",
+          "padding（内側の余白）",
+          "border（枠線）",
+          "margin（外側の余白）"
+        ],
+        answer: 1,
+        explanation: "Chromeなどの開発者ツールでは、青=content、緑=padding、黄=border、橙=margin の色分けが一般的。色を覚えると一目でレイアウト問題を診断できます。HPB4で開発者ツールを紹介するときの必須知識。"
+      },
+      {
+        id: "b4-19",
+        type: "single",
+        question: "受講生が『なぜリセットCSSをCSSの最初に書くのですか？最後ではダメなんですか？』と質問されました。最適な回答は？",
+        options: [
+          "最後に書いてもOKで、結果は同じ",
+          "CSSは後に書いた方が優先されるので、リセットCSSを最後に書くと自分のスタイルが上書きされてリセット状態になる。最初に書くべき",
+          "ブラウザが最初しか読まないから",
+          "言語仕様で禁止されている"
+        ],
+        answer: 1,
+        explanation: "CSSのカスケード（後勝ち）の原則を踏まえると、リセットCSSは最初に書くべき。最後に書くと自分が当てたスタイルが全て無効化されてしまいます。HPB1の継承知識との連携問題。"
+      },
+      {
+        id: "b4-20",
+        type: "code",
+        question: "次のCSSフローで、3ステップ目の『リセットCSS記述』として【最も簡単で基本的】な内容はどれですか？",
+        options: [
+          "* { color: red !important; }",
+          "* { margin: 0; padding: 0; } と ul { list-style: none; }",
+          "* { display: none; }",
+          "body { background: black; }"
+        ],
+        answer: 1,
+        explanation: "最も基本的なリセットCSSは『* { margin: 0; padding: 0; }』+ ul の list-style: none;。ブラウザのデフォルト余白とリストマーカーをリセットする最小構成。HPB4で受講生に伝える基本ライン。"
+      }
+    ]
+  }
+};
+
+</script>
+<script>
+'use strict';
+
+// ============================================================
+// ストレージ
+// ============================================================
+const STORAGE_KEY = 'hpb_instructor_quiz_v1';
+
+function loadStorage() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultStorage();
+    const data = JSON.parse(raw);
+    if (!data.progress) data.progress = {};
+    if (!data.history) data.history = [];
+    return data;
+  } catch (e) {
+    return defaultStorage();
+  }
+}
+
+function defaultStorage() {
+  return { progress: {}, history: [] };
+}
+
+function saveStorage(data) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  } catch (e) {
+    console.error('Storage save failed:', e);
+  }
+}
+
+let storage = loadStorage();
+
+// ============================================================
+// クイズ状態
+// ============================================================
+let currentQuizKey = null;     // 'hpb1' | 'hpb2' | 'hpb3' | 'hpb4'
+let currentQuestions = [];     // 現在のクイズの問題配列
+let currentIdx = 0;            // 現在の問題番号
+let userAnswers = [];          // [{questionId, selected, correct}]
+let isReviewMode = false;      // 復習モード（間違えた問題のみ）
+
+// ============================================================
+// 初期化
+// ============================================================
+function init() {
+  renderHome();
+  renderHistory();
+  
+  // タブ切替
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+}
+
+function switchTab(tabName) {
+  // クイズ進行中はタブ切替を制限
+  if (document.getElementById('tab-quiz').classList.contains('active') && currentQuestions.length > 0) {
+    if (!confirm('クイズの途中ですが、移動しますか？\n（進捗は自動保存されます）')) return;
+    saveProgress();
+  }
+  
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelector(`.tab-btn[data-tab="${tabName}"]`).classList.add('active');
+  
+  document.querySelectorAll('.home-section, .quiz-section, .result-section').forEach(s => {
+    s.classList.remove('active');
+  });
+  document.getElementById(`tab-${tabName}`).classList.add('active');
+  
+  if (tabName === 'home') renderHome();
+  if (tabName === 'history') renderHistory();
+}
+
+// ============================================================
+// ホーム画面
+// ============================================================
+function renderHome() {
+  // 全体統計
+  const totalQuestions = Object.values(QUIZ_DATA).reduce((sum, q) => sum + q.questions.length, 0);
+  const totalAttempts = storage.history.length;
+  
+  let bestTotal = 0;
+  let bestPossible = 0;
+  Object.keys(QUIZ_DATA).forEach(key => {
+    const best = getBestScore(key);
+    if (best !== null) {
+      bestTotal += best;
+      bestPossible += QUIZ_DATA[key].questions.length;
+    }
+  });
+  
+  const completedSets = Object.keys(QUIZ_DATA).filter(key => getBestScore(key) !== null).length;
+  
+  document.getElementById('overallStats').innerHTML = `
+    <div class="stat-item">
+      <div class="stat-value">${totalQuestions}</div>
+      <div class="stat-label">TOTAL Q</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">${completedSets}/4</div>
+      <div class="stat-label">COMPLETED SETS</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">${totalAttempts}</div>
+      <div class="stat-label">ATTEMPTS</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value">${bestPossible > 0 ? Math.round(bestTotal/bestPossible*100) : 0}%</div>
+      <div class="stat-label">BEST AVG</div>
+    </div>
+  `;
+  
+  // クイズセット一覧
+  const grid = document.getElementById('quizSetGrid');
+  grid.innerHTML = '';
+  
+  Object.entries(QUIZ_DATA).forEach(([key, set]) => {
+    const card = document.createElement('div');
+    card.className = 'quiz-set-card';
+    card.onclick = () => startQuiz(key);
+    
+    const inProgress = storage.progress[key];
+    const bestScore = getBestScore(key);
+    const total = set.questions.length;
+    
+    let statusHtml = '';
+    if (inProgress && inProgress.idx < total) {
+      statusHtml = `<span class="progress-pill in-progress">途中 ${inProgress.idx}/${total}</span>`;
+    }
+    if (bestScore !== null) {
+      const isHigh = bestScore === total;
+      statusHtml += `<span class="progress-pill ${isHigh ? 'high-score' : 'completed'}">${isHigh ? '🏆 ' : '✅ '}${bestScore}/${total}</span>`;
+    }
+    
+    card.innerHTML = `
+      <div class="quiz-set-name">${key.toUpperCase()}</div>
+      <h3 class="quiz-set-title">${escapeHtml(set.title)}</h3>
+      <p class="quiz-set-desc">${escapeHtml(set.description)}</p>
+      <div class="quiz-set-meta">
+        <span>${total}問</span>
+        <div class="quiz-set-progress">${statusHtml}</div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function getBestScore(key) {
+  const records = storage.history.filter(h => h.quizKey === key && !h.isReview);
+  if (records.length === 0) return null;
+  return records.reduce((max, r) => Math.max(max, r.score), 0);
+}
+
+// ============================================================
+// クイズ開始
+// ============================================================
+function startQuiz(key) {
+  currentQuizKey = key;
+  currentQuestions = [...QUIZ_DATA[key].questions];
+  isReviewMode = false;
+  
+  // 途中保存があるか確認
+  const saved = storage.progress[key];
+  if (saved && saved.idx < currentQuestions.length) {
+    if (confirm(`「${QUIZ_DATA[key].title}」の途中経過があります。\n問題 ${saved.idx + 1} から再開しますか？\n（OK：再開 / キャンセル：最初から）`)) {
+      currentIdx = saved.idx;
+      userAnswers = saved.answers || [];
+    } else {
+      currentIdx = 0;
+      userAnswers = [];
+      delete storage.progress[key];
+      saveStorage(storage);
+    }
+  } else {
+    currentIdx = 0;
+    userAnswers = [];
+  }
+  
+  document.getElementById('quizTitle').textContent = QUIZ_DATA[key].title;
+  switchToQuiz();
+  renderQuestion();
+}
+
+function switchToQuiz() {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.home-section, .quiz-section, .result-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-quiz').classList.add('active');
+}
+
+// ============================================================
+// 問題表示
+// ============================================================
+function renderQuestion() {
+  const q = currentQuestions[currentIdx];
+  const total = currentQuestions.length;
+  
+  // プログレス
+  document.getElementById('qNum').textContent = `QUESTION ${String(currentIdx + 1).padStart(2, '0')}`;
+  document.getElementById('progText').textContent = `問題 ${currentIdx + 1} / ${total}`;
+  const pct = Math.round((currentIdx / total) * 100);
+  document.getElementById('progPct').textContent = pct + '%';
+  document.getElementById('progFill').style.width = pct + '%';
+  
+  // タイプバッジ
+  const badge = document.getElementById('qTypeBadge');
+  if (q.type === 'code') {
+    badge.textContent = 'コードリーディング';
+    badge.className = 'q-type-badge code';
+  } else {
+    badge.textContent = '4択問題';
+    badge.className = 'q-type-badge';
+  }
+  
+  // 問題文
+  document.getElementById('qText').textContent = q.question;
+  
+  // 解説とボタンをリセット
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('nextBtn').style.display = 'none';
+  document.getElementById('prevBtn').style.display = currentIdx > 0 ? 'inline-block' : 'none';
+  
+  // 選択肢
+  const optsEl = document.getElementById('options');
+  optsEl.innerHTML = '';
+  
+  // すでに回答済みかチェック
+  const answered = userAnswers.find(a => a.questionId === q.id);
+  
+  q.options.forEach((opt, i) => {
+    const labels = ['A', 'B', 'C', 'D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `
+      <span class="opt-label">${labels[i]}</span>
+      <span class="opt-text">${escapeHtml(opt)}</span>
+    `;
+    
+    if (answered) {
+      div.classList.add('disabled');
+      if (i === q.answer) div.classList.add('correct');
+      if (i === answered.selected && i !== q.answer) div.classList.add('wrong');
+    } else {
+      div.onclick = () => selectAnswer(i);
+    }
+    
+    optsEl.appendChild(div);
+  });
+  
+  // すでに回答済みなら解説を表示
+  if (answered) {
+    showExplanation(q);
+  }
+}
+
+function selectAnswer(selectedIdx) {
+  const q = currentQuestions[currentIdx];
+  const isCorrect = selectedIdx === q.answer;
+  
+  // 回答を保存
+  userAnswers.push({
+    questionId: q.id,
+    selected: selectedIdx,
+    correct: isCorrect
+  });
+  
+  // UI更新
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach((o, i) => {
+    o.classList.add('disabled');
+    o.onclick = null;
+    if (i === q.answer) o.classList.add('correct');
+    if (i === selectedIdx && !isCorrect) o.classList.add('wrong');
+  });
+  
+  showExplanation(q);
+  
+  // 進捗を保存
+  saveProgress();
+}
+
+function showExplanation(q) {
+  document.getElementById('expText').textContent = q.explanation;
+  document.getElementById('explanation').classList.add('show');
+  
+  const isLast = currentIdx >= currentQuestions.length - 1;
+  const btn = document.getElementById('nextBtn');
+  btn.textContent = isLast ? '結果を見る →' : '次の問題へ →';
+  btn.style.display = 'inline-block';
+}
+
+// ============================================================
+// ナビゲーション
+// ============================================================
+function nextQuestion() {
+  if (currentIdx >= currentQuestions.length - 1) {
+    showResult();
+  } else {
+    currentIdx++;
+    saveProgress();
+    renderQuestion();
+  }
+}
+
+function prevQuestion() {
+  if (currentIdx > 0) {
+    currentIdx--;
+    renderQuestion();
+  }
+}
+
+// ============================================================
+// 進捗保存
+// ============================================================
+function saveProgress() {
+  if (isReviewMode) return;  // 復習モードは保存しない
+  if (currentIdx >= currentQuestions.length) {
+    delete storage.progress[currentQuizKey];
+  } else {
+    storage.progress[currentQuizKey] = {
+      idx: currentIdx,
+      answers: userAnswers,
+      timestamp: Date.now()
+    };
+  }
+  saveStorage(storage);
+}
+
+// ============================================================
+// 結果表示
+// ============================================================
+function showResult() {
+  const total = currentQuestions.length;
+  const correct = userAnswers.filter(a => a.correct).length;
+  const percentage = Math.round(correct / total * 100);
+  
+  // 履歴に追加
+  if (!isReviewMode) {
+    storage.history.unshift({
+      quizKey: currentQuizKey,
+      quizTitle: QUIZ_DATA[currentQuizKey].title,
+      score: correct,
+      total: total,
+      percentage: percentage,
+      timestamp: Date.now(),
+      isReview: false
+    });
+    // 最大20件まで
+    storage.history = storage.history.slice(0, 50);
+    
+    // 進捗をクリア（完走したので）
+    delete storage.progress[currentQuizKey];
+    saveStorage(storage);
+  }
+  
+  document.getElementById('resultScore').textContent = `${correct} / ${total}`;
+  document.getElementById('resultLabel').textContent = isReviewMode ? '復習結果' : '正解数 / 問題数';
+  document.getElementById('resultPercentage').textContent = `正答率 ${percentage}%`;
+  
+  // ランク判定
+  const rankBadge = document.getElementById('rankBadge');
+  let rank, rankClass, msg;
+  if (percentage === 100) {
+    rank = 'S RANK';
+    rankClass = 'rank-S';
+    msg = '🏆 完璧です！満点獲得！\n\nこの内容を完全に理解していて、自信を持ってライブ授業に登壇できるレベルです。受講生からどんな質問が来ても落ち着いて対応できる状態。素晴らしいです、お疲れさまでした！';
+  } else if (percentage >= 90) {
+    rank = 'A RANK';
+    rankClass = 'rank-A';
+    msg = '✨ 高得点です！授業対応の準備はバッチリ。\n\nあと少しで満点なので、間違えた問題の解説をじっくり読んで、最後の詰めをしておきましょう。授業前にもう一度挑戦して満点を狙いたいですね！';
+  } else if (percentage >= 75) {
+    rank = 'B RANK';
+    rankClass = 'rank-B';
+    msg = '👍 良い得点です！基本は理解できています。\n\nただし、授業中に質問されると焦るポイントがいくつかあるかもしれません。間違えた問題を確認して、もう一度挑戦してから本番に臨むのがおすすめです。';
+  } else if (percentage >= 60) {
+    rank = 'C RANK';
+    rankClass = 'rank-C';
+    msg = '⚠️ もう少し復習が必要です。\n\n基本は分かっているものの、応用問題や受講生が困りやすいポイントの理解が弱い部分があります。間違えた問題の解説をしっかり読み込んでから、再挑戦してください。';
+  } else {
+    rank = 'D RANK';
+    rankClass = 'rank-D';
+    msg = '📚 復習をしっかりお願いします。\n\nこの状態で授業に登壇すると、受講生からの質問に答えられない場面が出てきそうです。カリキュラムシートと解説を読み直してから、再挑戦してくださいね。最初は誰でも難しいです、頑張りましょう！';
+  }
+  
+  rankBadge.textContent = rank;
+  rankBadge.className = `result-rank-badge ${rankClass}`;
+  document.getElementById('resultMsg').textContent = msg;
+  
+  // 復習ボタン表示
+  const wrongAnswers = userAnswers.filter(a => !a.correct);
+  document.getElementById('reviewBtn').style.display = wrongAnswers.length > 0 ? 'inline-block' : 'none';
+  
+  // 結果画面表示
+  document.querySelectorAll('.home-section, .quiz-section, .result-section').forEach(s => s.classList.remove('active'));
+  document.getElementById('tab-result').classList.add('active');
+}
+
+// ============================================================
+// 復習モード
+// ============================================================
+function reviewWrong() {
+  const wrongIds = userAnswers.filter(a => !a.correct).map(a => a.questionId);
+  if (wrongIds.length === 0) {
+    alert('間違えた問題はありません！');
+    return;
+  }
+  
+  currentQuestions = QUIZ_DATA[currentQuizKey].questions.filter(q => wrongIds.includes(q.id));
+  currentIdx = 0;
+  userAnswers = [];
+  isReviewMode = true;
+  
+  switchToQuiz();
+  renderQuestion();
+}
+
+// ============================================================
+// 再挑戦
+// ============================================================
+function restartQuiz() {
+  currentQuestions = [...QUIZ_DATA[currentQuizKey].questions];
+  currentIdx = 0;
+  userAnswers = [];
+  isReviewMode = false;
+  delete storage.progress[currentQuizKey];
+  saveStorage(storage);
+  
+  switchToQuiz();
+  renderQuestion();
+}
+
+function goHome() {
+  currentQuizKey = null;
+  currentQuestions = [];
+  switchTab('home');
+}
+
+// ============================================================
+// 履歴
+// ============================================================
+function renderHistory() {
+  const list = document.getElementById('historyList');
+  
+  if (storage.history.length === 0) {
+    list.innerHTML = '<div class="history-empty">まだ挑戦履歴がありません。<br>クイズに挑戦してみましょう！</div>';
+    return;
+  }
+  
+  list.innerHTML = '';
+  storage.history.slice(0, 20).forEach(record => {
+    const date = new Date(record.timestamp);
+    const dateStr = `${date.getFullYear()}/${String(date.getMonth()+1).padStart(2,'0')}/${String(date.getDate()).padStart(2,'0')} ${String(date.getHours()).padStart(2,'0')}:${String(date.getMinutes()).padStart(2,'0')}`;
+    
+    const li = document.createElement('li');
+    li.className = 'history-item';
+    
+    const isHigh = record.percentage === 100;
+    const scoreColor = record.percentage >= 90 ? 'var(--correct)' : record.percentage >= 75 ? 'var(--accent3)' : record.percentage >= 60 ? 'var(--warn)' : 'var(--wrong)';
+    
+    li.innerHTML = `
+      <div class="history-info">
+        <div class="history-quiz-name">${escapeHtml(record.quizTitle)}${isHigh ? ' 🏆' : ''}</div>
+        <div class="history-date">${dateStr} · ${record.percentage}%</div>
+      </div>
+      <div class="history-score" style="color:${scoreColor};">${record.score} / ${record.total}</div>
+    `;
+    list.appendChild(li);
+  });
+}
+
+// ============================================================
+// クイズ離脱確認
+// ============================================================
+function confirmExitQuiz() {
+  if (currentQuestions.length > 0 && currentIdx < currentQuestions.length - 1) {
+    showModal({
+      title: 'クイズを中断しますか？',
+      msg: '進捗は自動的に保存され、後で再開できます。',
+      confirmText: '中断する',
+      onConfirm: () => {
+        saveProgress();
+        goHome();
+      }
+    });
+  } else {
+    goHome();
+  }
+}
+
+// ============================================================
+// モーダル
+// ============================================================
+function showModal({ title, msg, confirmText = 'OK', onConfirm }) {
+  document.getElementById('modalTitle').textContent = title;
+  document.getElementById('modalMsg').textContent = msg;
+  const btn = document.getElementById('modalConfirmBtn');
+  btn.textContent = confirmText;
+  btn.onclick = () => {
+    closeModal();
+    if (onConfirm) onConfirm();
+  };
+  document.getElementById('modalOverlay').classList.add('show');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('show');
+}
+
+// ============================================================
+// 全データ削除
+// ============================================================
+function confirmResetAll() {
+  showModal({
+    title: '⚠️ 全データを削除しますか？',
+    msg: '進捗・履歴を含む全てのデータが削除されます。この操作は取り消せません。',
+    confirmText: '削除する',
+    onConfirm: () => {
+      localStorage.removeItem(STORAGE_KEY);
+      storage = defaultStorage();
+      renderHome();
+      renderHistory();
+      alert('全データを削除しました');
+    }
+  });
+}
+
+// ============================================================
+// ユーティリティ
+// ============================================================
+function escapeHtml(text) {
+  const div = document.createElement('div');
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// 起動
+// ============================================================
+init();
+</script>
+
+</body>
+</html>
