@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ウェブサイト制作クイズ</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Zen+Kaku+Gothic+New:wght@400;700;900&family=Space+Mono:wght@400;700&display=swap');
+  :root {
+    --bg: #0f0f14;
+    --card: #1a1a24;
+    --border: #2a2a3a;
+    --accent1: #9b59ff;
+    --accent2: #ff59a0;
+    --text: #f0f0f0;
+    --sub: #888;
+    --correct: #2ecc71;
+    --wrong: #e74c3c;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: var(--bg); color: var(--text); font-family: 'Zen Kaku Gothic New', sans-serif; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .container { width: 100%; max-width: 680px; }
+  .header { text-align: center; margin-bottom: 32px; }
+  .badge { display: inline-block; background: linear-gradient(135deg, var(--accent1), var(--accent2)); padding: 6px 18px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 2px; margin-bottom: 12px; }
+  .title { font-size: 22px; font-weight: 900; }
+  .subtitle { font-size: 13px; color: var(--sub); margin-top: 6px; }
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-info { display: flex; justify-content: space-between; font-size: 12px; color: var(--sub); margin-bottom: 8px; }
+  .progress-bar { height: 4px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.4s ease; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 32px; }
+  .q-number { font-size: 12px; color: var(--accent1); font-weight: 700; letter-spacing: 1px; margin-bottom: 12px; }
+  .q-text { font-size: 18px; font-weight: 700; line-height: 1.6; margin-bottom: 28px; }
+  .options { display: flex; flex-direction: column; gap: 12px; }
+  .opt { display: flex; align-items: center; gap: 14px; padding: 14px 18px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; transition: all 0.2s; font-size: 15px; }
+  .opt:hover:not(.disabled) { border-color: var(--accent1); background: #1a1a2e; }
+  .opt-label { width: 28px; height: 28px; background: var(--border); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; font-family: 'Space Mono', monospace; }
+  .opt.correct { border-color: var(--correct); background: rgba(46,204,113,0.08); }
+  .opt.correct .opt-label { background: var(--correct); color: #000; }
+  .opt.wrong { border-color: var(--wrong); background: rgba(231,76,60,0.08); }
+  .opt.wrong .opt-label { background: var(--wrong); color: #fff; }
+  .opt.disabled { cursor: default; }
+  .explanation { margin-top: 20px; padding: 16px; background: rgba(155,89,255,0.08); border-left: 3px solid var(--accent1); border-radius: 0 8px 8px 0; font-size: 14px; line-height: 1.8; display: none; }
+  .explanation.show { display: block; }
+  .exp-title { font-weight: 700; color: var(--accent1); margin-bottom: 8px; font-size: 13px; }
+  .next-btn { margin-top: 24px; width: 100%; padding: 14px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; display: none; font-family: 'Zen Kaku Gothic New', sans-serif; transition: opacity 0.2s; }
+  .next-btn:hover { opacity: 0.85; }
+  .next-btn.show { display: block; }
+  .result { text-align: center; display: none; }
+  .result.show { display: block; }
+  .result-score { font-size: 72px; font-weight: 900; background: linear-gradient(135deg, var(--accent1), var(--accent2)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; line-height: 1; margin-bottom: 8px; }
+  .result-label { font-size: 16px; color: var(--sub); margin-bottom: 16px; }
+  .result-msg { font-size: 18px; font-weight: 700; line-height: 1.7; margin-bottom: 32px; padding: 0 8px; }
+  .breakdown { margin-bottom: 28px; text-align: left; }
+  .breakdown-title { font-size: 12px; font-weight: 700; letter-spacing: 2px; color: var(--sub); margin-bottom: 16px; text-align: center; }
+  .chapter-item { margin-bottom: 12px; }
+  .chapter-label { display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 6px; }
+  .chapter-bar { height: 6px; background: var(--border); border-radius: 4px; overflow: hidden; }
+  .chapter-fill { height: 100%; background: linear-gradient(90deg, var(--accent1), var(--accent2)); border-radius: 4px; transition: width 0.8s ease; }
+  .btn-group { display: flex; flex-direction: column; gap: 12px; }
+  .retry-btn { padding: 14px 40px; background: linear-gradient(135deg, var(--accent1), var(--accent2)); border: none; border-radius: 10px; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; }
+  .retry-wrong-btn { padding: 14px 40px; background: transparent; border: 2px solid var(--accent1); border-radius: 10px; color: var(--accent1); font-size: 15px; font-weight: 700; cursor: pointer; font-family: 'Zen Kaku Gothic New', sans-serif; display: none; }
+  .retry-wrong-btn.show { display: block; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="badge">WEBSITE · QUIZ</div>
+    <div class="title">ウェブサイト制作クイズ</div>
+    <div class="subtitle">今日学んだことを確認しよう！全10問</div>
+  </div>
+  <div class="progress-wrap">
+    <div class="progress-info"><span id="prog-text">問題 1 / 10</span><span id="prog-pct">0%</span></div>
+    <div class="progress-bar"><div class="progress-fill" id="prog-fill" style="width:0%"></div></div>
+  </div>
+  <div class="card" id="quiz-card">
+    <div class="q-number" id="q-num">QUESTION 01</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="options" id="options"></div>
+    <div class="explanation" id="explanation"><div class="exp-title">💡 解説</div><div id="exp-text"></div></div>
+    <button class="next-btn" id="next-btn">次の問題へ →</button>
+  </div>
+  <div class="card result" id="result">
+    <div class="result-score" id="result-score"></div>
+    <div class="result-label">正解数 / 10問</div>
+    <div class="result-msg" id="result-msg"></div>
+    <div class="breakdown">
+      <div class="breakdown-title">CHAPTER BREAKDOWN</div>
+      <div id="chapters"></div>
+    </div>
+    <div class="btn-group">
+      <button class="retry-btn" onclick="restart()">もう一度最初から</button>
+      <button class="retry-wrong-btn" id="retry-wrong-btn" onclick="retryWrong()">間違えた問題だけもう一度</button>
+    </div>
+  </div>
+</div>
+<script>
+function escHTML(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+const allQuestions = [
+  {
+    chapter: '画像タグ',
+    q: "画像を表示するときに使うHTMLのタグはどれですか？",
+    opts: ["imgタグ", "h1タグ", "bodyタグ", "footタグ"],
+    ans: 0,
+    exp: "画像を表示するときは img タグを使います！今日いろいろなサイトを開いて中身を見たとき、ロゴや写真はみんな img タグで作られていましたね。「画像＝img」とだけ覚えておけばバッチリです！"
+  },
+  {
+    chapter: 'src属性',
+    q: "画像のsrc（ソース）属性には何を書きますか？",
+    opts: ["画像をどこから持ってくるか（場所）", "画像の値段", "画像を見た人の名前", "画像を消すための合言葉"],
+    ans: 0,
+    exp: "src（ソース）属性には「画像をどこから持ってくるか」という場所を書きます！パソコンの中の場所を書くこともあれば、インターネット上の住所（URL）を書くこともあります。「どこにある画像を表示するの？」の答えがsrc、と覚えておけばOKです！"
+  },
+  {
+    chapter: 'alt属性',
+    q: "画像のalt（オルト）属性は、何のためにあるものですか？",
+    opts: ["画像をキラキラ光らせるため", "画像が表示されないときや読み上げのときに内容が伝わるようにするため", "画像を大きくするため", "画像を有料にするため"],
+    ans: 1,
+    exp: "alt（オルト）属性は「画像が表示されないとき」や「音声読み上げのとき」に、その画像が何なのかを伝えてくれます！電波が弱くて画像が出ないときでも、altに書いた文字で内容がわかります。誰にでも優しいサイトを作るための大事な気づかいですね！"
+  },
+  {
+    chapter: '参考サイト',
+    q: "ウェブサイトを作りはじめるとき、最初にやるとよいのはどれですか？",
+    opts: ["いきなり感覚で配置していく", "参考になるサイトを見てみる", "とりあえず色を全部塗る", "誰にも見せずにこっそり作る"],
+    ans: 1,
+    exp: "まずは参考になるサイトを見るのが正解です！プロでも「何もないところから感覚で作る」人はほとんどいません。良いサイトのいいところを集めて、自分のサイトに取り入れていきます。マネしながら作るのは、ずるではなく王道のやり方です！"
+  },
+  {
+    chapter: '目線の動き',
+    q: "ユーザーの目線がどう動くかを表した言葉として出てきたのはどれですか？",
+    opts: ["まる型・さんかく型", "F字型・Z型", "うずまき型", "ジグザグ専用型"],
+    ans: 1,
+    exp: "ユーザーの目線は「F字型」「Z型」に動くと言われています！人は左上から見はじめて、右へ・下へと視線を動かしていきます。この動きを知っておくと「大事なものをどこに置けば見てもらえるか」が考えられるようになります！"
+  },
+  {
+    chapter: '一番伝えたいこと',
+    q: "サイトで一番伝えたいこと（タイトルやサイト名）は、どこに置くとよいですか？",
+    opts: ["左上", "右下のすみっこ", "見えないところ", "真ん中の下"],
+    ans: 0,
+    exp: "一番伝えたいことは「左上」に置きます！目線はF字の起点である左上から動きはじめるので、最初に目に入る場所だからです。だから多くのサイトはサイト名やロゴを左上に置いているんですね！"
+  },
+  {
+    chapter: '一番してほしいこと',
+    q: "サイトで一番してほしいこと（お問い合わせや予約など）は、どこに置くとよいですか？",
+    opts: ["右上", "誰も見ない場所", "左下のすみ", "ページの外"],
+    ans: 0,
+    exp: "一番してほしいことは「右上」に置きます！目線が左上から右へ進んだ先が右上なので、ゴールになるボタンを置くのにぴったりです。お問い合わせや予約ボタンが右上にあるサイトが多いのは、こういう理由なんですね！"
+  },
+  {
+    chapter: '開発者ツール',
+    q: "ブラウザの開発者ツールを使うと、どんなことがわかりますか？",
+    opts: ["そのサイトのパスワード", "ある部分がどのタグで作られているか", "サイトを作った人の住所", "明日の天気"],
+    ans: 1,
+    exp: "開発者ツールを使うと「この部分はどのタグで作られているか」を見ることができます！気になったサイトの作りをのぞいて勉強できる、とても便利な道具です。今日もこれを使って、ロゴがimgタグで作られていることを確かめましたね！"
+  },
+  {
+    chapter: 'グローバルナビゲーション',
+    q: "サイトの上のほうにある「行きたいページへ案内してくれるボタンのまとまり」を何と言いますか？",
+    opts: ["グローバルナビゲーション", "ハンバーガーフード", "コピーライト", "スクロールバー"],
+    ans: 0,
+    exp: "あれは「グローバルナビゲーション」と言います！「メニュー」「お店紹介」「お問い合わせ」など、行きたい場所へ案内してくれるボタンのまとまりのことです。ナビ＝案内、と覚えるとイメージしやすいですね！"
+  },
+  {
+    chapter: 'header / main / footer',
+    q: "ページの「上・真ん中・下」のまとまりを表すタグの組み合わせはどれですか？",
+    opts: ["header / main / footer", "start / middle / end", "top / center / bottom", "first / second / third"],
+    ans: 0,
+    exp: "ページの上・真ん中・下は header / main / footer で表します！いきなり細かいタグを置くのではなく、まず大きなまとまりに分けてあげると、人にもコンピュータにも分かりやすいサイトになります。ケーキをまず半分に切ってから細かく分けるのと同じイメージですね！"
+  }
+];
+
+let questions = [...allQuestions];
+let wrongIndices = [];
+let current = 0, score = 0, answered = false;
+let isRetryMode = false;
+const chapterResults = {};
+
+function render() {
+  const q = questions[current];
+  const total = questions.length;
+  document.getElementById('q-num').textContent = `QUESTION ${String(current+1).padStart(2,'0')}`;
+  document.getElementById('q-text').textContent = q.q;
+  document.getElementById('prog-text').textContent = `問題 ${current+1} / ${total}`;
+  const pct = Math.round((current / total) * 100);
+  document.getElementById('prog-pct').textContent = pct + '%';
+  document.getElementById('prog-fill').style.width = pct + '%';
+  document.getElementById('explanation').classList.remove('show');
+  document.getElementById('next-btn').classList.remove('show');
+  answered = false;
+  const opts = document.getElementById('options');
+  opts.innerHTML = '';
+  q.opts.forEach((o, i) => {
+    const labels = ['A','B','C','D'];
+    const div = document.createElement('div');
+    div.className = 'opt';
+    div.innerHTML = `<span class="opt-label">${labels[i]}</span><span>${escHTML(o)}</span>`;
+    div.onclick = () => select(i);
+    opts.appendChild(div);
+  });
+}
+
+function select(i) {
+  if (answered) return;
+  answered = true;
+  const q = questions[current];
+  const opts = document.querySelectorAll('.opt');
+  opts.forEach(o => o.classList.add('disabled'));
+  const isCorrect = i === q.ans;
+  opts[i].classList.add(isCorrect ? 'correct' : 'wrong');
+  if (!isCorrect) {
+    opts[q.ans].classList.add('correct');
+    if (!isRetryMode) wrongIndices.push(allQuestions.indexOf(q));
+  }
+  if (isCorrect) score++;
+  if (!chapterResults[q.chapter]) chapterResults[q.chapter] = { correct: 0, total: 0 };
+  chapterResults[q.chapter].total++;
+  if (isCorrect) chapterResults[q.chapter].correct++;
+  document.getElementById('exp-text').textContent = q.exp;
+  document.getElementById('explanation').classList.add('show');
+  const btn = document.getElementById('next-btn');
+  btn.textContent = current < questions.length - 1 ? '次の問題へ →' : '結果を見る';
+  btn.classList.add('show');
+}
+
+document.getElementById('next-btn').onclick = () => {
+  current++;
+  if (current < questions.length) render();
+  else showResult();
+};
+
+function showResult() {
+  document.getElementById('quiz-card').style.display = 'none';
+  document.getElementById('prog-fill').style.width = '100%';
+  document.getElementById('prog-pct').textContent = '100%';
+  const r = document.getElementById('result');
+  r.classList.add('show');
+  document.getElementById('result-score').textContent = `${score} / ${questions.length}`;
+
+  const msgs = [
+    "0問正解！実はこれがいちばんラッキーかもしれない。人間の脳は「間違えた瞬間」に強く記憶が動きます。今日の間違いは次回の確実な正解になる。今日ここに来て手を動かしてくれただけで、もう十分すごい！",
+    "1問正解！今日はじめての内容に最後まで一緒に取り組んでくれた。それだけで本当にえらい！1問取れたってことは、理解はもう始まってる。頑張っててとってもえらいです！",
+    "2問正解！しっかり聞けてた証拠です！難しい言葉も出てきたのに食らいついてくれた。今日ここに来て手を動かしてくれたこと、それだけでもう十分すごい！",
+    "3問正解！ちゃんと自分のものになってきてる！今日の内容、着実に身についてます。今日真剣に取り組んでくれたこと、それが一番大事！この調子でいきましょう！",
+    "4問正解！いい感じです！img・src・alt・目線の動き、しっかり頭に残ってますね。頑張っててとってもえらいです！",
+    "5問正解！ちょうど半分！今日の大事なポイントをしっかりつかめています。ここまで来られたの、本当にすごいことです！",
+    "6問正解！しっかり聞けてました！サイトの作り方の考え方が身についてきてる証拠です。頑張っててとってもえらいです！",
+    "7問正解！かなりの高得点！今日の内容、ほとんど自分のものになってますね。この調子で次回もいきましょう！",
+    "8問正解！すばらしい！img・src・alt・F字・グローバルナビ…ほとんど完ぺきに理解できています。頑張っててとってもえらいです！",
+    "9問正解！ほぼ満点！あと1問、おしかった！その悔しさがしっかり記憶に残ります。今日の理解度、本当にすごいです！",
+    "満点！完ぺきです！！img・src・alt・目線の動き・グローバルナビ・header / main / footer、全部バッチリ頭に入ってます！今日ここに来て、手を動かして、最後まで頑張ってくれた。それがもう最高にえらい！自信を持って次もいきましょう！！"
+  ];
+  document.getElementById('result-msg').textContent = msgs[score];
+
+  if (!isRetryMode) {
+    const ch = document.getElementById('chapters');
+    ch.innerHTML = '';
+    Object.entries(chapterResults).forEach(([name, res]) => {
+      const pct = Math.round((res.correct / res.total) * 100);
+      ch.innerHTML += `<div class="chapter-item"><div class="chapter-label"><span>${escHTML(name)}</span><span>${res.correct}/${res.total}</span></div><div class="chapter-bar"><div class="chapter-fill" style="width:${pct}%"></div></div></div>`;
+    });
+  }
+
+  const wrongBtn = document.getElementById('retry-wrong-btn');
+  if (wrongIndices.length > 0 && !isRetryMode) wrongBtn.classList.add('show');
+}
+
+function restart() {
+  questions = [...allQuestions];
+  wrongIndices = [];
+  current = 0; score = 0; isRetryMode = false;
+  Object.keys(chapterResults).forEach(k => delete chapterResults[k]);
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+function retryWrong() {
+  questions = wrongIndices.map(i => allQuestions[i]);
+  current = 0; score = 0; isRetryMode = true;
+  document.getElementById('quiz-card').style.display = 'block';
+  document.getElementById('result').classList.remove('show');
+  document.getElementById('retry-wrong-btn').classList.remove('show');
+  render();
+}
+
+render();
+</script>
+</body>
+</html>
