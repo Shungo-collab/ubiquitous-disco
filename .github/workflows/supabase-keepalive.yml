@@ -1,0 +1,44 @@
+name: Supabase keep-alive
+
+# ポケカ在庫管理アプリ（pokeka-inventory.html）が使う Supabase プロジェクトは
+# 無料プランのため、約7日間アクセスが無いと自動で一時停止し、
+# API のホスト名ごと落ちて「読み込みエラー」になる。
+# それを防ぐため、週2回 REST API を1回だけ叩いて「使用中」の状態を維持する。
+
+on:
+  schedule:
+    # 毎週 火・金 の 06:00 JST（UTC 21:00 月・木）
+    - cron: '0 21 * * 1,4'
+  workflow_dispatch:        # 手動実行もできる
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Ping Supabase REST API
+        env:
+          # ここに書いてあるのは anon（公開）キー。
+          # pokeka-inventory.html にそのまま埋め込まれていて誰でも見られる値なので、
+          # このファイルに書いても新たに秘密が漏れることはない。
+          SB_URL: https://skrltozqpelemuhjxtml.supabase.co
+          SB_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNrcmx0b3pxcGVsZW11aGp4dG1sIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM3MzMzNDQsImV4cCI6MjA4OTMwOTM0NH0.qqJmGsyrL6cBaK0d-ZGAV4mpq6LQU0NBnBovztjwlow
+        run: |
+          set -u
+          # 一時停止直後は 521/503 が返ることがあるので、間隔をあけて3回まで試す
+          for attempt in 1 2 3; do
+            code=$(curl -s -o /tmp/body.txt -w '%{http_code}' --max-time 30 \
+              -H "apikey: ${SB_KEY}" \
+              -H "Authorization: Bearer ${SB_KEY}" \
+              "${SB_URL}/rest/v1/cards?select=id&limit=1") || code=000
+            echo "attempt ${attempt}: HTTP ${code}"
+            if [ "${code}" = "200" ] || [ "${code}" = "206" ]; then
+              echo "Supabase is awake."
+              exit 0
+            fi
+            sleep 30
+          done
+
+          echo "::error::Supabase への疎通に失敗しました（最後のHTTPコード: ${code}）。プロジェクトが一時停止している可能性があります。"
+          cat /tmp/body.txt || true
+          exit 1
